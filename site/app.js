@@ -90,6 +90,8 @@ const GAMES = {
     G("blur", "Badge blur", "blur", { tag: "A blurry club crest that sharpens by the second.", pool: () => items("football", (x) => x.kind === "club" && x.logo), unit: "club", imgKey: "logo" }),
     G("photo", "Who's that player?", "blur", { tag: "A blurred player photo that sharpens. Name him before your rival does.", pool: () => items("football", (x) => x.kind === "player" && x.img), unit: "player", imgKey: "img" }),
     G("value", "Market value", "hol", { tag: "Two players. Who is worth more? Keep the streak alive.", pool: () => items("football", (x) => x.kind === "player" && x.val && x.img), stat: (x) => x.val, show: euro, ask: "Who is worth more?", higher: true }),
+    G("xi", "Starting XI", "all", { tag: "A real final or big match. Name the eleven who started, position by position.", pool: () => items("football", (x) => x.kind === "lineup"), list: (m) => m.players.map((p) => ({ n: p.n, pos: p.pos, x: items("football", (y) => y.kind === "player" && y.n === p.n)[0] })), unit: "player" }),
+    G("ttt", "Football tic-tac-toe", "ttt", { tag: "Name a player who fits the row and the column: club, nationality or position. Three in a row wins.", pool: () => items("football", (x) => x.kind === "player"), attrs: () => tttAttrsBall("football"), unit: "player" }),
     G("roulette", "Club roulette", "roulette", { tag: "A club appears. Take turns naming players who played for it. First to blank loses.", pool: () => items("football", (x) => x.kind === "club").filter((c) => rosterOf("football", c).length >= 8), roster: (c) => rosterOf("football", c), unit: "player" }),
     G("scramble", "Scramble", "scramble", { tag: "A player or club with the letters shuffled. Unscramble it first.", pool: () => items("football") }),
   ],
@@ -99,6 +101,8 @@ const GAMES = {
     G("logo", "Logo blur", "blur", { tag: "A blurred NBA team logo that sharpens by the second.", pool: () => items("basketball", (x) => x.kind === "team"), unit: "team", imgKey: "logo" }),
     G("photo", "Who's that player?", "blur", { tag: "A blurred headshot that sharpens. Name him first.", pool: () => items("basketball", (x) => x.kind === "bplayer" && x.img), unit: "bplayer", imgKey: "img" }),
     G("points", "Career points", "hol", { tag: "Two players. Who scored more career points?", pool: () => items("basketball", (x) => x.kind === "bplayer" && x.pts && x.img), stat: (x) => x.pts, show: (v) => v.toLocaleString(), ask: "More career points?", higher: true }),
+    G("five", "Starting five", "all", { tag: "A real playoff or Finals game. Name the five who started.", pool: () => items("basketball", (x) => x.kind === "lineup"), list: (m) => m.players.map((p) => ({ n: p.n, pos: p.pos, x: items("basketball", (y) => y.kind === "bplayer" && y.n === p.n)[0] })), unit: "bplayer" }),
+    G("ttt", "Hoops tic-tac-toe", "ttt", { tag: "Name a player who fits the row and the column: team, position or career mark. Three in a row wins.", pool: () => items("basketball", (x) => x.kind === "bplayer"), attrs: () => tttAttrsBall("basketball"), unit: "bplayer" }),
     G("roulette", "Team roulette", "roulette", { tag: "A team appears. Take turns naming players who played for it.", pool: () => items("basketball", (x) => x.kind === "team").filter((t) => rosterOf("basketball", t).length >= 8), roster: (t) => rosterOf("basketball", t), unit: "bplayer" }),
     G("scramble", "Scramble", "scramble", { tag: "A player or team with the letters shuffled.", pool: () => items("basketball") }),
   ],
@@ -118,6 +122,10 @@ const GAMES = {
     G("hear", "Hear the song", "audio", { tag: "Three seconds of a real song. Then five more. Buzz and type the title before the hints arrive.", pool: () => items("kpop", (x) => x.kind === "song" && x.pv), unit: "song", min: 6 }),
     G("whose", "Whose song is it?", "clue", { tag: "A song title appears. Type the group who sings it.", pool: () => items("kpop", (x) => x.kind === "song" && x.by), clues: (x) => [["Song", x.n], ["Year", x.year], ["Album", x.album], ["Starts with", x.by[0]]].filter((c) => c[1]), unit: "group", answer: (x) => x.by }),
     G("members", "Member roulette", "roulette", { tag: "A group appears. Take turns naming its members. First to blank or repeat loses the round.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOf("kpop", g).length >= 4), roster: (g) => rosterOf("kpop", g), unit: "idol" }),
+    G("lineup", "Name every member", "all", { tag: "A group appears. Name every member in our data before the clock runs out.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOf("kpop", g).length >= 3), list: (g) => rosterOf("kpop", g).map((p) => ({ n: p.n, pos: "", x: p })), unit: "idol" }),
+    G("ttt", "K-pop tic-tac-toe", "ttt", { tag: "Name a group that fits the row and the column: agency, boy or girl group, debut era. Three in a row wins.", pool: () => items("kpop", (x) => x.kind === "group"), attrs: () => tttAttrsKpop(), unit: "group" }),
+    G("older", "Who's older?", "hol", { tag: "Two idols. Who was born first?", pool: () => items("kpop", (x) => x.kind === "idol" && x.born && x.img), stat: (x) => x.born, show: String, ask: "Born first?", higher: false, gaps: [8, 4, 2] }),
+    G("labels", "Label roulette", "roulette", { tag: "An agency appears. Take turns naming its groups. First to blank loses.", pool: () => labelPool(), roster: (l) => items("kpop", (g) => g.kind === "group" && (g.labels || []).includes(l.n)), unit: "group" }),
     G("debut", "Who debuted first?", "hol", { gaps: [8, 4, 2], tag: "Two groups, one question: which one debuted earlier?", pool: () => items("kpop", (x) => x.kind === "group" && x.debut && x.img), stat: (x) => x.debut, show: String, ask: "Who debuted first?", higher: false }),
     G("scramble", "Scramble", "scramble", { tag: "An idol or group with the letters shuffled.", pool: () => items("kpop") }),
   ],
@@ -157,7 +165,7 @@ function suggestPool(g, w) {
   if (g.unit === "capital") return [...new Set(items("geography").map((x) => x.capital).filter(Boolean))].map((n) => ({ n }));
   if (g.unit === "origin") return [...new Set(items("food").map((x) => x.origin).concat(items("geography").map((x) => x.n)))].map((n) => ({ n }));
   if (g.kind === "scramble") return [];
-  if (g.unit === "trivia") return []; const kinds = { anime: ["anime"], song: ["song"], bplayer: ["bplayer"], cplayer: ["cplayer"], opening: ["opening"], team: ["team"], player: ["player"], club: ["club"], idol: ["idol"], group: ["group"], kpop: ["idol", "group"], country: ["country"], person: ["person"], dish: ["dish"] }[g.unit] || null;
+  if (g.unit === "trivia") return []; if (g.unit === "label") return labelPool(); const kinds = { anime: ["anime"], song: ["song"], bplayer: ["bplayer"], cplayer: ["cplayer"], opening: ["opening"], team: ["team"], player: ["player"], club: ["club"], idol: ["idol"], group: ["group"], kpop: ["idol", "group"], country: ["country"], person: ["person"], dish: ["dish"] }[g.unit] || null;
   return items(w, (x) => !kinds || kinds.includes(x.kind));
 }
 
@@ -170,6 +178,77 @@ function rosterOf(w, x) {
   else if (w === "basketball") r = items("basketball", (p) => p.kind === "bplayer" && (p.hist || []).includes(x.short));
   return (rosterOf.c[k] = r);
 }
+function labelPool() { if (labelPool.c) return labelPool.c; const m = {}; items("kpop", (g) => g.kind === "group").forEach((g) => (g.labels || []).forEach((l) => { m[l] = (m[l] || 0) + 1; })); return (labelPool.c = Object.entries(m).filter(([, n]) => n >= 4).map(([n, k]) => ({ id: "L" + n, n, fame: k }))); }
+/* tic-tac-toe attributes: every one is a real fact from the data; a grid is only used when all nine cells have answers */
+function tttAttrsKpop() {
+  const era = (a, b, l) => ({ label: l, test: (g) => g.debut >= a && g.debut <= b });
+  const fam = [labelPool().sort((a, b) => b.fame - a.fame).slice(0, 8).map((l) => ({ label: l.n, test: (g) => (g.labels || []).includes(l.n) })),
+    [{ label: "Boy group", test: (g) => g.gender === "boy group" }, { label: "Girl group", test: (g) => g.gender === "girl group" }],
+    [era(1990, 2009, "Debuted before 2010"), era(2010, 2014, "Debuted 2010–2014"), era(2015, 2019, "Debuted 2015–2019"), era(2020, 2100, "Debuted 2020 or later")],
+    [{ label: "5+ members", test: (g) => (g.members || 0) >= 5 }, { label: "4 or fewer members", test: (g) => g.members && g.members <= 4 }]];
+  return fam;
+}
+function tttAttrsBall(w) {
+  const P = w === "football" ? items("football", (x) => x.kind === "player") : items("basketball", (x) => x.kind === "bplayer"), cnt = {};
+  P.forEach((p) => new Set(p.hist || []).forEach((c) => { cnt[c] = (cnt[c] || 0) + 1; }));
+  const clubs = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([c]) => ({ label: c, test: (p) => (p.hist || []).includes(c) }));
+  if (w === "football") {
+    const nat = {}; P.forEach((p) => { if (p.nat) nat[p.nat] = (nat[p.nat] || 0) + 1; });
+    const grp = (p) => /keeper/i.test(p.pos || "") ? "Goalkeeper" : /back|defen/i.test(p.pos || "") ? "Defender" : /midfield/i.test(p.pos || "") ? "Midfielder" : /forward|wing|striker|attack/i.test(p.pos || "") ? "Attacker" : "";
+    return [clubs, Object.entries(nat).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([n]) => ({ label: n, test: (p) => p.nat === n })), ["Defender", "Midfielder", "Attacker"].map((g) => ({ label: g, test: (p) => grp(p) === g }))];
+  }
+  return [clubs, [{ label: "Guard", test: (p) => /guard/i.test(p.pos || "") }, { label: "Forward", test: (p) => /forward/i.test(p.pos || "") }, { label: "Center", test: (p) => /center/i.test(p.pos || "") }],
+    [{ label: "10,000+ career points", test: (p) => p.pts >= 10000 }, { label: "Won a title", test: (p) => p.titles > 0 }, { label: "Born outside the US", test: (p) => p.nat && p.nat !== "United States" }]];
+}
+const T3 = { s: null };
+function newTTT(mode) {
+  const g = gameOf(S.world, S.game), pool = g.pool(), fams = g.attrs(); let rows, cols, ok = false;
+  for (let k = 0; k < 300 && !ok; k++) { const [fr, fc] = shuffle(fams.map((_, i) => i)).slice(0, 2); if (fams[fr].length < 3 || fams[fc].length < 3) continue; rows = shuffle(fams[fr]).slice(0, 3); cols = shuffle(fams[fc]).slice(0, 3); ok = rows.every((r) => cols.every((c) => pool.filter((x) => r.test(x) && c.test(x)).length >= (S.diff === "easy" ? 3 : 1))); }
+  T3.s = { w: S.world, game: S.game, mode, rows, cols, cells: Array(9).fill(null), turn: 0, used: new Set(), msg: "", over: false, winner: null, pool }; renderTTT();
+}
+const LINES3 = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+function renderTTT() {
+  const s = T3.s, g = gameOf(s.w, s.game), n = s.mode === "solo" ? [prof().nick || "You", "Computer"] : NAMES();
+  const cell = (i) => { const c = s.cells[i]; return `<button type="button" class="t3c ${c ? "p" + c.who : ""} ${s.sel === i ? "sel" : ""}" data-t3="${i}" ${c || s.over ? "disabled" : ""}>${c ? `${imgOf(c.x) ? `<img src="${imgOf(c.x)}" alt="" class="${isCut(c.x) ? "cutpic" : ""} ${c.x.logo ? "contain" : ""}">` : ""}<b>${esc(c.x.n)}</b>` : "<span>+</span>"}</button>`; };
+  $("#room").innerHTML = `<div class="card">${gamesBar(esc(g.name))}<div class="qhud"><span class="label">${s.over ? (s.winner == null ? "A draw" : esc(n[s.winner]) + " wins!") : (s.mode === "solo" && s.turn === 0 ? "Your turn" : esc(n[s.turn]) + "'s turn")}</span><span class="num qscore"><small>✕ ${esc(n[0])}</small></span><span class="num qscore"><small>◯ ${esc(n[1])}</small></span></div>
+    <div class="t3"><span></span>${s.cols.map((c) => `<div class="t3h">${esc(c.label)}</div>`).join("")}${[0, 1, 2].map((r) => `<div class="t3h">${esc(s.rows[r].label)}</div>${[0, 1, 2].map((c) => cell(r * 3 + c)).join("")}`).join("")}</div>
+    ${s.over ? `<div class="row" style="margin-top:12px"><button class="btn" id="t3Again" type="button">Play again</button></div>` : s.sel != null ? `<div class="answerbox"><div class="row"><b>${esc(s.rows[Math.floor(s.sel / 3)].label)} + ${esc(s.cols[s.sel % 3].label)}</b><span class="num fine" id="t3Clock"></span></div><div class="row"><input id="qIn" autocomplete="off" spellcheck="false" placeholder="Type a name" aria-label="Your answer"><button class="btn" id="t3Go" type="button">Play it</button></div><div id="qSug" class="sugs"></div></div>` : `<p class="fine" style="margin-top:10px">${esc(s.msg || "Tap a square, then name someone who fits both its row and its column.")}</p>`}</div>`;
+  const i = $("#qIn"); if (i) i.focus({ preventScroll: true });
+}
+function t3Play(typed, pickName) {
+  const s = T3.s, i = s.sel; if (i == null || s.over) return; const r = s.rows[Math.floor(i / 3)], c = s.cols[i % 3];
+  const cand = s.pool.filter((x) => pickName != null ? x.n === pickName : nameMatch(typed, x.n, true) || qnorm(typed) === qnorm(x.n)), fit = cand.find((x) => r.test(x) && c.test(x) && !s.used.has(x.id));
+  if (fit) { s.cells[i] = { who: s.turn, x: fit }; s.used.add(fit.id); Snd.right(); flashEdge(true); s.msg = ""; collect(s.w, fit); }
+  else { Snd.wrong(); flashEdge(false); s.msg = cand.length ? (cand.some((x) => s.used.has(x.id)) ? `${cand[0].n} is already on the board. Turn lost.` : `${cand[0].n} doesn't fit both. Turn lost.`) : "Not found in the data. Turn lost."; }
+  s.sel = null; t3Check(); if (!s.over) { s.turn = 1 - s.turn; if (s.mode === "solo" && s.turn === 1) setTimeout(t3Cpu, 900); } renderTTT();
+}
+function t3Check() { const s = T3.s, w = LINES3.find((l) => l.every((k) => s.cells[k] && s.cells[k].who === s.cells[l[0]].who)); if (w) { s.over = true; s.winner = s.cells[w[0]].who; Snd.win(); confetti(); if (s.mode !== "solo" || s.winner === 0) addXP(40, s.w); award("duo"); } else if (s.cells.every(Boolean)) { s.over = true; s.winner = null; } }
+function t3Cpu() {
+  const s = T3.s; if (s.over) return; const free = s.cells.map((c, i) => (c ? -1 : i)).filter((i) => i >= 0), skill = { easy: 0.35, medium: 0.55, hard: 0.75, elite: 0.9 }[S.diff];
+  const win = free.find((i) => LINES3.some((l) => l.includes(i) && l.filter((k) => s.cells[k] && s.cells[k].who === 1).length === 2)), block = free.find((i) => LINES3.some((l) => l.includes(i) && l.filter((k) => s.cells[k] && s.cells[k].who === 0).length === 2));
+  const i = win != null ? win : block != null && Math.random() < skill ? block : rnd(free); s.sel = i; const r = s.rows[Math.floor(i / 3)], c = s.cols[i % 3], opts = byFame(s.pool).filter((x) => r.test(x) && c.test(x) && !s.used.has(x.id));
+  if (opts.length && Math.random() < skill) { const x = opts[0]; s.cells[i] = { who: 1, x }; s.used.add(x.id); s.msg = `Computer played ${x.n}.`; Snd.lock(); } else s.msg = "The computer couldn't think of anyone. Your turn.";
+  s.sel = null; t3Check(); if (!s.over) s.turn = 0; renderTTT();
+}
+/* Name them all (ballknowledge's Starting XI): a real line-up, every name to find before the clock runs out */
+const AL = { s: null, t: null };
+function newAll(mode) {
+  const g = gameOf(S.world, S.game), x = rnd(byFame(g.pool())), list = g.list(x);
+  AL.s = { w: S.world, game: S.game, mode, x, list, found: new Set(), hints: 0, wrong: 0, left: { easy: 180, medium: 140, hard: 100, elite: 70 }[S.diff] * (list.length > 6 ? 1 : 0.6), over: false, msg: "" };
+  clearInterval(AL.t); AL.t = setInterval(() => { const s = AL.s; if (!s || s.over) return clearInterval(AL.t); s.left -= 0.25; const c = $("#alClock"); if (c) c.textContent = Math.ceil(s.left) + "s"; if (s.left <= 0) endAll(); }, 250); renderAll();
+}
+function renderAll() {
+  const s = AL.s, g = gameOf(s.w, s.game), x = s.x, score = s.found.size * 100 - s.wrong * 20 - s.hints * 30;
+  const slot = (p, i) => { const ok = s.found.has(i) || s.over; return `<div class="alslot ${s.found.has(i) ? "got" : s.over ? "miss" : ""}">${ok && p.x && imgOf(p.x) ? `<img src="${imgOf(p.x)}" alt="" class="${isCut(p.x) ? "cutpic" : ""}">` : `<span class="alq">?</span>`}<b>${ok ? esc(p.n) : s.hints > [...Array(i + 1).keys()].filter((k) => !s.found.has(k)).length - 1 ? esc(first(p.n)) : "?"}</b><small>${esc(p.pos || "")}</small></div>`; };
+  const head = x.kind === "lineup" ? `<div class="label">${esc(x.date || "")} · ${esc(x.score || "")}${x.won != null ? (x.won ? " · won" : " · lost") : ""}</div><h3 style="font-size:28px;font-family:var(--display)">${esc(x.club)}</h3><div class="fine">${esc(x.title)}</div>` : `<div class="row" style="gap:12px;align-items:center">${imgOf(x) ? `<img class="ansimg" src="${imgOf(x)}" alt="">` : ""}<div><div class="label">Every member in our data</div><h3 style="font-size:30px;font-family:var(--display)">${esc(x.n)}</h3></div></div>`;
+  $("#room").innerHTML = `<div class="card">${gamesBar(esc(g.name))}<div class="qhud"><span class="label">${s.found.size} of ${s.list.length}</span><span class="num qscore"><small>Score</small> <b>${score}</b></span><span class="num" id="alClock" style="font:800 28px var(--display)">${Math.ceil(s.left)}s</span></div>${head}<div class="algrid">${s.list.map(slot).join("")}</div>
+    ${s.over ? `<div class="rcard on" style="margin-top:10px"><b>${s.found.size === s.list.length ? "All of them! " : ""}${s.found.size} of ${s.list.length} named · ${score} points</b></div><div class="row" style="margin-top:12px"><button class="btn" id="alAgain" type="button">Another one</button></div>` : `<div class="answerbox"><div class="row"><input id="alIn" autocomplete="off" spellcheck="false" placeholder="Type a name" aria-label="A name"><button class="btn" id="alGo" type="button">Add</button><button class="btn ghost" id="alHint" type="button">Initials (-30)</button><button class="btn ghost" id="alGive" type="button">Give up</button></div><div class="fine">${esc(s.msg)}</div></div>`}</div>`;
+  const i = $("#alIn"); if (i) i.focus({ preventScroll: true });
+}
+function allSay() { const s = AL.s, t = ($("#alIn") || {}).value || ""; if (!t.trim() || s.over) return; const k = s.list.findIndex((p, i) => !s.found.has(i) && (nameMatch(t, p.n) || qnorm(t) === qnorm(p.n)));
+  if (k >= 0) { s.found.add(k); Snd.right(); flashEdge(true); s.msg = ""; if (s.list[k].x) collect(s.w, s.list[k].x); if (s.found.size === s.list.length) return endAll(); } else { s.wrong++; Snd.wrong(); flashEdge(false); s.msg = s.list.some((p, i) => s.found.has(i) && nameMatch(t, p.n)) ? "Already named." : "Not in this line-up."; }
+  renderAll(); }
+function endAll() { const s = AL.s; if (s.over) return; s.over = true; clearInterval(AL.t); const sc = s.found.size * 100 - s.wrong * 20 - s.hints * 30; addXP(Math.max(5, Math.round(sc / 20)), s.w); if (s.found.size === s.list.length) { Snd.win(); confetti(); Mascot.react("best", true); } else Mascot.react("over"); const k = s.w + ":" + s.game, p = prof(); if (!p.best[k] || sc > p.best[k].score) { p.best[k] = { score: sc, streak: s.found.size }; saveProf(); } renderAll(); }
 /* ---------------- storage and profile (browser first, like ballknowledge without an account) ---------------- */
 const KEY = "gp-v1";
 const store = (() => { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return {}; } })();
@@ -313,17 +392,17 @@ const modeIntro = (title, blurb, opts) => `<div class="card">${gamesBar(title)}<
 const NAMES = () => { try { const n = JSON.parse(localStorage.getItem("gp_names") || "null"); return n && n.length === 2 ? n : ["Player 1", "Player 2"]; } catch (e) { return ["Player 1", "Player 2"]; } };
 function openGame(id) {
   S.game = id; const g = gameOf(S.world, id); stopQuiz(); Q.s = null; H.s = null;
-  const how = { clue: "Clues start hard and get easier.", blur: "The picture starts blurred and sharpens every few seconds.", scramble: "The letters of every word are shuffled. Hints arrive slowly.", hol: "Two picks, one question. Tap the right side.", roulette: "Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.", audio: "A real song plays in short slices: 3 seconds, then 5 more, then the rest." }[g.kind];
+  const how = { clue: "Clues start hard and get easier.", blur: "The picture starts blurred and sharpens every few seconds.", scramble: "The letters of every word are shuffled. Hints arrive slowly.", hol: "Two picks, one question. Tap the right side.", all: "Type names in any order. Initials cost 30 points, a wrong name 20.", ttt: "Tap a square and name someone who fits its row and column. A wrong or repeated name loses your turn.", roulette: "Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.", audio: "A real song plays in short slices: 3 seconds, then 5 more, then the rest." }[g.kind];
   $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how} ${g.kind === "hol" ? "Solo: keep the streak going. Two players: take turns, five each." : "Buzz in whenever you think you know it. The sooner you are right, the more you score (up to 1,000); a wrong guess costs 150."}`, [
-    { id: "solo", t: g.kind === "roulette" ? "Solo, against the clock" : "Solo streak", d: g.kind === "roulette" ? "Name as many as you can before time runs out." : "Keep going for as long as you can. The run ends the first time you miss." },
-    { id: "duo", t: "Two players, one device", d: g.kind === "hol" ? "Take turns. Most right after five each wins." : g.kind === "roulette" ? "Three rounds. Take turns typing names on the same screen." : "Five rounds. Race to buzz: A for player 1, L for player 2." },
-    ...(g.kind === "hol" || g.kind === "roulette" ? [] : [{ id: "online", t: "Two players, two devices", d: "The same race on two phones or computers, with a four-letter room code." }])]);
+    { id: "solo", t: g.kind === "ttt" ? "Solo, against the computer" : g.kind === "roulette" || g.kind === "all" ? "Solo, against the clock" : "Solo streak", d: g.kind === "ttt" ? "The computer gets smarter with the difficulty." : g.kind === "all" ? "Name everyone before the clock runs out." : g.kind === "roulette" ? "Name as many as you can before time runs out." : "Keep going for as long as you can. The run ends the first time you miss." },
+    ...(g.kind === "all" ? [] : [{ id: "duo", t: "Two players, one device", d: g.kind === "hol" ? "Take turns. Most right after five each wins." : g.kind === "roulette" ? "Three rounds. Take turns typing names on the same screen." : "Five rounds. Race to buzz: A for player 1, L for player 2." }]),
+    ...(["hol", "roulette", "all", "ttt"].includes(g.kind) ? [] : [{ id: "online", t: "Two players, two devices", d: "The same race on two phones or computers, with a four-letter room code." }])]);
   Snd.mode("game");
 }
 function startMode(m) {
   const g = gameOf(S.world, S.game); if (m === "online") return openOnline();
   addPlay(S.world);
-  const go2 = () => { if (g.kind === "hol") return newHol(m); if (g.kind === "roulette") return newRou(m); newQuiz(S.world, S.game, m); };
+  const go2 = () => { if (g.kind === "all") return newAll(m); if (g.kind === "ttt") return newTTT(m); if (g.kind === "hol") return newHol(m); if (g.kind === "roulette") return newRou(m); newQuiz(S.world, S.game, m); };
   if (m === "duo") { const n = NAMES(); Vs.match({ nick: n[0], avatar: prof().avatar }, { nick: n[1], avatar: "" }, go2); } else go2();
 }
 /* ---------------- roulette (ballknowledge's Club roulette): name members or players of a group, club or team ---------------- */
@@ -447,7 +526,9 @@ function renderQuiz() {
   if (bz && mine) focusIn();
 }
 function paintSuggestions() {
-  const box = $("#qSug"), q = ($("#qIn") || {}).value || ""; if (!box) return; const d = curDef(); if (d.kind === "scramble") { box.innerHTML = ""; return; }
+  const box = $("#qSug"), q = ($("#qIn") || {}).value || ""; if (!box) return;
+  if ($("#t3Go") && T3.s) { box.innerHTML = suggestions(q, T3.s.pool, (x) => x.n).map((x) => `<button type="button" class="sug" data-t3sug="${esc(x.n)}">${esc(x.n)}</button>`).join(""); return; }
+  const d = curDef(); if (d.kind === "scramble") { box.innerHTML = ""; return; }
   const list = suggestions(q, suggestPool(d, curWorld()), (x) => x.n); box.innerHTML = list.map((x) => `<button type="button" class="sug" data-sug="${esc(x.n)}">${x.img || x.logo || x.flag ? `<img src="${imgOf(x)}" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;margin-right:6px;vertical-align:middle">` : ""}${esc(x.n)}</button>`).join("");
 }
 
@@ -612,6 +693,8 @@ document.addEventListener("click", (e) => {
   if (t.dataset.snd) { Snd.setLevel(+t.dataset.snd); renderSettings(); return; } if (t.dataset.mus) { Snd.setMusic(t.dataset.mus === "1"); renderSettings(); return; }
   if (t.dataset.mas) { try { localStorage.setItem("gp_mascot", t.dataset.mas); } catch (x) { /* blocked */ } Mascot.dock(); renderSettings(); return; }
   if (t.dataset.voice) { try { localStorage.setItem("gp_voice", t.dataset.voice); } catch (x) { /* blocked */ } renderSettings(); return; }
+  if (t.dataset.t3 != null) { T3.s.sel = +t.dataset.t3; Snd.tick(); renderTTT(); return; } if (t.id === "t3Go") { t3Play(($("#qIn") || {}).value || ""); return; } if (t.dataset.t3sug) { t3Play("", t.dataset.t3sug); return; } if (t.id === "t3Again") { newTTT(T3.s.mode); return; }
+  if (t.id === "alGo") { allSay(); return; } if (t.id === "alHint") { AL.s.hints = Math.min(AL.s.list.length, AL.s.hints + 1); renderAll(); return; } if (t.id === "alGive") { endAll(); return; } if (t.id === "alAgain") { newAll(AL.s.mode); return; }
   if (t.id === "audReplay") { const n = shownCount(); Aud.play(0, n >= 5 ? 30 : n >= 2 ? 8 : 3); return; }
   if (t.id === "roGo") { rouSay(); return; } if (t.id === "roNext") { if (RO.s.mode === "solo" || RO.s.round >= 3) { RO.s.phase = "done"; if (RO.s.mode === "duo") award("duo"); renderRou(); } else nextRou(); return; } if (t.id === "roAgain") { newRou(RO.s.mode); return; }
   if (t.dataset.kick) { const p = prof(); p.kick = p.kick || {}; p.kick[S.world] = t.dataset.kick; saveProf(); const d = $("#mascot"); if (d) d.dataset.who = ""; Mascot.dock(); Mascot.hello(); renderHub(); return; }
@@ -622,6 +705,8 @@ document.addEventListener("click", (e) => {
 document.addEventListener("input", (e) => { if (e.target.id === "qIn") paintSuggestions(); if (e.target.id === "nick") { prof().nick = e.target.value.slice(0, 16); saveProf(); paintProfileBtn(); } });
 document.addEventListener("keydown", (e) => {
   if (e.target.id === "roIn" && e.key === "Enter") { e.preventDefault(); rouSay(); return; }
+  if (e.target.id === "alIn" && e.key === "Enter") { e.preventDefault(); allSay(); return; }
+  if (e.target.id === "qIn" && e.key === "Enter" && $("#t3Go")) { e.preventDefault(); const one = $("#qSug .sug"); t3Play(e.target.value, $("#qSug").children.length === 1 ? one.dataset.t3sug : null); return; }
   if (e.target.tagName === "INPUT") { if (e.key === "Enter" && e.target.id === "qIn") { e.preventDefault(); const s = $("#qSug .sug"); const typed = e.target.value; if (s && !isRightSafe(typed) && $("#qSug").children.length === 1) submitAnswer(s.dataset.sug); else submitAnswer(null); } return; }
   const s = Q.s; if (!s || s.phase !== "run" || s.paused) return;
   if (s.mode === "solo" && e.code === "Space") { e.preventDefault(); buzz(0); }

@@ -6,6 +6,7 @@ A games-only knowledge site spun off from ballknowledge (`~/Desktop/football-pre
 
 ```bash
 python3 pipelines/build_packs.py            # real data + images for every category (slow: Commons asks for gentle downloads)
+python3 pipelines/lineups.py                 # real starting XIs and starting fives from ballknowledge
 python3 pipelines/song_previews.py           # Apple's 30-second previews for K-pop songs (about 20 lookups a minute)
 python3 build.py                             # site -> docs/index.html + docs/img/
 ```
