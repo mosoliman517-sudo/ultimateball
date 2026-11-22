@@ -106,8 +106,16 @@
 
 :root[data-league="basketball"] { --bg: #1A1020; --surface: #29182F; --surface2: #36203D; --ink: #FFF3E8; --muted: #C9B3C6; --accent: #FF8A3D; --accent2: #5B8CFF; --line: #4E2F55; --glow: #FF5E1A; --on-accent: #2A1000; --display: "Big Shoulders Display", system-ui, sans-serif; }
 :root[data-league="chess"] { --bg: #0E1424; --surface: #162036; --surface2: #1E2B47; --ink: #EEF3F7; --muted: #9DB2CB; --accent: #7CF5C8; --accent2: #E4C35B; --line: #2D4668; --glow: #5B6CFF; --on-accent: #062018; --display: "DM Serif Display", Georgia, serif; }
+#homeCats, #worlds { grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
 #homeCats .world.feat, #worlds .world.feat { grid-column: 1 / -1; min-height: 240px; }
-#homeCats .world.feat .wn, #worlds .world.feat .wn { font-size: clamp(48px, 8vw, 84px); }
+#homeCats .world.feat .wn, #worlds .world.feat .wn { font-size: clamp(44px, 7vw, 80px); white-space: nowrap; }
+.world { min-height: 200px; }
+.world .wn { white-space: nowrap; font-size: clamp(30px, 4vw, 44px); }
+.world .wk { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.world .wbody { max-width: 58%; }
+.world .wbig { position: absolute; right: 10px; bottom: 0; width: 42%; max-width: 170px; z-index: 0; filter: drop-shadow(0 14px 26px rgba(0,0,0,.45)); }
+.world .wbig svg { width: 100%; height: auto; }
+@media (max-width: 520px) { .world .wbody { max-width: 100%; padding-bottom: 120px; } .world .wpics img { width: 74px; height: 94px; } }
 #homeCats .world.feat .wpics img, #worlds .world.feat .wpics img { width: 130px; height: 164px; }
 .homehero { min-height: 0 !important; }
 .kickrow { display: flex; gap: 8px; align-items: flex-end; overflow-x: auto; padding: 6px 2px 12px; margin-bottom: 8px; scrollbar-width: thin; }

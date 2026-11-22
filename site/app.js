@@ -62,7 +62,7 @@ const clueSpeed = () => ({ easy: 1.35, medium: 1, hard: 0.8, elite: 0.6 })[S.dif
 const first = (n) => n.split(/\s+/).map((w) => w[0].toUpperCase()).join(". ") + ".";
 const CLUES = {
   player: (p) => [["Born", p.born], ["Nationality", p.nat], ["Position", p.pos], ["Clubs", p.hist && p.hist.length ? `${new Set(p.hist).size} clubs on record` : null], ["Strong foot", p.foot], ["Caps", p.caps != null ? `${p.caps} for his country` : null], ["Now at", p.club], ["Initials", first(p.n)]].filter((c) => c[1]),
-  idol: (p) => [["Born", p.born], ["Birthplace", p.from], ["Group", p.groups && p.groups.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
+  idol: (p) => [["Born", p.born], ["Birthplace", p.from], ["Group", p.groups && p.groups.join(", ")], ["Real name", p.full], ["Initials", first(p.n)]].filter((c) => c[1]),
   group: (g) => [["Type", g.gender], ["Members", g.members ? `${g.members} members on record` : null], ["Label", g.labels && g.labels.join(", ")], ["Debut", g.debut], ["Initials", first(g.n)]].filter((c) => c[1]),
   country: (c) => [["Population", c.pop ? fmt(c.pop) + " people" : null], ["Area", c.area ? fmt(c.area) + " km²" : null], ["Currency", c.currency && c.currency.join(", ")], ["Language", c.language && c.language.join(", ")], ["Continent", c.continent], ["Capital", c.capital], ["Initials", first(c.n)]].filter((c) => c[1]),
   person: (p) => [["Born", p.born < 0 ? `${-p.born} BC` : p.born], ["Died", p.died != null ? (p.died < 0 ? `${-p.died} BC` : p.died) : null], ["Known as", p.occ && p.occ.join(", ")], ["Country", p.ctry && p.ctry.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
@@ -160,6 +160,19 @@ const GAMES = {
 };
 Object.keys(GAMES).forEach((w) => { GAMES[w] = GAMES[w].filter((g) => g.pool().length >= (g.min || 4)); });
 const gameOf = (w, id) => (GAMES[w] || []).find((g) => g.id === id);
+/* forgiving answer check: the full name, any distinctive word of it (a first name, a stage name, a surname), the legal name,
+   a few typos on longer names, or most of the name typed from the start all count. Accents, spaces and hyphens are ignored. */
+function nameOK(typed, name, alts) {
+  const t = qnorm(typed); if (t.length < 2) return false;
+  for (const c of [name, ...(alts || [])].filter(Boolean)) {
+    const n = qnorm(c); if (!n) continue;
+    if (t === n) return true;
+    const tol = n.length >= 10 ? 2 : n.length >= 5 ? 1 : 0; if (tol && lev(t, n) <= tol) return true;
+    if (t.length >= 3 && nameMatch(typed, c, true)) return true;
+    if (t.length >= 4 && n.startsWith(t) && t.length >= n.length * 0.6) return true;
+  }
+  return false;
+}
 const nameOfAnswer = (g, x) => (g.answer ? g.answer(x) : x.n);
 function suggestPool(g, w) {
   if (g.unit === "capital") return [...new Set(items("geography").map((x) => x.capital).filter(Boolean))].map((n) => ({ n }));
@@ -212,12 +225,12 @@ function renderTTT() {
   const cell = (i) => { const c = s.cells[i]; return `<button type="button" class="t3c ${c ? "p" + c.who : ""} ${s.sel === i ? "sel" : ""}" data-t3="${i}" ${c || s.over ? "disabled" : ""}>${c ? `${imgOf(c.x) ? `<img src="${imgOf(c.x)}" alt="" class="${isCut(c.x) ? "cutpic" : ""} ${c.x.logo ? "contain" : ""}">` : ""}<b>${esc(c.x.n)}</b>` : "<span>+</span>"}</button>`; };
   $("#room").innerHTML = `<div class="card">${gamesBar(esc(g.name))}<div class="qhud"><span class="label">${s.over ? (s.winner == null ? "A draw" : esc(n[s.winner]) + " wins!") : (s.mode === "solo" && s.turn === 0 ? "Your turn" : esc(n[s.turn]) + "'s turn")}</span><span class="num qscore"><small>✕ ${esc(n[0])}</small></span><span class="num qscore"><small>◯ ${esc(n[1])}</small></span></div>
     <div class="t3"><span></span>${s.cols.map((c) => `<div class="t3h">${esc(c.label)}</div>`).join("")}${[0, 1, 2].map((r) => `<div class="t3h">${esc(s.rows[r].label)}</div>${[0, 1, 2].map((c) => cell(r * 3 + c)).join("")}`).join("")}</div>
-    ${s.over ? `<div class="row" style="margin-top:12px"><button class="btn" id="t3Again" type="button">Play again</button></div>` : s.sel != null ? `<div class="answerbox"><div class="row"><b>${esc(s.rows[Math.floor(s.sel / 3)].label)} + ${esc(s.cols[s.sel % 3].label)}</b><span class="num fine" id="t3Clock"></span></div><div class="row"><input id="qIn" autocomplete="off" spellcheck="false" placeholder="Type a name" aria-label="Your answer"><button class="btn" id="t3Go" type="button">Play it</button></div><div id="qSug" class="sugs"></div></div>` : `<p class="fine" style="margin-top:10px">${esc(s.msg || "Tap a square, then name someone who fits both its row and its column.")}</p>`}</div>`;
+    ${s.over ? `<div class="row" style="margin-top:12px"><button class="btn" id="t3Again" type="button">Play again</button></div>` : s.sel == null ? `<p class="fine" style="margin-top:10px">${esc(s.msg || "Tap a square, then name someone who fits both its row and its column.")}</p><div class="row"><button class="btn ghost" id="t3Quit" type="button">Give up the game</button></div>` : s.sel != null ? `<div class="answerbox"><div class="row"><b>${esc(s.rows[Math.floor(s.sel / 3)].label)} + ${esc(s.cols[s.sel % 3].label)}</b><span class="num fine" id="t3Clock"></span></div><div class="row"><input id="qIn" autocomplete="off" spellcheck="false" placeholder="Type a name" aria-label="Your answer"><button class="btn" id="t3Go" type="button">Play it</button><button class="btn ghost" id="t3Pass" type="button">Pass</button></div><div id="qSug" class="sugs"></div></div>` : `<p class="fine" style="margin-top:10px">${esc(s.msg || "Tap a square, then name someone who fits both its row and its column.")}</p>`}</div>`;
   const i = $("#qIn"); if (i) i.focus({ preventScroll: true });
 }
 function t3Play(typed, pickName) {
   const s = T3.s, i = s.sel; if (i == null || s.over) return; const r = s.rows[Math.floor(i / 3)], c = s.cols[i % 3];
-  const cand = s.pool.filter((x) => pickName != null ? x.n === pickName : nameMatch(typed, x.n, true) || qnorm(typed) === qnorm(x.n)), fit = cand.find((x) => r.test(x) && c.test(x) && !s.used.has(x.id));
+  const cand = s.pool.filter((x) => pickName != null ? x.n === pickName : nameOK(typed, x.n, [x.full])), fit = cand.find((x) => r.test(x) && c.test(x) && !s.used.has(x.id));
   if (fit) { s.cells[i] = { who: s.turn, x: fit }; s.used.add(fit.id); Snd.right(); flashEdge(true); s.msg = ""; collect(s.w, fit); }
   else { Snd.wrong(); flashEdge(false); s.msg = cand.length ? (cand.some((x) => s.used.has(x.id)) ? `${cand[0].n} is already on the board. Turn lost.` : `${cand[0].n} doesn't fit both. Turn lost.`) : "Not found in the data. Turn lost."; }
   s.sel = null; t3Check(); if (!s.over) { s.turn = 1 - s.turn; if (s.mode === "solo" && s.turn === 1) setTimeout(t3Cpu, 900); } renderTTT();
@@ -245,8 +258,8 @@ function renderAll() {
     ${s.over ? `<div class="rcard on" style="margin-top:10px"><b>${s.found.size === s.list.length ? "All of them! " : ""}${s.found.size} of ${s.list.length} named · ${score} points</b></div><div class="row" style="margin-top:12px"><button class="btn" id="alAgain" type="button">Another one</button></div>` : `<div class="answerbox"><div class="row"><input id="alIn" autocomplete="off" spellcheck="false" placeholder="Type a name" aria-label="A name"><button class="btn" id="alGo" type="button">Add</button><button class="btn ghost" id="alHint" type="button">Initials (-30)</button><button class="btn ghost" id="alGive" type="button">Give up</button></div><div class="fine">${esc(s.msg)}</div></div>`}</div>`;
   const i = $("#alIn"); if (i) i.focus({ preventScroll: true });
 }
-function allSay() { const s = AL.s, t = ($("#alIn") || {}).value || ""; if (!t.trim() || s.over) return; const k = s.list.findIndex((p, i) => !s.found.has(i) && (nameMatch(t, p.n) || qnorm(t) === qnorm(p.n)));
-  if (k >= 0) { s.found.add(k); Snd.right(); flashEdge(true); s.msg = ""; if (s.list[k].x) collect(s.w, s.list[k].x); if (s.found.size === s.list.length) return endAll(); } else { s.wrong++; Snd.wrong(); flashEdge(false); s.msg = s.list.some((p, i) => s.found.has(i) && nameMatch(t, p.n)) ? "Already named." : "Not in this line-up."; }
+function allSay() { const s = AL.s, t = ($("#alIn") || {}).value || ""; if (!t.trim() || s.over) return; const k = s.list.findIndex((p, i) => !s.found.has(i) && nameOK(t, p.n, [p.x && p.x.full]));
+  if (k >= 0) { s.found.add(k); Snd.right(); flashEdge(true); s.msg = ""; if (s.list[k].x) collect(s.w, s.list[k].x); if (s.found.size === s.list.length) return endAll(); } else { s.wrong++; Snd.wrong(); flashEdge(false); s.msg = s.list.some((p, i) => s.found.has(i) && nameOK(t, p.n, [p.x && p.x.full])) ? "Already named." : "Not in this line-up."; }
   renderAll(); }
 function endAll() { const s = AL.s; if (s.over) return; s.over = true; clearInterval(AL.t); const sc = s.found.size * 100 - s.wrong * 20 - s.hints * 30; addXP(Math.max(5, Math.round(sc / 20)), s.w); if (s.found.size === s.list.length) { Snd.win(); confetti(); Mascot.react("best", true); } else Mascot.react("over"); const k = s.w + ":" + s.game, p = prof(); if (!p.best[k] || sc > p.best[k].score) { p.best[k] = { score: sc, streak: s.found.size }; saveProf(); } renderAll(); }
 /* ---------------- storage and profile (browser first, like ballknowledge without an account) ---------------- */
@@ -346,7 +359,7 @@ function renderHome() {
 function catCards() {
   const p = prof();
   return WORLD_IDS.map((w, k) => { const W = WORLDS[w], pics = shuffle(items(w, (x) => x.img).slice(0, 24)).slice(0, 3), wx = (p.worlds[w] || {}).xp || 0, kick = (p.kick || {})[w] || W.mascot;
-    return `<button type="button" class="world ${k === 0 ? "feat" : ""}" data-go="w-${w}" style="${wvars(w)};--d:${k * 70}ms"><div class="wbody"><div class="wk">${esc(W.kicker)}</div><div class="wn">${esc(W.name)}</div><div class="wt">${esc(W.tag)}</div><div class="ws"><span>${GAMES[w].length} games</span><span>${rkIcon(wRank(wx))} ${wRank(wx)}</span></div></div><div class="wpics">${pics.map((x) => `<img src="${x.img}" alt="" class="${isCut(x) ? "cutpic" : ""}">`).join("")}</div><div class="wmas">${MASCOT_SVG[kick]("happy")}</div></button>`; }).join("");
+    return `<button type="button" class="world ${k === 0 ? "feat" : ""}" data-go="w-${w}" style="${wvars(w)};--d:${k * 70}ms"><div class="wbody"><div class="wk">${esc(W.kicker)}</div><div class="wn">${esc(W.name)}</div><div class="wt">${esc(W.tag)}</div><div class="ws"><span>${GAMES[w].length} games</span><span>${rkIcon(wRank(wx))} ${wRank(wx)}</span></div></div>${pics.length ? `<div class="wpics">${pics.map((x) => `<img src="${x.img}" alt="" class="${isCut(x) ? "cutpic" : ""}">`).join("")}</div><div class="wmas">${MASCOT_SVG[kick]("happy")}</div>` : `<div class="wbig">${MASCOT_SVG[kick]("happy")}</div>`}</button>`; }).join("");
 }
 function homeTilt() { document.querySelectorAll(".door,.world,.gcard").forEach((el) => { el.onpointermove = (e) => { const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; el.style.setProperty("--ry", `${(x - 0.5) * 8}deg`); el.style.setProperty("--rx", `${(0.5 - y) * 8}deg`); el.style.setProperty("--mx", x * 100 + "%"); el.style.setProperty("--my", y * 100 + "%"); }; el.onpointerleave = () => { el.style.setProperty("--rx", "0deg"); el.style.setProperty("--ry", "0deg"); }; }); }
 
@@ -417,13 +430,13 @@ function renderRou() {
   if (s.phase === "done") { clearInterval(RO.t); const duo = s.mode === "duo", winner = s.wins[0] === s.wins[1] ? -1 : s.wins[0] > s.wins[1] ? 0 : 1; $("#room").innerHTML = `<div class="card">${gamesBar(esc(g.name))}${finale({ label: duo ? "Full time" : "Time!", verdict: duo ? (winner < 0 ? "A draw." : esc(n[winner]) + " wins!") : `${s.score} named.`, players: duo ? [0, 1].map((k) => ({ name: n[k], score: s.wins[k] })) : [{ name: prof().nick || "You", score: s.score, av: avatarHTML(prof().avatar, "lg", prof().nick || "You") }], winner: duo ? winner : null, good: duo || s.score >= 6, tiles: [], buttons: `<button class="btn" id="roAgain" type="button">Play again</button>` })}</div>`; return; }
   const head = `<div class="row" style="gap:14px;align-items:center;margin:6px 0 12px">${imgOf(x) ? `<img class="ansimg ${x.logo ? "contain" : ""}" src="${imgOf(x)}" alt="">` : ""}<div><div class="label">${s.mode === "duo" ? `Round ${s.round} of 3` : "Name as many as you can"}</div><h3 style="font-size:32px;font-family:var(--display)">${esc(x.n)}</h3><div class="fine">${s.roster.length} in our data</div></div><span class="num" id="roClock" style="margin-left:auto;font:800 34px var(--display)">${Math.ceil(s.left)}s</span></div>`;
   const named = `<div class="mixstrip">${s.named.map((p) => `<span>${imgOf(p) ? `<img src="${imgOf(p)}" alt="">` : ""}${esc(p.n)}</span>`).join("")}</div>`;
-  const reveal = s.phase === "reveal" ? `<div class="rcard on" style="margin-top:10px"><b>${esc(s.msg)}</b><div class="fine" style="margin-top:6px">Some you could have said: ${s.roster.filter((p) => !s.named.includes(p)).slice(0, 8).map((p) => esc(p.n)).join(", ")}</div></div><div class="row" style="margin-top:12px"><button class="btn" id="roNext" type="button">${s.mode === "solo" || s.round >= 3 ? "See the result" : "Next round"}</button></div>` : `<div class="answerbox"><div class="row"><b>${s.mode === "duo" ? esc(n[s.turn]) + ", your turn" : "Your answer"}</b></div><div class="row"><input id="roIn" autocomplete="off" spellcheck="false" placeholder="Type a name" aria-label="A name"><button class="btn" id="roGo" type="button">Say it</button></div><div class="fine">${esc(s.msg)}</div></div>`;
+  const reveal = s.phase === "reveal" ? `<div class="rcard on" style="margin-top:10px"><b>${esc(s.msg)}</b><div class="fine" style="margin-top:6px">Some you could have said: ${s.roster.filter((p) => !s.named.includes(p)).slice(0, 8).map((p) => esc(p.n)).join(", ")}</div></div><div class="row" style="margin-top:12px"><button class="btn" id="roNext" type="button">${s.mode === "solo" || s.round >= 3 ? "See the result" : "Next round"}</button></div>` : `<div class="answerbox"><div class="row"><b>${s.mode === "duo" ? esc(n[s.turn]) + ", your turn" : "Your answer"}</b></div><div class="row"><input id="roIn" autocomplete="off" spellcheck="false" placeholder="Type a name" aria-label="A name"><button class="btn" id="roGo" type="button">Say it</button><button class="btn ghost" id="roGive" type="button">Give up</button></div><div class="fine">${esc(s.msg)}</div></div>`;
   $("#room").innerHTML = `<div class="card">${gamesBar(esc(g.name))}${s.mode === "duo" ? `<div class="qhud"><span class="label">Rounds won</span>${[0, 1].map((i) => `<span class="num qscore"><small>${esc(n[i])}</small> <b>${s.wins[i]}</b></span>`).join("")}</div>` : `<div class="qhud"><span class="label">Named</span><span class="num qscore"><b>${s.score}</b></span></div>`}${head}${named}${reveal}</div>`;
   const i = $("#roIn"); if (i) i.focus({ preventScroll: true });
 }
 function rouSay() {
   const s = RO.s, t = ($("#roIn") || {}).value || ""; if (!t.trim() || s.phase !== "play") return;
-  const hit = s.roster.find((p) => nameMatch(t, p.n) || qnorm(t) === qnorm(p.n));
+  const hit = s.roster.find((p) => !s.named.includes(p) && nameOK(t, p.n, [p.full])) || s.roster.find((p) => nameOK(t, p.n, [p.full]));
   if (!hit) { s.msg = `Not in the data for ${s.x.n}. Try another.`; Snd.wrong(); flashEdge(false); renderRou(); return; }
   if (s.named.includes(hit)) { if (s.mode === "duo") return rouLose("repeat"); s.msg = "Already said."; renderRou(); return; }
   s.named.push(hit); Snd.right(); flashEdge(true); collect(s.w, hit); s.msg = "";
@@ -432,9 +445,9 @@ function rouSay() {
   renderRou();
 }
 function rouLose(why) { const s = RO.s; if (s.phase !== "play") return; clearInterval(RO.t); s.phase = "reveal"; const n = NAMES();
-  if (s.mode === "solo") s.msg = why === "all" ? "You named every one!" : `Time! ${s.score} named.`;
+  if (s.mode === "solo") s.msg = why === "all" ? "You named every one!" : `${why === "give" ? "You gave up" : "Time!"} ${s.score} named.`;
   else if (why === "all") s.msg = "Every name used. Nobody loses this round.";
-  else { s.wins[1 - s.turn]++; s.msg = `${n[s.turn]} ${why === "repeat" ? "repeated a name" : "ran out of time"}. Round to ${n[1 - s.turn]}.`; Snd.wrong(); }
+  else { s.wins[1 - s.turn]++; s.msg = `${n[s.turn]} ${why === "repeat" ? "repeated a name" : why === "give" ? "gave up" : "ran out of time"}. Round to ${n[1 - s.turn]}.`; Snd.wrong(); }
   renderRou(); }
 
 function addPlay(w) { const p = prof(); const W = p.worlds[w] || (p.worlds[w] = { xp: 0, plays: 0 }); W.plays++; saveProf(); const n = WORLD_IDS.filter((x) => (p.worlds[x] || {}).plays).length; if (n >= 3) award("tourist"); if (n >= WORLD_IDS.length) award("explorer"); }
@@ -466,7 +479,7 @@ function buzz(who) {
   s.paused = true; s.buzzed = who; s.answerLeft = answerTime(); Aud.pause(); Snd.lock(); renderQuiz(); Net.sync(); focusIn();
 }
 const focusIn = () => setTimeout(() => { const i = $("#qIn"); if (i) { i.value = ""; i.focus({ preventScroll: true }); } }, 0);
-function isRight(typed, pickName) { const s = Q.s, d = curDef(), ans = nameOfAnswer(d, s.r); if (pickName != null) return qnorm(pickName) === qnorm(ans); if (qnorm(typed) === qnorm(ans)) return true; if (nameMatch(typed, ans, d.unit === "club" || d.unit === "group" || d.unit === "country")) return true; const m = resolveGuess(typed, suggestPool(d, curWorld()), (x) => x.n); return !!m && qnorm(m.n) === qnorm(ans); }
+function isRight(typed, pickName) { const s = Q.s, d = curDef(), ans = nameOfAnswer(d, s.r); if (pickName != null) return qnorm(pickName) === qnorm(ans); if (nameOK(typed, ans, ans === s.r.n && s.r.full ? [s.r.full] : [])) return true; const m = resolveGuess(typed, suggestPool(d, curWorld()), (x) => x.n); return !!m && qnorm(m.n) === qnorm(ans); }
 function submitAnswer(pickName, typedRemote) {
   const s = Q.s; if (!s || !s.paused) return; const typed = typedRemote != null ? typedRemote : ($("#qIn") && $("#qIn").value) || "";
   if (Net.role === "guest") { Net.send({ k: "ans", t: typed, p: pickName }); return; }
@@ -506,7 +519,7 @@ function cluesHTML() {
 }
 function answerCard() {
   const s = Q.s, d = curDef(), x = s.r, ans = nameOfAnswer(d, x), facts = (CLUES[x.kind] ? CLUES[x.kind](x) : []).filter((c) => c[0] !== "Initials").slice(0, 4).map((c) => `${esc(c[0])}: ${esc(c[1])}`).join(" · ");
-  return `<div class="rcard on"><div class="label">The answer</div><div class="row" style="gap:14px;margin:8px 0;align-items:center">${imgOf(x) ? `<img class="ansimg ${x.logo || x.flag ? "contain" : ""} ${isCut(x) ? "cutpic" : ""}" src="${imgOf(x)}" alt="">` : ""}<div><h3 style="font-size:28px">${esc(ans)}</h3>${ans !== x.n ? `<div class="fine">${esc(x.n)}</div>` : ""}<div class="fine">${facts}</div></div></div>${credOf(x, d.imgKey)}${x.am ? `<a class="credit" href="${x.am}" target="_blank" rel="noopener">Preview courtesy of Apple Music. Listen to the full song there.</a>` : ""}</div>`;
+  return `<div class="rcard on"><div class="label">The answer</div><div class="row" style="gap:14px;margin:8px 0;align-items:center">${imgOf(x) ? `<img class="ansimg ${x.logo || x.flag ? "contain" : ""} ${isCut(x) ? "cutpic" : ""}" src="${imgOf(x)}" alt="">` : ""}<div><h3 style="font-size:28px">${esc(ans)}</h3>${ans !== x.n ? `<div class="fine">${esc(x.n)}</div>` : ""}${x.full ? `<div class="fine">Real name: ${esc(x.full)}</div>` : ""}<div class="fine">${facts}</div></div></div>${credOf(x, d.imgKey)}${x.am ? `<a class="credit" href="${x.am}" target="_blank" rel="noopener">Preview courtesy of Apple Music. Listen to the full song there.</a>` : ""}</div>`;
 }
 function renderQuiz() {
   const s = Q.s, d = curDef(), duo = s.mode !== "solo", names = s.mode === "online" ? Net.names() : NAMES(), title = s.mix ? `Round ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : esc(d.name);
@@ -521,8 +534,9 @@ function renderQuiz() {
   const bz = s.paused, me = Net.role === "guest" ? 1 : 0;
   const buzzers = duo ? `<div class="buzzers"><button class="buzz p1" id="qB0" type="button" ${s.locked[0] || bz || (Net.role === "guest") ? "disabled" : ""}>${Net.role ? (me === 0 ? "Buzz" : esc(names[0])) : esc(names[0])}<small>${Net.role ? (me === 0 ? "space bar" : "your rival") : "key A"}</small></button><button class="buzz p2" id="qB1" type="button" ${s.locked[1] || bz || Net.role === "host" ? "disabled" : ""}>${Net.role ? (me === 1 ? "Buzz" : esc(names[1])) : esc(names[1])}<small>${Net.role ? (me === 1 ? "space bar" : "your rival") : "key L"}</small></button></div>` : `<div class="buzzers"><button class="buzz p1 wide" id="qB0" type="button" ${bz ? "disabled" : ""}>BUZZ<small>space bar</small></button></div>`;
   const mine = !Net.role || s.buzzed === me;
+  const giveUp = !bz && !(Net.role === "guest") ? `<div class="row" style="justify-content:center;margin-top:8px"><button class="btn ghost" id="qGive" type="button">${duo ? "Skip this one" : "Give up"}</button></div>` : "";
   const answer = bz ? `<div class="answerbox"><div class="row"><b>${duo ? esc(names[s.buzzed]) : "Your answer"}</b><span class="num fine" id="qClock">${Math.ceil(s.answerLeft)}s</span></div>${mine ? `<div class="row"><input id="qIn" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="Type your answer" aria-label="Your answer"><button class="btn" id="qGuess" type="button">Guess</button></div><div id="qSug" class="sugs"></div>` : `<div class="fine">Your rival is answering…</div>`}</div>` : "";
-  $("#room").innerHTML = `<div class="card">${head}${hud}<div class="meter"><i id="qMeter" style="width:${(100 * (1 - s.elapsed / s.total)).toFixed(1)}%"></i></div><div class="row" style="justify-content:space-between"><span class="fine">Worth <b class="num" id="qWorth">${worth()}</b> points now</span><span class="fine">${esc(WORLDS[curWorld()].name)}</span></div><div id="qClues" class="clues">${cluesHTML()}</div>${answer}${buzzers}</div>`;
+  $("#room").innerHTML = `<div class="card">${head}${hud}<div class="meter"><i id="qMeter" style="width:${(100 * (1 - s.elapsed / s.total)).toFixed(1)}%"></i></div><div class="row" style="justify-content:space-between"><span class="fine">Worth <b class="num" id="qWorth">${worth()}</b> points now</span><span class="fine">${esc(WORLDS[curWorld()].name)}</span></div><div id="qClues" class="clues">${cluesHTML()}</div>${answer}${buzzers}${giveUp}</div>`;
   if (bz && mine) focusIn();
 }
 function paintSuggestions() {
@@ -693,7 +707,11 @@ document.addEventListener("click", (e) => {
   if (t.dataset.snd) { Snd.setLevel(+t.dataset.snd); renderSettings(); return; } if (t.dataset.mus) { Snd.setMusic(t.dataset.mus === "1"); renderSettings(); return; }
   if (t.dataset.mas) { try { localStorage.setItem("gp_mascot", t.dataset.mas); } catch (x) { /* blocked */ } Mascot.dock(); renderSettings(); return; }
   if (t.dataset.voice) { try { localStorage.setItem("gp_voice", t.dataset.voice); } catch (x) { /* blocked */ } renderSettings(); return; }
-  if (t.dataset.t3 != null) { T3.s.sel = +t.dataset.t3; Snd.tick(); renderTTT(); return; } if (t.id === "t3Go") { t3Play(($("#qIn") || {}).value || ""); return; } if (t.dataset.t3sug) { t3Play("", t.dataset.t3sug); return; } if (t.id === "t3Again") { newTTT(T3.s.mode); return; }
+  if (t.dataset.t3 != null) { T3.s.sel = +t.dataset.t3; Snd.tick(); renderTTT(); return; } if (t.id === "t3Pass") { const s3 = T3.s; s3.sel = null; s3.msg = "Passed."; s3.turn = 1 - s3.turn; Snd.back(); if (s3.mode === "solo" && s3.turn === 1) setTimeout(t3Cpu, 700); renderTTT(); return; }
+  if (t.id === "t3Quit") { const s3 = T3.s; s3.over = true; s3.winner = 1 - s3.turn; Snd.wrong(); renderTTT(); return; }
+  if (t.id === "roGive") { rouLose("give"); return; }
+  if (t.id === "qGive") { if (Q.s && Q.s.phase === "run" && !Q.s.paused) { stopQuiz(); endRound(null); } return; }
+  if (t.id === "t3Go") { t3Play(($("#qIn") || {}).value || ""); return; } if (t.dataset.t3sug) { t3Play("", t.dataset.t3sug); return; } if (t.id === "t3Again") { newTTT(T3.s.mode); return; }
   if (t.id === "alGo") { allSay(); return; } if (t.id === "alHint") { AL.s.hints = Math.min(AL.s.list.length, AL.s.hints + 1); renderAll(); return; } if (t.id === "alGive") { endAll(); return; } if (t.id === "alAgain") { newAll(AL.s.mode); return; }
   if (t.id === "audReplay") { const n = shownCount(); Aud.play(0, n >= 5 ? 30 : n >= 2 ? 8 : 3); return; }
   if (t.id === "roGo") { rouSay(); return; } if (t.id === "roNext") { if (RO.s.mode === "solo" || RO.s.round >= 3) { RO.s.phase = "done"; if (RO.s.mode === "duo") award("duo"); renderRou(); } else nextRou(); return; } if (t.id === "roAgain") { newRou(RO.s.mode); return; }
