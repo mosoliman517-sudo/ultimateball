@@ -2268,7 +2268,7 @@ function nextRound() {
   s.elapsed = 0; s.paused = false; s.buzzed = null; s.locked = [false, false]; s.phase = "run"; s.result = null; s.hn = 0;
   Aud.load(d.kind === "audio" ? r.pv : null); s.cs = (d.kind === "audio" ? 7 : d.kind === "blur" ? 3.2 : d.kind === "scramble" ? 7 : 6) * clueSpeed(); s.total = s.clues.length * s.cs + 6;
   if (s.mix) { setTheme(curWorld()); }
-  renderQuiz(); stopQuiz(); Q.timer = setInterval(tickQuiz, 250); Net.sync();
+  renderQuiz(); if (Q.timer) clearInterval(Q.timer); Q.timer = setInterval(tickQuiz, 250); Net.sync();   /* not stopQuiz(): that would also stop this round's song */
 }
 const worth = () => { const s = Q.s; return Math.max(100, Math.round(1000 * (1 - s.elapsed / s.total) * (curDef().kind === "scramble" ? Math.max(0.4, 1 - 0.15 * s.hn) : 1))); };
 const shownCount = () => { const s = Q.s, k = curDef().kind; return k === "scramble" ? Math.min(s.clues.length, startClues() + s.hn) : Math.min(s.clues.length, (k === "audio" ? 1 : startClues()) + Math.floor(s.elapsed / s.cs)); };
