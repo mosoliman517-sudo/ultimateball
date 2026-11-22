@@ -1,5 +1,5 @@
 # raw downloaded pictures stay out of git (the built site in docs/ carries the copies it needs, each credited)
-img/
+/img/
 proto_assets/
 docs_art/
 __pycache__/
