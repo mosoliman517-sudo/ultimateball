@@ -37,13 +37,13 @@ def year(s):
 fname = lambda u: urllib.parse.unquote(u.rsplit("/", 1)[-1]) if u else None
 strip = lambda h: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", h or "")).strip()
 
-def credits_for(files):
+def credits_for(files, width=500):
     out = {}
     files = [f for f in files if f]
     for i in range(0, len(files), 40):
         chunk = files[i:i + 40]
         r = get("https://commons.wikimedia.org/w/api.php", params={"action": "query", "titles": "|".join("File:" + f for f in chunk), "prop": "imageinfo",
-                                                                  "iiprop": "url|extmetadata", "iiurlwidth": 500, "format": "json"}).json()
+                                                                  "iiprop": "url|extmetadata", "iiurlwidth": width, "format": "json"}).json()
         norm = {n["to"]: n["from"] for n in r["query"].get("normalized", [])}
         for p in r["query"]["pages"].values():
             if "imageinfo" not in p:
@@ -54,7 +54,7 @@ def credits_for(files):
         time.sleep(1)
     return out
 
-def save_img(url, dest, square=False, keep_alpha=False):
+def save_img(url, dest, square=False, keep_alpha=False, size=420):
     if os.path.exists(dest):
         return True
     try:
@@ -66,25 +66,25 @@ def save_img(url, dest, square=False, keep_alpha=False):
         if r.status_code != 200: raise RuntimeError(r.status_code)
         im = Image.open(io.BytesIO(r.content))
         im = im.convert("RGBA") if keep_alpha or im.mode in ("RGBA", "LA", "P") else im.convert("RGB")
-        im.thumbnail((420, 420))
+        im.thumbnail((size, size))
         os.makedirs(os.path.dirname(dest), exist_ok=True)
-        im.save(dest, "WEBP", quality=78)
+        im.save(dest, "WEBP", quality=82 if size > 420 else 78)
         time.sleep(0.5)
         return True
     except Exception as e:
         print("  image failed", dest, e)
         return False
 
-def attach_images(world, items, keys=("img",), alpha_keys=("logo", "flag")):
+def attach_images(world, items, keys=("img",), alpha_keys=("logo", "flag"), width=500, size=420):
     files = [it.get("_" + k) for it in items for k in keys]
-    cr = credits_for(files)
+    cr = credits_for(files, width)
     for it in items:
         for k in keys:
             f = it.pop("_" + k, None)
             if not f or f not in cr:
                 continue
             rel = f"img/{world}/{it['id']}_{k}.webp"
-            if save_img(cr[f]["thumb"], os.path.join(ROOT, rel), keep_alpha=k in alpha_keys):
+            if save_img(cr[f]["thumb"], os.path.join(ROOT, rel), keep_alpha=k in alpha_keys, size=size):
                 it[k] = rel
                 it.setdefault("cr", {})[k] = {"by": cr[f]["by"], "lic": cr[f]["lic"], "page": cr[f]["page"]}
 
@@ -93,26 +93,47 @@ def write(world, items, meta=None):
     json.dump({"world": world, "items": items, **(meta or {})}, open(os.path.join(ROOT, "packs", world + ".json"), "w"), ensure_ascii=False, separators=(",", ":"))
     print(f"{world}: {len(items)} items, {sum(1 for x in items if x.get('img'))} photos, {sum(1 for x in items if x.get('logo'))} logos, {sum(1 for x in items if x.get('flag'))} flags")
 
-# ---------------- K-pop: groups and their members ----------------
+# ---------------- K-pop: 3rd to 5th generation groups (debut 2012 on) and their members ----------------
+# pictures Wikidata does not link yet, chosen by hand from Commons (free licences)
+IMG_FIX = {"Juun": "20260827 HEARTS2HEARTS Juun @ K-World Dream Awards.jpg"}
+FIRST_GEN3 = 2015
 def kpop():
-    rows = sparql("""SELECT ?g ?gLabel ?inc ?labLabel ?img ?logo ?sl ?typeLabel (COUNT(DISTINCT ?m) AS ?n) WHERE {
+    rows = sparql("""SELECT ?g ?gLabel ?inc ?ws ?labLabel ?img ?logo ?sl ?typeLabel ?title (COUNT(DISTINCT ?m) AS ?n) WHERE {
       ?g wdt:P136 wd:Q213665; wdt:P31 ?type; wikibase:sitelinks ?sl. VALUES ?type { wd:Q215380 wd:Q216337 wd:Q641066 wd:Q2088357 }
-      OPTIONAL { ?g wdt:P571 ?inc } OPTIONAL { ?g wdt:P264 ?lab } OPTIONAL { ?g wdt:P18 ?img } OPTIONAL { ?g wdt:P154 ?logo } OPTIONAL { ?g wdt:P527 ?m }
-      FILTER(?sl > 10) SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }
-      GROUP BY ?g ?gLabel ?inc ?labLabel ?img ?logo ?sl ?typeLabel ORDER BY DESC(?sl) LIMIT 900""")
+      OPTIONAL { ?g wdt:P571 ?inc } OPTIONAL { ?g wdt:P2031 ?ws } OPTIONAL { ?g wdt:P264 ?lab } OPTIONAL { ?g wdt:P18 ?img } OPTIONAL { ?g wdt:P154 ?logo } OPTIONAL { ?g wdt:P527 ?m }
+      OPTIONAL { ?art schema:about ?g; schema:isPartOf <https://en.wikipedia.org/>; schema:name ?title }
+      FILTER(?sl > 5) SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }
+      GROUP BY ?g ?gLabel ?inc ?ws ?labLabel ?img ?logo ?sl ?typeLabel ?title ORDER BY DESC(?sl) LIMIT 4000""")
     groups = {}
     for b in rows:
-        g = qid(v(b, "g")); x = groups.setdefault(g, {"id": g, "n": v(b, "gLabel"), "kind": "group", "fame": int(v(b, "sl")), "labels": set(), "types": set()})
-        if v(b, "inc") and "debut" not in x: x["debut"] = year(v(b, "inc"))
-        if v(b, "labLabel"): x["labels"].add(v(b, "labLabel"))
+        g = qid(v(b, "g")); x = groups.setdefault(g, {"id": g, "n": v(b, "gLabel"), "kind": "group", "fame": int(v(b, "sl")), "labels": set(), "types": set(), "_y": set()})
+        for k in ("inc", "ws"):
+            if v(b, k) and year(v(b, k)): x["_y"].add(year(v(b, k)))
+        if v(b, "labLabel") and not re.match(r"^Q\d+$", v(b, "labLabel")): x["labels"].add(v(b, "labLabel"))
         if v(b, "typeLabel"): x["types"].add(v(b, "typeLabel"))
         if v(b, "img"): x["_img"] = fname(v(b, "img"))
         if v(b, "logo"): x["_logo"] = fname(v(b, "logo"))
+        if v(b, "title"): x["wiki"] = v(b, "title")
         if int(v(b, "n") or 0): x["members"] = max(x.get("members", 0), int(v(b, "n")))
-    gl = sorted(groups.values(), key=lambda x: -x["fame"])[:160]
+    for x in groups.values():
+        y = x.pop("_y")
+        if y: x["debut"] = min(y)
+    # 3rd generation on; a group with no debut year on Wikidata is kept for now and dated from its first release by kpop_songs.py
+    gl = [x for x in groups.values() if not re.match(r"^Q\d+$", x["n"]) and ((x.get("debut") or 9999) >= FIRST_GEN3 or x["n"] in ("BTS",))]
+    gl = sorted(gl, key=lambda x: -x["fame"])[:240]
     for x in gl:
         x["labels"] = sorted(x["labels"])[:2]; t = x.pop("types")
         x["gender"] = "boy group" if "boy band" in t else "girl group" if "girl group" in t else None
+        if x.get("debut"): x["gen"] = 3 if x["debut"] < 2018 else 4 if x["debut"] < 2023 else 5
+    # how popular each group is now: English Wikipedia page views over the last 12 months (Wikimedia pageviews API)
+    for x in gl:
+        t = x.get("wiki")
+        if not t: continue
+        try:
+            r = requests.get("https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/" + urllib.parse.quote(t.replace(" ", "_"), safe="") + "/monthly/2025110100/2026103100", headers=HEAD, timeout=30)
+            if r.status_code == 200: x["views"] = sum(i["views"] for i in r.json()["items"])
+        except requests.RequestException: pass
+        time.sleep(0.15)
     ids = " ".join("wd:" + x["id"] for x in gl)
     rows = sparql(f"""SELECT ?p ?pLabel ?g ?dob ?bpLabel ?img ?sl WHERE {{ VALUES ?g {{ {ids} }} ?p wdt:P463 ?g; wdt:P31 wd:Q5; wikibase:sitelinks ?sl.
       OPTIONAL {{ ?p wdt:P569 ?dob }} OPTIONAL {{ ?p wdt:P19 ?bp }} OPTIONAL {{ ?p wdt:P18 ?img }} FILTER(?sl > 0)
@@ -124,23 +145,15 @@ def kpop():
         if v(b, "dob"): x["born"] = year(v(b, "dob"))
         if v(b, "bpLabel") and not re.match(r"^Q\d+$", v(b, "bpLabel")): x["from"] = v(b, "bpLabel")
         if v(b, "img"): x["_img"] = fname(v(b, "img"))
-    il = sorted(idols.values(), key=lambda x: -x["fame"]); il = il[:700] + [x for x in il[700:] if "Hearts2Hearts" in x["groups"]]
-    for x in il: x["groups"] = sorted(x["groups"])
-    rows = sparql(f"""SELECT ?s ?sLabel ?g ?date ?albLabel ?sl WHERE {{ VALUES ?g {{ {ids} }} ?s wdt:P175 ?g; wikibase:sitelinks ?sl. VALUES ?t {{ wd:Q7366 wd:Q134556 }} ?s wdt:P31 ?t.
-      OPTIONAL {{ ?s wdt:P577 ?date }} OPTIONAL {{ ?s wdt:P361 ?alb }} FILTER(?sl > 2) SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }} }}""")
-    songs = {}
-    for b in rows:
-        sid = qid(v(b, "s")); x = songs.setdefault(sid, {"id": sid, "n": v(b, "sLabel"), "kind": "song", "fame": int(v(b, "sl")), "by": gname[qid(v(b, "g"))]})
-        if v(b, "date"): x["year"] = min(x.get("year", 9999), year(v(b, "date")))
-        if v(b, "albLabel") and not re.match(r"^Q\d+$", v(b, "albLabel")): x["album"] = v(b, "albLabel")
-    sl = [x for x in songs.values() if not re.match(r"^Q\d+$", x["n"])]
-    gimg = {x["n"]: x for x in gl}
-    print(f"kpop: {len(gl)} groups, {len(il)} idols, {len(sl)} songs")
-    for k, x in enumerate(il):   # photos for the 250 best-known idols and every Hearts2Hearts member; the rest play without a picture
-        if k >= 250 and "Hearts2Hearts" not in x["groups"]: x.pop("_img", None)
-    
-    items = gl + il + sorted(sl, key=lambda x: -x["fame"])[:500]
-    attach_images("kpop", items, keys=("img", "logo"))
+    il = [x for x in idols.values() if not re.match(r"^Q\d+$", x["n"])]
+    for x in il:
+        x["groups"] = sorted(x["groups"])
+        if x["n"] in IMG_FIX and not x.get("_img"): x["_img"] = IMG_FIX[x["n"]]
+    il.sort(key=lambda x: -x["fame"])
+    print(f"kpop: {len(gl)} groups (debut {FIRST_GEN3}+), {len(il)} idols, {sum(1 for x in gl if x.get('views'))} with page views")
+    shutil.rmtree(os.path.join(ROOT, "img", "kpop"), ignore_errors=True)   # re-fetched sharper (960 px source, 720 px saved)
+    items = gl + il
+    attach_images("kpop", items, keys=("img", "logo"), width=960, size=720)
     write("kpop", items)
 
 # ---------------- Geography: sovereign states ----------------
@@ -170,9 +183,11 @@ def geography():
 
 # ---------------- History: famous people born before 1900 ----------------
 def history():
-    occ = "wd:Q116 wd:Q82955 wd:Q189290 wd:Q4964182 wd:Q11900058 wd:Q901 wd:Q1028181 wd:Q36834 wd:Q36180 wd:Q47064"
+    """People (any era, not only before 1900), events (wars, battles, revolutions, treaties...), inventions with the year they
+    appeared, and countries that no longer exist with their old flags."""
+    occ = "wd:Q116 wd:Q82955 wd:Q189290 wd:Q4964182 wd:Q11900058 wd:Q901 wd:Q1028181 wd:Q36834 wd:Q36180 wd:Q47064 wd:Q205375 wd:Q169470"
     rows = sparql(f"""SELECT ?p ?pLabel ?dob ?dod ?cLabel ?occLabel ?img ?sl WHERE {{ VALUES ?occ {{ {occ} }}
-      ?p wdt:P106 ?occ; wikibase:sitelinks ?sl. FILTER(?sl > 150) ?p wdt:P31 wd:Q5; wdt:P569 ?dob; wdt:P18 ?img. FILTER(YEAR(?dob) < 1900)
+      ?p wdt:P106 ?occ; wikibase:sitelinks ?sl. FILTER(?sl > 140) ?p wdt:P31 wd:Q5; wdt:P569 ?dob; wdt:P18 ?img. FILTER(YEAR(?dob) < 1960)
       OPTIONAL {{ ?p wdt:P570 ?dod }} OPTIONAL {{ ?p wdt:P27 ?c }}
       SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }} }}""")
     ps = {}
@@ -182,9 +197,60 @@ def history():
         if v(b, "occLabel"): x["occ"].add(v(b, "occLabel"))
         if v(b, "cLabel") and not re.match(r"^Q\d+$", v(b, "cLabel")): x["ctry"].add(v(b, "cLabel"))
         x["_img"] = fname(v(b, "img"))
-    items = sorted(ps.values(), key=lambda x: -x["fame"])[:160]
-    for x in items: x["occ"] = sorted(x["occ"])[:2]; x["ctry"] = sorted(x["ctry"])[:1]
-    attach_images("history", items)
+    people = sorted(ps.values(), key=lambda x: -x["fame"])[:220]
+    for x in people: x["occ"] = sorted(x["occ"])[:2]; x["ctry"] = sorted(x["ctry"])[:1]
+    # events: wars, battles, revolutions, treaties, disasters, landmark moments, with a date
+    rows = sparql("""SELECT ?e ?eLabel ?tLabel ?start ?pit ?end ?locLabel ?img ?sl WHERE {
+      VALUES ?t { wd:Q198 wd:Q178561 wd:Q10931 wd:Q131569 wd:Q3839081 wd:Q8065 wd:Q7944 wd:Q124734 wd:Q2223653 wd:Q1261499 wd:Q645883 wd:Q2334719 }
+      ?e wdt:P31 ?t; wikibase:sitelinks ?sl. FILTER(?sl > 40)
+      OPTIONAL { ?e wdt:P580 ?start } OPTIONAL { ?e wdt:P585 ?pit } OPTIONAL { ?e wdt:P582 ?end } OPTIONAL { ?e wdt:P276 ?loc } OPTIONAL { ?e wdt:P18 ?img }
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }""")
+    ev = {}
+    for b in rows:
+        e = qid(v(b, "e")); x = ev.setdefault(e, {"id": e, "n": v(b, "eLabel"), "kind": "event", "fame": int(v(b, "sl")), "type": v(b, "tLabel")})
+        y = year(v(b, "start")) or year(v(b, "pit"))
+        if y is not None: x["year"] = min(x.get("year", 99999), y)
+        if v(b, "end") and year(v(b, "end")): x["end"] = year(v(b, "end"))
+        if v(b, "locLabel") and not re.match(r"^Q\d+$", v(b, "locLabel")): x["where"] = v(b, "locLabel")
+        if v(b, "img"): x["_img"] = fname(v(b, "img"))
+    events = sorted([x for x in ev.values() if x.get("year") is not None and not re.match(r"^Q\d+$", x["n"])], key=lambda x: -x["fame"])[:220]
+    # inventions and discoveries with the year they appeared (P575)
+    rows = sparql("""SELECT ?i ?iLabel ?d ?byLabel ?img ?sl ?tLabel WHERE { ?i wdt:P575 ?d; wikibase:sitelinks ?sl. FILTER(?sl > 25)
+      OPTIONAL { ?i wdt:P31 ?t } OPTIONAL { ?i wdt:P61 ?by } OPTIONAL { ?i wdt:P18 ?img }
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 30000""")
+    # Wikidata dates mostly discoveries in nature this way (planets, moons, elements, islands); keep things people made:
+    # an item stays only when every type it has reads like a made thing (device, weapon, sport, material, method...)
+    MADE = re.compile(r"device|weapon|sport|invention|product|material|component|instrument|vehicle|machine|technique|game|tool|food|drink|dish|software|medic|vaccine|toy|hobby|technolog|engine|aircraft|apparatus|equipment|method|process|class of|type of (?!chemical|quantum|disease)", re.I)
+    NOT_MADE = {"electricity", "atoll", "hormone", "synapse", "G/g", "grapheme", "potato", "Van Allen radiation belt", "intron", "mitochondrial DNA", "amylase", "pectin", "prion",
+                "natural selection", "electromagnetic radiation", "gravitational wave", "standing wave", "Zeeman effect", "Compton scattering", "altostratus", "meme", "quaternion"}
+    types = {}
+    for b in rows: types.setdefault(qid(v(b, "i")), set()).add(v(b, "tLabel") or "")
+    made = {i for i, ts in types.items() if all(t == "" or MADE.search(t) for t in ts)}
+    inv = {}
+    for b in rows:
+        i = qid(v(b, "i"))
+        if i not in made or v(b, "iLabel") in NOT_MADE: continue
+        x = inv.setdefault(i, {"id": i, "n": v(b, "iLabel"), "kind": "invention", "fame": int(v(b, "sl")), "by": set()})
+        y = year(v(b, "d"))
+        if y is not None: x["year"] = min(x.get("year", 99999), y)
+        if v(b, "byLabel") and not re.match(r"^Q\d+$", v(b, "byLabel")): x["by"].add(v(b, "byLabel"))
+        if v(b, "img"): x["_img"] = fname(v(b, "img"))
+    inventions = sorted([x for x in inv.values() if x.get("year") is not None and not re.match(r"^Q\d+$", x["n"])], key=lambda x: -x["fame"])[:200]
+    for x in inventions: x["by"] = sorted(x["by"])[:2]
+    # countries that no longer exist, with their flags
+    rows = sparql("""SELECT ?c ?cLabel ?inc ?dis ?capLabel ?flag ?sl WHERE { VALUES ?t { wd:Q3024240 wd:Q1250464 wd:Q19953632 } ?c wdt:P31 ?t; wdt:P41 ?flag; wdt:P576 ?dis; wikibase:sitelinks ?sl. FILTER(?sl > 45)
+      OPTIONAL { ?c wdt:P571 ?inc } OPTIONAL { ?c wdt:P36 ?cap } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }""")
+    old = {}
+    for b in rows:
+        c = qid(v(b, "c")); x = old.setdefault(c, {"id": c, "n": v(b, "cLabel"), "kind": "oldstate", "fame": int(v(b, "sl"))})
+        if v(b, "inc") and year(v(b, "inc")) is not None: x["from"] = min(x.get("from", 99999), year(v(b, "inc")))
+        if year(v(b, "dis")) is not None: x["to"] = max(x.get("to", -99999), year(v(b, "dis")))
+        if v(b, "capLabel") and not re.match(r"^Q\d+$", v(b, "capLabel")): x["capital"] = v(b, "capLabel")
+        x["_flag"] = fname(v(b, "flag"))
+    olds = sorted([x for x in old.values() if not re.match(r"^Q\d+$", x["n"])], key=lambda x: -x["fame"])[:150]
+    print(f"history: {len(people)} people, {len(events)} events, {len(inventions)} inventions, {len(olds)} former countries")
+    items = people + events + inventions + olds
+    attach_images("history", items, keys=("img", "flag"), width=960, size=640)
     write("history", items)
 
 # ---------------- Food: dishes with a country of origin ----------------
@@ -244,13 +310,18 @@ def general():
     write("general", items)
 
 def anime():
-    rows = sparql("""SELECT ?a ?aLabel ?start ?studioLabel ?eps ?authLabel ?genreLabel ?sl WHERE { ?a wdt:P31 wd:Q63952888; wikibase:sitelinks ?sl. FILTER(?sl > 8)
+    # Wikidata files the anime TV series apart from the manga it adapts, and the anime entry often looks obscure (Demon Slayer's
+    # anime has 9 language articles, its manga 65), so a title counts as famous as the better known of the two;
+    # pipelines/fame_views.py then ranks everything by real Wikipedia readership.
+    rows = sparql("""SELECT ?a ?aLabel ?start ?studioLabel ?eps ?authLabel ?genreLabel ?sl ?m ?msl WHERE { ?a wdt:P31 wd:Q63952888; wikibase:sitelinks ?sl.
+      OPTIONAL { ?a wdt:P144 ?m. ?m wikibase:sitelinks ?msl } FILTER(?sl > 3 || ?msl > 15)
       OPTIONAL { ?a wdt:P580 ?start } OPTIONAL { ?a wdt:P272 ?studio } OPTIONAL { ?a wdt:P1113 ?eps } OPTIONAL { ?a wdt:P144 ?based. ?based wdt:P50 ?auth } OPTIONAL { ?a wdt:P136 ?genre }
       SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }""")
     xs = {}
     for b in rows:
         a = qid(v(b, "a")); x = xs.setdefault(a, {"id": a, "n": v(b, "aLabel"), "kind": "anime", "fame": int(v(b, "sl")), "studios": set(), "authors": set(), "genres": set()})
-        if v(b, "start"): x["year"] = year(v(b, "start"))
+        if v(b, "msl") and int(v(b, "msl")) > x["fame"]: x["fame"] = int(v(b, "msl")); x["based"] = qid(v(b, "m"))
+        if v(b, "start"): x["year"] = min(x.get("year") or 9999, year(v(b, "start")))
         if v(b, "eps"): x["eps"] = int(float(v(b, "eps")))
         for k, f in (("studios", "studioLabel"), ("authors", "authLabel"), ("genres", "genreLabel")):
             if v(b, f) and not re.match(r"^Q\d+$", v(b, f)): x[k].add(v(b, f))
@@ -273,6 +344,8 @@ def food():
     for x in items: x["origin"] = next(iter(x["origin"])); x["made"] = sorted(x["made"])[:5]
     items = sorted(items, key=lambda x: -x["fame"])[:250]
     attach_images("food", items)
+    for x in items:
+        if x["n"] and x["n"][0].islower(): x["n"] = x["n"][0].upper() + x["n"][1:]   # Wikidata labels some dishes in lower case
     write("food", items)
 
 # ---------------- Football: from ballknowledge ----------------

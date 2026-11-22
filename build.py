@@ -27,7 +27,7 @@ assert "theme," in core and "let LOBBY" in core, "music patch failed"
 
 packs = {}
 for f in sorted(os.listdir(os.path.join(ROOT, "packs"))):
-    if f.endswith(".json") and not f.endswith("_audio.json"):
+    if f.endswith(".json") and not f.endswith("_audio.json") and not f.startswith("_"):
         try:
             packs[f[:-5]] = json.load(open(os.path.join(ROOT, "packs", f), encoding="utf-8"))
         except ValueError:
@@ -39,9 +39,9 @@ if "kpop" in packs and os.path.exists(au):
         if A.get(x["id"]):
             x["pv"], x["am"] = A[x["id"]]["pv"], A[x["id"]]["url"]
 html = rd("site/template.html")
-for k, v in {"/*FONTS*/": rd("site/fonts.html"), "/*BASE_CSS*/": rd("site/base.css"), "/*EXTRA_CSS*/": rd("site/extra.css"), "/*SPRITE*/": rd("site/sprite.html"),
+for k, v in {"/*FONTS*/": rd("site/fonts.html"), "/*BASE_CSS*/": rd("site/base.css"), "/*EXTRA_CSS*/": rd("site/extra.css") + "\n" + rd("site/chess.css"), "/*SPRITE*/": rd("site/sprite.html"),
              "/*PACKS*/{}": json.dumps(packs, ensure_ascii=False, separators=(",", ":")), "/*CORE*/": core,
-             "/*MASCOTS*/": rd("site/mascot_lines.js") + "\n" + rd("site/coach_lines.js") + "\n" + rd("site/chess_coaches.js") + "\n" + rd("site/mascot_art.js") + "\n" + rd("site/mascots_worlds.js"), "/*APP*/": rd("site/app.js")}.items():
+             "/*MASCOTS*/": rd("site/mascot_lines.js") + "\n" + rd("site/coach_lines.js") + "\n" + rd("site/chess_coaches.js") + "\n" + rd("site/mascot_art.js") + "\n" + rd("site/mascots_worlds.js"), "/*APP*/": rd("site/app.js") + "\n" + rd("site/social.js") + "\n" + rd("site/chessplay.js")}.items():
     html = html.replace(k, v, 1)
 out = os.path.join(ROOT, "docs")
 os.makedirs(out, exist_ok=True)
@@ -49,6 +49,9 @@ open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(html)
 if os.path.isdir(os.path.join(out, "img")):
     shutil.rmtree(os.path.join(out, "img"))
 shutil.copytree(os.path.join(ROOT, "img"), os.path.join(out, "img"))
+shutil.rmtree(os.path.join(out, "engine"), ignore_errors=True); shutil.copytree(os.path.join(ROOT, "site", "engine"), os.path.join(out, "engine"))   # Stockfish (GPL-3, licence inside)
+os.makedirs(os.path.join(out, "img"), exist_ok=True)
+for f in os.listdir(os.path.join(ROOT, "site", "pwa")): shutil.copy(os.path.join(ROOT, "site", "pwa", f), os.path.join(out, f))   # install as an app
 n = sum(len(fs) for _, _, fs in os.walk(os.path.join(out, "img")))
 print(f"docs/index.html {len(html) // 1024} KB, {len(packs)} worlds ({', '.join(f'{w} {len(p['items'])}' for w, p in packs.items())}), {n} images")
 

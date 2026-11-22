@@ -28,10 +28,12 @@ for i in range(0, len(idols), 150):
             stage.setdefault(b["p"]["value"].rsplit("/", 1)[-1], []).append(v)
     time.sleep(1)
 
+KEEP_FULL = {"Lee Know", "Kim Lip", "Kim Woojin", "Han Seungwoo", "Bang Chan", "Jung Kook"}   # stage names that look like a surname + given name, or idols known by the full name
 def given(label):
     w = label.split()
-    if len(w) == 2 and w[0].lower() in SURNAMES and re.fullmatch(r"[A-Z][a-z]+-[a-z]+", w[1]):
-        return w[1].replace("-", "")
+    if label in KEEP_FULL or len(w) != 2 or w[0].lower() not in SURNAMES: return None
+    if re.fullmatch(r"[A-Z][a-z]+-[a-z]+", w[1]): return w[1].replace("-", "")          # Kang Seul-gi -> Seulgi
+    if re.fullmatch(r"[A-Z][a-z]{4,}", w[1]): return w[1]                                # Im Nayeon -> Nayeon, Lim Yoona -> Yoona (5+ letters, so Bang Chan and Jung Kook stay whole)
     return None
 
 changed = 0

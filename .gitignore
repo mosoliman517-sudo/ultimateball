@@ -6,3 +6,4 @@ __pycache__/
 .DS_Store
 proto_data.js
 prototype.html
+packs/_*

@@ -2,6 +2,11 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#120a1c">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 /*FONTS*/
@@ -21,6 +26,7 @@
     <span class="byline">Built by moisback22</span>
     <span class="spacer"></span>
     <button class="pill" data-go="worlds" type="button" title="All worlds"><svg class=ic><use href=#i-compass></use></svg></button>
+    <button class="pill" data-go="wiki" type="button" title="Wiki: search every group, idol, country and player" aria-label="Wiki"><svg class=ic><use href=#i-search></use></svg></button>
     <button class="pill" data-go="collection" type="button" title="Your collection"><svg class=ic><use href=#i-album></use></svg></button>
     <button class="pill" data-go="settings" type="button" title="Settings: sound, music, sidekick" aria-label="Settings"><svg class=ic><use href=#i-gear></use></svg></button>
     <button class="pill profilebtn" id="profileBtn" data-go="profile" type="button" title="Your profile, ranks and achievements" aria-label="Open your profile"></button>
@@ -37,6 +43,7 @@
         <div class="ribbon" id="ribbon"></div>
       </div>
     </div>
+    <div id="homeTop"></div>
     <h2 class="sec">Pick a category</h2>
     <p class="secsub">Tap one to see its games. Each has its own sidekick, music, loading screens and rank.</p>
     <div class="worlds" id="homeCats"></div>
@@ -64,6 +71,7 @@
   </section>
   <section id="profilePage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button></nav><div id="profRoom"></div></section>
   <section id="collPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button></nav><div id="collRoom"></div></section>
+  <section id="wikiPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button><div class="trail"><span class="crumb cur">Wiki</span></div></nav><div id="wikiRoom"></div></section>
   <section id="setPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button></nav><div id="setRoom"></div></section>
 
   <div class="foot">
@@ -71,6 +79,8 @@
     <span>Club crests and football player photos belong to their owners and appear only to identify them. An independent student project.</span>
   </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 const $ = (s, r = document) => r.querySelector(s);
 const REDUCED = (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
