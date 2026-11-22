@@ -1,4 +1,4 @@
-# Lumo (placeholder name): the games site
+# ultimateball: the games site
 
 A games-only knowledge site spun off from ballknowledge (`~/Desktop/football-prediction-model`). It is built on that site's football page: the same CSS and look, round engine, sounds and lobby music, finale card, versus screens, MQTT rooms and sidekicks, copied into `site/` and extended to many categories.
 
