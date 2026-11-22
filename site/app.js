@@ -16,8 +16,8 @@ const pic = (x, cls = "") => imgOf(x) ? `<img class="${cls} ${isCut(x) ? "cutpic
 
 /* ---------------- the worlds ---------------- */
 const WORLDS = {
-  kpop: { name: "K-pop", kicker: "Idols, groups, songs, fandoms", tag: "The new generation: groups that debuted from 2015 on, newest first, with real photos, album covers and song previews.", mascot: "bongi", kicks: ["bongi", "mic", "pocha"] },
-  football: { name: "Football", kicker: "Five leagues of ball knowledge", tag: "Players, careers, crests and market values from ballknowledge's real data.", mascot: "bench", kicks: ["bench", "boot", "rita"] },
+  kpop: { name: "K-pop", kicker: "Idols, groups, songs, fandoms", tag: "The current generation: 4th and 5th gen groups plus TWICE, BLACKPINK, BTS and IZ*ONE, with their idols, hits since 2022, album covers and song previews.", mascot: "bongi", kicks: ["bongi", "mic", "pocha"] },
+  football: { name: "Football", kicker: "Five leagues, real data", tag: "Players, careers, crests and market values from ballknowledge's real data.", mascot: "bench", kicks: ["bench", "boot", "rita"] },
   basketball: { name: "Basketball", kicker: "25 seasons of the NBA", tag: "Players, careers, team logos and career points from ballknowledge's basketball data.", mascot: "rim", kicks: ["rim", "clock", "sneak"] },
   chess: { name: "Chess", kicker: "Grandmasters and openings", tag: "Elite players with their peak ratings, and the real openings from Lichess.", mascot: "pip", kicks: ["pip", "vera", "bea"] },
   geography: { name: "Geography", kicker: "Flags, capitals, countries", tag: "Every sovereign country: flags, capitals, languages and populations.", mascot: "pin", kicks: ["pin"] },
@@ -80,7 +80,7 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 const released = (x) => (x.date ? `${MONTHS[+x.date.slice(5, 7) - 1]} ${x.date.slice(0, 4)}` : x.year);
 const genOf = (g) => (g && g.gen ? ["", "", "", "3rd", "4th", "5th"][g.gen] + " generation" : null);
 const groupOf = (n) => items("kpop", (g) => g.kind === "group" && g.n === n)[0];
-const first = (n) => n.split(/\s+/).map((w) => w[0].toUpperCase()).join(". ") + ".";
+const first = (n) => String(n || "").split(/\s+/).filter(Boolean).map((w) => (w[0] || "").toUpperCase()).join(". ") + ".";
 const CLUES = {
   player: (p) => [["Born", p.born], ["Nationality", p.nat], ["Position", p.pos], ["Clubs", p.hist && p.hist.length ? `${new Set(p.hist).size} clubs on record` : null], ["Strong foot", p.foot], ["Caps", p.caps != null ? `${p.caps} for his country` : null], ["Now at", p.club], ["Initials", first(p.n)]].filter((c) => c[1]),
   idol: (p) => [["Born", p.born], ["Birthplace", p.from], ["Group", p.groups && p.groups.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
@@ -148,8 +148,8 @@ const GAMES = {
     G("album", "Album → song", "photo", { tag: "An album cover and its year. Name the song. The group's name is the first hint.", pool: () => albumPool(), top: (x) => `<div class="blurpic cover"><img src="${x.cover}" alt=""></div><div class="fine" style="text-align:center">Released ${esc(released(x))}</div>`, hints: (x) => [["By", x.by], ["Starts with", x.n[0].toUpperCase()]], unit: "song" }),
     G("hear", "Hear the song", "audio", { tag: "Three seconds of a real song. Then five more. Buzz and type the title before the hints arrive.", pool: () => items("kpop", (x) => x.kind === "song" && x.pv), unit: "song", min: 6 }),
     G("song", "Guess the song", "clue", { tag: "A real song: when it came out, its album, then the group. Type the title.", pool: () => items("kpop", (x) => x.kind === "song" && x.date), clues: CLUES.song, unit: "song" }),
-    G("albumname", "Which album is it from?", "clue", { tag: "A song, its group and when it came out. Name the album it is on. Harder on Hard and Elite: deeper album tracks.", pool: () => items("kpop", (x) => x.kind === "song" && x.album && qnorm(x.album) !== qnorm(x.n)), clues: (x) => [["Song", x.n], ["By", x.by], ["Released", released(x)], ["Starts with", x.album[0]]], unit: "album", answer: (x) => x.album }),
-    G("whose", "Whose song is it?", "clue", { tag: "A song title appears. Type the group who sings it.", pool: () => items("kpop", (x) => x.kind === "song" && x.by), clues: (x) => [["Song", x.n], ["Released", released(x)], ["Album", x.album && qnorm(x.album) !== qnorm(x.n) ? x.album : null], ["Generation", genOf(groupOf(x.by))], ["Starts with", x.by[0]]].filter((c) => c[1]), unit: "group", answer: (x) => x.by }),
+    G("albumname", "Which album is it from?", "clue", { tag: "A song, its group and when it came out. Name the album it is on. Harder on Hard and Elite: deeper album tracks.", pool: () => items("kpop", (x) => x.kind === "song" && x.album && qnorm(x.album) !== qnorm(x.n) && qnorm(x.album) !== qnorm(x.by)), clues: (x) => [["Song", x.n], ["By", x.by], ["Released", released(x)], ["Starts with", x.album[0]]], unit: "album", answer: (x) => x.album }),
+    G("whose", "Whose song is it?", "clue", { tag: "A song title appears. Type the group who sings it.", pool: () => items("kpop", (x) => x.kind === "song" && x.by && !qnorm(x.n).includes(qnorm(x.by)) && !qnorm(x.album || "").includes(qnorm(x.by))), clues: (x) => [["Song", x.n], ["Released", released(x)], ["Album", x.album && qnorm(x.album) !== qnorm(x.n) ? x.album : null], ["Generation", genOf(groupOf(x.by))], ["Starts with", x.by[0]]].filter((c) => c[1]), unit: "group", answer: (x) => x.by }),
     G("group", "Group: Who are we?", "clue", { tag: "A mystery group. Generation, members, label and debut year reveal it.", pool: () => items("kpop", (x) => x.kind === "group" && (x.debut || (x.labels || []).length)), clues: CLUES.group, unit: "group" }),
     G("logo", "Logo blur", "blur", { tag: "A blurred group logo that sharpens by the second.", pool: () => items("kpop", (x) => x.kind === "group" && x.logo), unit: "group", imgKey: "logo", min: 6 }),
     G("newer", "Which song is newer?", "hol", { gaps: [730, 240, 60], tag: "Two songs with their covers. Which came out more recently? Keep the streak alive.", pool: () => items("kpop", (x) => x.kind === "song" && x.date && x.cover), stat: (x) => Math.round(Date.parse(x.date) / 864e5), show: (v) => { const t = new Date(v * 864e5); return `${MONTHS[t.getUTCMonth()]} ${t.getUTCFullYear()}`; }, ask: "Released more recently?", higher: true }),
@@ -166,7 +166,7 @@ const GAMES = {
     G("scramble", "Answer scramble", "scramble", { tag: "A quiz answer with its letters shuffled.", pool: () => items("general", (x) => x.n.length >= 5) }),
   ],
   anime: [
-    G("who", "Which anime am I?", "clue", { tag: "Genres, episodes, studio, creator, year. Name the series.", pool: () => items("anime", (x) => x.kind === "anime"), clues: CLUES.anime, unit: "anime" }),
+    G("who", "Which anime am I?", "clue", { tag: "Genres, episodes, studio, creator, year. Name the series.", pool: () => items("anime", (x) => x.kind === "anime" && (x.studios || []).length + (x.genres || []).length + (x.authors || []).length + (x.eps ? 1 : 0) + (x.year ? 1 : 0) >= 3), clues: CLUES.anime, unit: "anime" }),
     G("from", "Which anime are they from?", "clue", { tag: "A character's name, then a co-star, the year and the studio. Name the series.", pool: () => items("anime", (x) => x.kind === "character" && items("anime", (a) => a.kind === "anime" && a.n === x.anime).length), clues: (c) => { const a = items("anime", (y) => y.kind === "anime" && y.n === c.anime)[0] || {}, co = items("anime", (y) => y.kind === "character" && y.anime === c.anime && y.id !== c.id); return [["Character", c.n], ["Also in it", co.length ? rnd(co).n : null], ["First aired", a.year], ["Studio", a.studios && a.studios.join(", ")], ["Starts with", c.anime[0]]].filter((k) => k[1]); }, answer: (c) => c.anime, unit: "anime" }),
     G("cast", "Character roulette", "roulette", { tag: "A series appears. Take turns naming its characters. First to blank loses.", pool: () => items("anime", (x) => x.kind === "anime").filter((a) => rosterOf("anime", a).length >= 4), roster: (a) => rosterOf("anime", a), unit: "character" }),
     G("aired", "Which aired first?", "hol", { gaps: [10, 5, 2], tag: "Two series. Which one started earlier?", pool: () => items("anime", (x) => x.year), stat: (x) => x.year, show: String, ask: "Aired first?", higher: false }),
@@ -258,12 +258,15 @@ function albumPool() { if (albumPool.c) return albumPool.c; const n = {}; items(
 function labelPool() { if (labelPool.c) return labelPool.c; const m = {}; items("kpop", (g) => g.kind === "group").forEach((g) => (g.labels || []).forEach((l) => { m[l] = (m[l] || 0) + 1; })); return (labelPool.c = Object.entries(m).filter(([, n]) => n >= 4).map(([n, k]) => ({ id: "L" + n, n, fame: k }))); }
 /* tic-tac-toe attributes: every one is a real fact from the data; a grid is only used when all nine cells have answers */
 function tttAttrsKpop() {
-  const era = (a, b, l) => ({ label: l, test: (g) => g.debut >= a && g.debut <= b });
-  const fam = [labelPool().sort((a, b) => b.fame - a.fame).slice(0, 8).map((l) => ({ label: l.n, test: (g) => (g.labels || []).includes(l.n) })),
+  const G = (g) => g.debut || 0, size = (g) => rosterOf("kpop", g).length, songYr = (g, y) => items("kpop", (x) => x.kind === "song" && x.by === g.n && (x.date || "") >= y + "-01-01").length > 0;
+  const fam = [
+    [{ label: "Debuted 2015–2019", test: (g) => G(g) >= 2015 && G(g) <= 2019 }, { label: "Debuted 2020–2022", test: (g) => G(g) >= 2020 && G(g) <= 2022 }, { label: "Debuted 2023 or later", test: (g) => G(g) >= 2023 }],
+    [{ label: "Biggest acts (tier 1)", test: (g) => g.tier === 1 }, { label: "Mainstream (tier 2)", test: (g) => g.tier === 2 }, { label: "Established (tier 3)", test: (g) => g.tier === 3 }],
+    [{ label: "5 or more members", test: (g) => size(g) >= 5 }, { label: "4 or fewer members", test: (g) => size(g) > 0 && size(g) <= 4 }, { label: "7 or more members", test: (g) => size(g) >= 7 }],
+    [{ label: "Released music in 2025", test: (g) => songYr(g, 2025) }, { label: "Released music in 2024", test: (g) => songYr(g, 2024) }, { label: "Released music in 2023", test: (g) => songYr(g, 2023) }],
     [{ label: "Boy group", test: (g) => g.gender === "boy group" }, { label: "Girl group", test: (g) => g.gender === "girl group" }],
-    [era(2015, 2017, "Debuted 2015–2017"), era(2018, 2022, "4th gen (2018–2022)"), era(2023, 2100, "5th gen (2023 on)")],
-    [{ label: "5+ members", test: (g) => (g.members || 0) >= 5 }, { label: "4 or fewer members", test: (g) => g.members && g.members <= 4 }]];
-  return fam;
+  ];
+  return fam.concat([labelPool().sort((a, b) => b.fame - a.fame).slice(0, 8).map((l) => ({ label: l.n, test: (g) => (g.labels || []).includes(l.n) }))]);
 }
 function tttAttrsBall(w) {
   const P = w === "football" ? items("football", (x) => x.kind === "player") : items("basketball", (x) => x.kind === "bplayer"), cnt = {};
@@ -464,7 +467,7 @@ function renderHome() {
 }
 function catCards() {
   const p = prof();
-  return WORLD_IDS.map((w, k) => { const W = WORLDS[w], pics = shuffle(items(w, (x) => x.img).slice(0, 24)).slice(0, 3), wx = (p.worlds[w] || {}).xp || 0, kick = (p.kick || {})[w] || W.mascot;
+  return WORLD_IDS.map((w, k) => { const W = WORLDS[w], pics = shuffle(items(w, (x) => x.img && (w !== "kpop" || x.kind === "idol")).sort((a, b) => (b.fame || 0) - (a.fame || 0)).slice(0, 24)).slice(0, 3), wx = (p.worlds[w] || {}).xp || 0, kick = (p.kick || {})[w] || W.mascot;
     return `<button type="button" class="world ${k === 0 ? "feat" : ""}" data-go="w-${w}" style="${wvars(w)};--d:${k * 70}ms"><div class="wbody"><div class="wk">${esc(W.kicker)}</div><div class="wn">${esc(W.name)}</div><div class="wt">${esc(W.tag)}</div><div class="ws"><span>${GAMES[w].length} games</span><span>${rkIcon(wRank(wx))} ${wRank(wx)}</span></div></div>${pics.length ? `<div class="wpics">${pics.map((x) => `<img src="${x.img}" alt="" class="${isCut(x) ? "cutpic" : ""}">`).join("")}</div><div class="wmas">${MASCOT_SVG[kick]("happy")}</div>` : `<div class="wbig">${MASCOT_SVG[kick]("happy")}</div>`}</button>`; }).join("");
 }
 function homeTilt() { document.querySelectorAll(".door,.world,.gcard").forEach((el) => { el.onpointermove = (e) => { const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; el.style.setProperty("--ry", `${(x - 0.5) * 8}deg`); el.style.setProperty("--rx", `${(0.5 - y) * 8}deg`); el.style.setProperty("--mx", x * 100 + "%"); el.style.setProperty("--my", y * 100 + "%"); }; el.onpointerleave = () => { el.style.setProperty("--rx", "0deg"); el.style.setProperty("--ry", "0deg"); }; }); }
@@ -568,10 +571,12 @@ function nextRound() {
   const s = Q.s; s.round++; const d = curDef(), pool = byFame(d.pool()); let r;
   const bal = (list) => { if (curWorld() !== "kpop" || !list.length || !list[0].kind) return rnd(list); const L = list.filter((x) => kbucket(x) === "L"), M = list.filter((x) => kbucket(x) === "M"); return L.length && M.length ? (Math.random() < 0.18 ? rnd(L) : rnd(M)) : rnd(list); };
   const pickR = s.daily ? (k) => pool[Math.floor(seeded(`${s.daily}:${s.round}:${k}`) * pool.length)] : () => bal(pool);
-  for (let k = 0; k < 40; k++) { r = pickR(k); if (!s.used.has(r.id)) break; }
+  for (let k = 0; k < 60; k++) { r = pickR(k); if (!s.used.has(r.id) && (d.kind !== "scramble" || qnorm(r.n).length >= 4)) break; }
   if (s.fixed) r = items(s.w).find((x) => x.id === s.fixed[s.round - 1]) || r;   // a challenge replays the challenger's exact rounds
   s.used.add(r.id); s.r = r; (s.picks = s.picks || []).push(r.id);
   s.clues = d.kind === "audio" ? [["Listen", "3 seconds"], ["Listen", "5 more seconds"], ["By", r.by], ["Year", r.year], ["Listen", "the whole preview"], ["Initials", first(r.n)]].filter((c) => c[1]) : d.kind === "blur" ? BLUR.map((b) => ["Blur", b]) : d.kind === "scramble" ? [["Letters", scrambleName(r.n)], ["It is", KIND_WORD[r.kind] || "a name"], ...(CLUES[r.kind] ? CLUES[r.kind](r).filter((c) => !/Initials|Starts|Letters/.test(c[0])).slice(-1) : []), ["Starts with", first(r.n)]] : d.kind === "photo" ? d.hints(r) : d.clues(r);
+  /* a hint must never contain the answer (Tottenham Hotspur Stadium for Tottenham, "Albanian lek" for Albania): drop it, unless the clue IS the prompt */
+  if (!["capital", "whose", "albumname", "where", "from", "quiz"].includes(d.id) && d.kind !== "scramble" && d.kind !== "audio") { const an = qnorm(nameOfAnswer(d, r)); if (an.length >= 5) { const stem = an.slice(0, Math.max(5, an.length - 2)), keep = s.clues.filter((c, i) => i === 0 || !qnorm(String(c[1])).includes(stem) || /^(Initials|Starts with)$/.test(c[0])); if (keep.length >= 2) s.clues = keep; } }
   s.elapsed = 0; s.paused = false; s.buzzed = null; s.locked = [false, false]; s.phase = "run"; s.result = null; s.hn = 0;
   Aud.load(d.kind === "audio" ? r.pv : null); s.cs = (d.kind === "audio" ? 7 : d.kind === "blur" ? 3.2 : d.kind === "scramble" ? 7 : d.kind === "photo" ? 8 : 6) * clueSpeed(); s.total = d.kind === "photo" ? 3 * s.cs : s.clues.length * s.cs + 6;
   if (s.mix) { setTheme(curWorld()); }
@@ -677,7 +682,7 @@ function nextHol() { const s = H.s, g = gameOf(s.w, s.game), pool = byFame(g.poo
 function renderHol() {
   const s = H.s, g = gameOf(s.w, s.game), duo = s.mode === "duo", names = NAMES(), done = s.phase === "done";
   if (done) { const winner = s.scores[0] === s.scores[1] ? -1 : s.scores[0] > s.scores[1] ? 0 : 1; $("#room").innerHTML = `<div class="card">${gamesBar(esc(g.name))}${finale({ label: duo ? "Full time" : `Run over`, verdict: duo ? (winner < 0 ? "A draw." : esc(names[winner]) + " wins!") : s.streak >= 10 ? "Unreal." : s.streak >= 5 ? "Strong run." : "Go again.", players: duo ? [0, 1].map((k) => ({ name: names[k], score: s.scores[k] })) : [{ name: prof().nick || "You", score: s.streak, av: avatarHTML(prof().avatar, "lg", prof().nick || "You") }], winner: duo ? winner : null, good: duo || s.streak >= 5, tiles: duo ? [] : [[s.streak, "streak"]], buttons: `<button class="btn" id="hAgain" type="button">Play again</button>` })}</div>`; return; }
-  const side = (x, k) => { const rev = s.phase === "reveal", ok = rev && ((g.higher ? g.stat(x) > g.stat(k === "a" ? s.b : s.a) : g.stat(x) < g.stat(k === "a" ? s.b : s.a))); return `<button type="button" class="holside ${rev ? (ok ? "win" : "lose") : ""}" data-hol="${k}" ${rev ? "disabled" : ""}>${imgOf(x) ? `<img src="${imgOf(x)}" alt="" class="${isCut(x) ? "cutpic" : ""}" style="${(x.flag || x.logo) && !x.img && !x.cover ? "object-fit:contain;padding:30px;background:#0b1a22" : ""}">` : ""}<b>${esc(x.n)}</b><span class="hv num" data-v="${g.stat(x)}">${rev ? esc(g.show(g.stat(x))) : ""}</span></button>`; };
+  const side = (x, k) => { const rev = s.phase === "reveal", ok = rev && ((g.higher ? g.stat(x) > g.stat(k === "a" ? s.b : s.a) : g.stat(x) < g.stat(k === "a" ? s.b : s.a))); return `<button type="button" class="holside ${rev ? (ok ? "win" : "lose") : ""}" data-hol="${k}" ${rev ? "disabled" : ""}>${imgOf(x) ? `<img src="${imgOf(x)}" alt="" class="${isCut(x) ? "cutpic" : ""}" style="${(x.flag || x.logo) && !x.img && !x.cover ? "object-fit:contain;padding:30px;background:#0b1a22" : ""}">` : `<span class="hph">${esc(String(x.n || "?")[0].toUpperCase())}</span>`}<b>${esc(x.n)}</b><span class="hv num" data-v="${g.stat(x)}">${rev ? esc(g.show(g.stat(x))) : ""}</span></button>`; };
   const hud = duo ? `<div class="qhud"><span class="label">${esc(names[s.turn])}'s turn · ${s.n[0] + s.n[1] + 1} of 10</span>${[0, 1].map((i) => `<span class="num qscore"><small>${esc(names[i])}</small> <b>${s.scores[i]}</b></span>`).join("")}</div>` : `<div class="qhud"><span class="label">Streak ${s.streak}</span></div>`;
   $("#room").innerHTML = `<div class="card">${gamesBar(esc(g.name))}${hud}<h3 style="text-align:center;font-family:var(--display);font-size:clamp(26px,4vw,40px);margin:6px 0 12px">${esc(g.ask)}</h3><div class="holpair">${side(s.a, "a")}${side(s.b, "b")}<div class="holor">OR</div></div>${s.phase === "reveal" ? `<div class="row" style="margin-top:14px;justify-content:space-between"><span class="fine">${credOf(s.a)}${credOf(s.b)}</span><button class="btn" id="hNext" type="button">${s.over ? "See the result" : "Next"}</button></div>` : ""}</div>`;
 }

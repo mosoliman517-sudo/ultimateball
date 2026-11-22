@@ -322,3 +322,5 @@ ol.board li:nth-child(1) .rk { color: #ffd666; } ol.board li:nth-child(2) .rk { 
 .statgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 6px; }
 .statgrid > div { display: flex; flex-direction: column; padding: 10px; border-radius: 12px; background: rgba(255,255,255,.05); }
 .statgrid b { font-size: 22px; }
+/* higher-or-lower card with no picture: a big initial on the category colour */
+.hph { display: grid; place-items: center; width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, var(--c-glow, #7c6cff), var(--c-bg, #1a1020)); font: 900 clamp(64px, 18vw, 120px) var(--c-display, system-ui); color: rgba(255,255,255,.88); text-shadow: 0 8px 30px rgba(0,0,0,.35); }
