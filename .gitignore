@@ -1,0 +1,8 @@
+# raw downloaded pictures stay out of git (the built site in docs/ carries the copies it needs, each credited)
+img/
+proto_assets/
+docs_art/
+__pycache__/
+.DS_Store
+proto_data.js
+prototype.html

@@ -1,0 +1,87 @@
+<title>Lumo Games</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+/*FONTS*/
+<style>
+/*BASE_CSS*/
+/*EXTRA_CSS*/
+</style>
+/*SPRITE*/
+<div id="splash" class="splash k-star" role="status" aria-live="polite"><div class="sp-art" aria-hidden="true"></div><div class="sp-brand">lu<b>mo</b></div><div class="sp-foot"><div class="sp-tip" id="spTip">Loading…</div><div class="sp-bar"><i></i></div><div class="sp-meta"><span id="spName"></span><span id="spRar" class="sp-rar"></span><span id="spNew"></span></div><button type="button" class="sp-skip" id="spSkip">Tap to skip</button></div></div>
+<div id="stadium" class="stadium" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="wash" id="wash" aria-hidden="true"></div>
+<div class="wrap">
+  <div class="bar">
+    <button class="brand" id="brand" type="button" title="Back to the front page" aria-label="Back to the front page"><i></i><span>lu<b>mo</b></span></button>
+    <span class="vtag"><b>Draft</b> v0.1</span>
+    <span class="byline">Placeholder name · built by moisback22</span>
+    <span class="spacer"></span>
+    <button class="pill" data-go="worlds" type="button" title="All worlds"><svg class=ic><use href=#i-compass></use></svg></button>
+    <button class="pill" data-go="collection" type="button" title="Your collection"><svg class=ic><use href=#i-album></use></svg></button>
+    <button class="pill" data-go="settings" type="button" title="Settings: sound, music, sidekick" aria-label="Settings"><svg class=ic><use href=#i-gear></use></svg></button>
+    <button class="pill profilebtn" id="profileBtn" data-go="profile" type="button" title="Your profile, ranks and achievements" aria-label="Open your profile"></button>
+  </div>
+
+  <section id="home" hidden>
+    <div class="homehero">
+      <div class="photowall" id="photowall" aria-hidden="true"></div>
+      <div class="homeinner">
+        <div class="label">Every topic, one arena</div>
+        <h1>lu<em>mo</em></h1>
+        <p>K-pop, football, basketball, chess, flags, history and food. Real data, typed answers, solo or against a friend.</p>
+        <div class="doors" id="doors" hidden></div>
+        <div class="ribbon" id="ribbon"></div>
+      </div>
+    </div>
+    <h2 class="sec">Pick a category</h2>
+    <p class="secsub">Tap one to see its games. Each has its own sidekick, music, loading screens and rank.</p>
+    <div class="worlds" id="homeCats"></div>
+    <div id="homeMix" style="margin-top:28px"></div>
+  </section>
+
+  <section id="worldsPage" hidden>
+    <nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button><div class="trail"><span class="crumb cur">Worlds</span></div></nav>
+    <div class="hero"><h1>Pick your <em>world</em></h1><p>Every world has its own games, sidekick, music, loading screens and rank. Your level and achievements follow you everywhere.</p></div>
+    <div class="worlds" id="worlds"></div>
+  </section>
+
+  <section id="league" hidden>
+    <nav class="crumbs" id="crumbs" aria-label="Where you are"></nav>
+    <div class="lhead">
+      <div class="flag" id="lFlag" aria-hidden="true"></div><div class="lid"><div><div class="label" id="lKicker"></div><h1 id="lName"></h1><p id="lTag"></p></div></div>
+      <div class="scorebox" id="scorebox"></div>
+    </div>
+    <div id="room"></div>
+  </section>
+
+  <section id="mixPage" hidden>
+    <nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button><div class="trail"><span class="crumb cur">Cross-category match</span></div></nav>
+    <div id="mixRoom"></div>
+  </section>
+  <section id="profilePage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button></nav><div id="profRoom"></div></section>
+  <section id="collPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button></nav><div id="collRoom"></div></section>
+  <section id="setPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button></nav><div id="setRoom"></div></section>
+
+  <div class="foot">
+    <span>Facts come from Wikidata (CC0) and ballknowledge's football data. Pictures are from Wikimedia Commons under free licences, each credited on its answer card.</span>
+    <span>Club crests and football player photos belong to their owners and appear only to identify them. An independent student project.</span>
+  </div>
+</div>
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const REDUCED = (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+window.PACKS = /*PACKS*/{};
+</script>
+<script>
+/*CORE*/
+</script>
+<script>
+/*MASCOTS*/
+</script>
+<script>
+/*APP*/
+</script>
