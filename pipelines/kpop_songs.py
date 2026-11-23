@@ -50,7 +50,7 @@ def get_json(url, params):
 def fetch(g, names):
     """Looks the artist up first (genre K-Pop preferred, name must match), then fetches that artist's songs by id: searching by
     a name like 'Twice' or 'Ive' returns hundreds of unrelated artists and buries the group."""
-    k = "artist:" + g["n"]
+    k = "artist2:" + g["n"]
     if k in cache: return cache[k]
     terms = [g["n"]] + ALIAS.get(g["n"], [])
     found = None
@@ -61,8 +61,10 @@ def fetch(g, names):
         if c: found = c[0]; break
     if not found:
         print("no Apple artist for", g["n"], flush=True); return []
-    r = get_json("https://itunes.apple.com/lookup", {"id": found["artistId"], "entity": "song", "limit": 200, "country": "US"}); time.sleep(3.2)
-    out = [t for t in r.get("results", []) if t.get("wrapperType") == "track"]
+    out = []
+    for tag, extra in (("pop", {}), ("recent", {"sort": "recent"})):   # Apple's default order (roughly by popularity) and its newest-first order
+        r = get_json("https://itunes.apple.com/lookup", dict({"id": found["artistId"], "entity": "song", "limit": 200, "country": "US"}, **extra)); time.sleep(3.2)
+        for i, t in enumerate(x for x in r.get("results", []) if x.get("wrapperType") == "track"): t["_ord"] = (tag, i); out.append(t)
     if out: cache[k] = out; json.dump(cache, open(CACHE, "w"))
     return out
 
@@ -84,15 +86,18 @@ for k, g in enumerate(groups):
         date = (t.get("releaseDate") or "")[:10]
         if not date: continue
         firsts[g["id"]] = min(firsts.get(g["id"], "9999"), date)
+        if date[:4] < "2022": continue        # recent music only: older songs would crowd out the quota before the cutoff
         key = norm(title)
-        if not key or (key in seen and seen[key]["date"] <= date): continue
+        score = t["_ord"][1] if t["_ord"][0] == "pop" else 100 + t["_ord"][1]      # appears early in Apple's popular order: best; recent-only: after
+        if not key or (key in seen and seen[key]["_rank"] <= score): continue
         alb = re.sub(r"\s*-\s*(Single|EP)$", "", t.get("collectionName", "")).strip()
         seen[key] = {"id": "s" + str(t["trackId"]), "n": title, "kind": "song", "by": g["n"], "gid": g["id"], "date": date, "year": int(date[:4]), "album": alb,
                      "single": t.get("collectionName", "").endswith("- Single") or norm(alb) == key, "cover": (t.get("artworkUrl100") or "").replace("100x100bb", "600x600bb"),
-                     "pv": t["previewUrl"], "am": t.get("trackViewUrl"), "_rank": len(seen)}
-    top = sorted(seen.values(), key=lambda s: s["_rank"])[:PER_GROUP]
+                     "pv": t["previewUrl"], "am": t.get("trackViewUrl"), "_rank": score}
+    quota = {1: 22, 2: 15, 3: 9}.get(g.get("tier"), 12)
+    top = sorted(seen.values(), key=lambda s: s["_rank"])[:quota]
     for i, s in enumerate(top):
-        s["fame"] = s["fame0"] = round(g.get("fame0", g["fame"]) * (1 - i / (PER_GROUP * 1.5)), 1); s.pop("_rank")
+        s["fame"] = s["fame0"] = round(g.get("fame0", g["fame"]) * (1 - i / (quota * 1.5)), 1); s.pop("_rank")
     songs += top
     if k % 20 == 0 or not top: print(k, g["n"], len(top), "songs", flush=True)
 

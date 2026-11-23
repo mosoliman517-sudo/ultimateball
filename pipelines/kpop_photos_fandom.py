@@ -33,14 +33,14 @@ for x in need:
     for t in cands:
         m = re.fullmatch(r"(.+?) \((.+)\)", t)
         if m and key(m.group(1)) in {key(n) for n in names} and key(m.group(2)) in {key(a) for a in gs}: title = t; break
-    if not title:   # a bare-name page ("Juun") is accepted only when its intro names the idol's group
+    if not title:   # any candidate page counts when its picture's own file name names the group AND a piece of the idol's name
+        toks = [key(t) for t in re.split(r"[\s-]+", x["n"]) if len(key(t)) >= 3] or [key(x["n"])]
         for t in cands:
-            if key(t) in {key(n) for n in names}:
-                ex = get({"action": "query", "titles": t, "prop": "extracts|pageimages", "exintro": 1, "explaintext": 1, "piprop": "thumbnail", "pithumbsize": 720, "format": "json"})
-                try: pg = next(iter(ex["query"]["pages"].values())); txt = pg.get("extract", "") + " " + urllib.parse.unquote((pg.get("thumbnail") or {}).get("source", ""))
-                except Exception: continue
-                # the intro text, or the picture's own file name ("Hearts2Hearts_Juun_..."), must name the group
-                if any(key(a) in key(txt) for a in gs if key(a)) and key(x["n"]) in key(txt): title = t; break
+            if t.endswith("/Gallery") or "/" in t or key(t) in {key(a) for a in gs}: continue
+            ex = get({"action": "query", "titles": t, "prop": "pageimages", "piprop": "thumbnail", "pithumbsize": 720, "format": "json"})
+            try: pg = next(iter(ex["query"]["pages"].values())); fn = key(urllib.parse.unquote((pg.get("thumbnail") or {}).get("source", "")).split("/revision/")[0].split("/")[-1])
+            except Exception: continue
+            if any(key(a) in fn for a in gs if key(a)) and any(tk in fn for tk in toks): title = t; break
     if not title: continue
     r = get({"action": "query", "titles": title, "prop": "pageimages", "piprop": "thumbnail", "pithumbsize": 720, "format": "json"})
     try: src = next(iter(r["query"]["pages"].values()))["thumbnail"]["source"]

@@ -4,7 +4,7 @@
 const PK = window.PACKS || {};
 Object.values(PK).forEach((p) => { p.items = p.items.filter((x) => x.n && !/^Q\d+$/.test(x.n)); });   /* Wikidata entries with no English name are left out, never renamed */
 if (window.IMGDATA) Object.values(PK).forEach((p) => p.items.forEach((x) => ["img", "logo", "flag"].forEach((k) => { if (x[k]) { if (IMGDATA[x[k]]) x[k] = IMGDATA[x[k]]; else delete x[k]; } })));
-const items = (w, f) => ((PK[w] && PK[w].items) || []).filter((x) => !f || f(x));
+const items = (w, f) => ((PK[w] && PK[w].items) || []).filter((x) => !x.former && (!f || f(x)));   // former members are kept in the data but never used in a game
 const rnd = (a) => a[Math.floor(Math.random() * a.length)];
 const shuffle = (a) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
 const fmt = (n) => n >= 1e9 ? (n / 1e9).toFixed(1).replace(/\.0$/, "") + " bn" : n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, "") + " m" : n >= 1e3 ? Math.round(n / 1e3) + "k" : String(n);
@@ -62,6 +62,7 @@ function fameCuts(w, kind, bucket) {
 }
 function byFame(list) {
   if (!list.length) return list;
+  if (S.world === "kpop" || (list[0] && items("kpop").includes(list[0]))) return list;   // K-pop: the whole eligible database, weighted by Pick (see social.js); difficulty metadata stays for later
   const w = S.world && items(S.world).includes(list[0]) ? S.world : WORLD_IDS.find((x) => items(x).includes(list[0])), s2 = list.slice().sort((a, b) => (b.fame || 0) - (a.fame || 0));
   const top = (x) => { const c = fameCuts(w, x.kind, w === "kpop" ? kbucket(x) : ""); return S.diff === "easy" ? x.fame >= c.easy : S.diff === "medium" ? x.fame >= c.medium : S.diff === "hard" ? x.fame >= c.hard : true; };
   let r = S.diff === "elite" ? s2.filter((x) => (x.fame || 0) < fameCuts(w, x.kind, w === "kpop" ? kbucket(x) : "").easy) : s2.filter(top);
@@ -84,7 +85,7 @@ const first = (n) => String(n || "").split(/\s+/).filter(Boolean).map((w) => (w[
 const CLUES = {
   player: (p) => [["Born", p.born], ["Nationality", p.nat], ["Position", p.pos], ["Clubs", p.hist && p.hist.length ? `${new Set(p.hist).size} clubs on record` : null], ["Strong foot", p.foot], ["Caps", p.caps != null ? `${p.caps} for his country` : null], ["Now at", p.club], ["Initials", first(p.n)]].filter((c) => c[1]),
   idol: (p) => [["Born", p.born], ["Birthplace", p.from], ["Group", p.groups && p.groups.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
-  group: (g) => [["Generation", genOf(g)], ["Type", g.gender], ["Members", g.members ? `${g.members} members on record` : null], ["Label", g.labels && g.labels.join(", ")], ["Debut", g.debut], ["Initials", first(g.n)]].filter((c) => c[1]),
+  group: (g) => [["Generation", genOf(g)], ["Type", g.gender], ["Members", g.members ? `${g.members}-member group` : null], ["Agency", g.agency || (g.labels && g.labels.join(", "))], ["Fandom name", g.fandom], ["Debut", g.debut], ["Status", g.status === "disbanded" ? "Disbanded" : null], ["Initials", first(g.n)]].filter((c) => c[1]),
   country: (c) => [["Population", c.pop ? fmt(c.pop) + " people" : null], ["Area", c.area ? fmt(c.area) + " km²" : null], ["Currency", c.currency && c.currency.join(", ")], ["Language", c.language && c.language.join(", ")], ["Continent", c.continent], ["Capital", c.capital], ["Initials", first(c.n)]].filter((c) => c[1]),
   person: (p) => [["Born", p.born < 0 ? `${-p.born} BC` : p.born], ["Died", p.died != null ? (p.died < 0 ? `${-p.died} BC` : p.died) : null], ["Known as", p.occ && p.occ.join(", ")], ["Country", p.ctry && p.ctry.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
   character: (c) => [["From", c.anime], ["Gender", c.gender]].filter((k) => k[1]),
@@ -144,7 +145,7 @@ const GAMES = {
   kpop: [
     G("face", "Who's that idol?", "photo", { tag: "An idol's photo, right away. Buzz and type the name. A hint comes at a third of the time, another at two thirds.", pool: () => items("kpop", (x) => x.kind === "idol" && x.img), hints: (p) => [["Group", p.groups.join(", ")], ["Initials", first(p.n)]], unit: "idol" }),
     G("missing", "Who's missing?", "photo", { tag: "A group's line-up with one empty slot. Name the missing member.", pool: () => missingPool(), top: missingTop, hints: (p) => [["Born", p.born], ["Initials", first(p.n)]].filter((c) => c[1]), unit: "idol" }),
-    G("fromMembers", "Name the group", "clue", { tag: "Member names appear one by one. Buzz with the group they're in.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOf("kpop", g).length >= 3), clues: (g) => [...shuffle(rosterOf("kpop", g)).slice(0, 6).map((p) => ["Member", p.n]), ["Debut", g.debut]].filter((c) => c[1]), unit: "group" }),
+    G("fromMembers", "Name the group", "clue", { tag: "Member names appear one by one. Buzz with the group they're in.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOK(g)), clues: (g) => [...shuffle(rosterOf("kpop", g)).slice(0, 6).map((p) => ["Member", p.n]), ["Debut", g.debut]].filter((c) => c[1]), unit: "group" }),
     G("album", "Album → song", "photo", { tag: "An album cover and its year. Name the song. The group's name is the first hint.", pool: () => albumPool(), top: (x) => `<div class="blurpic cover"><img src="${x.cover}" alt=""></div><div class="fine" style="text-align:center">Released ${esc(released(x))}</div>`, hints: (x) => [["By", x.by], ["Starts with", x.n[0].toUpperCase()]], unit: "song" }),
     G("hear", "Hear the song", "audio", { tag: "Three seconds of a real song. Then five more. Buzz and type the title before the hints arrive.", pool: () => items("kpop", (x) => x.kind === "song" && x.pv), unit: "song", min: 6 }),
     G("song", "Guess the song", "clue", { tag: "A real song: when it came out, its album, then the group. Type the title.", pool: () => items("kpop", (x) => x.kind === "song" && x.date), clues: CLUES.song, unit: "song" }),
@@ -154,8 +155,8 @@ const GAMES = {
     G("logo", "Logo blur", "blur", { tag: "A blurred group logo that sharpens by the second.", pool: () => items("kpop", (x) => x.kind === "group" && x.logo), unit: "group", imgKey: "logo", min: 6 }),
     G("newer", "Which song is newer?", "hol", { gaps: [730, 240, 60], tag: "Two songs with their covers. Which came out more recently? Keep the streak alive.", pool: () => items("kpop", (x) => x.kind === "song" && x.date && x.cover), stat: (x) => Math.round(Date.parse(x.date) / 864e5), show: (v) => { const t = new Date(v * 864e5); return `${MONTHS[t.getUTCMonth()]} ${t.getUTCFullYear()}`; }, ask: "Released more recently?", higher: true }),
     G("fandom", "Bigger fandom?", "hol", { tag: "Two groups. Whose English Wikipedia page got more views over the last year?", pool: () => items("kpop", (x) => x.kind === "group" && x.views && (x.img || x.logo)), stat: (x) => x.views, show: (v) => fmt(v) + " views", ask: "More popular?", higher: true }),
-    G("members", "Member roulette", "roulette", { tag: "A group appears. Take turns naming its members. First to blank or repeat loses the round.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOf("kpop", g).length >= 4), roster: (g) => rosterOf("kpop", g), unit: "idol" }),
-    G("lineup", "Name every member", "all", { tag: "A group appears. Name every member in our data before the clock runs out.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOf("kpop", g).length >= 3), list: (g) => rosterOf("kpop", g).map((p) => ({ n: p.n, pos: "", x: p })), unit: "idol" }),
+    G("members", "Member roulette", "roulette", { tag: "A group appears. Take turns naming its members. First to blank or repeat loses the round.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOK(g) && rosterOf("kpop", g).length >= 4), roster: (g) => rosterOf("kpop", g), unit: "idol" }),
+    G("lineup", "Name every member", "all", { tag: "A group appears. Name every member in our data before the clock runs out.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOK(g)), list: (g) => rosterOf("kpop", g).map((p) => ({ n: p.n, pos: "", x: p })), unit: "idol" }),
     G("ttt", "K-pop tic-tac-toe", "ttt", { tag: "Name a group that fits the row and the column: agency, boy or girl group, generation. Three in a row wins.", pool: () => items("kpop", (x) => x.kind === "group"), attrs: () => tttAttrsKpop(), unit: "group" }),
     G("older", "Who's older?", "hol", { tag: "Two idols. Who was born first?", pool: () => items("kpop", (x) => x.kind === "idol" && x.born && x.img), stat: (x) => x.born, show: String, ask: "Born first?", higher: false, gaps: [8, 4, 2] }),
     G("labels", "Label roulette", "roulette", { tag: "An agency appears. Take turns naming its groups. First to blank loses.", pool: () => labelPool(), roster: (l) => items("kpop", (g) => g.kind === "group" && (g.labels || []).includes(l.n)), unit: "group" }),
@@ -239,6 +240,8 @@ function suggestPool(g, w) {
   return items(w, (x) => !kinds || kinds.includes(x.kind));
 }
 
+/* a roster game needs the full line-up: the idols we hold for a group must equal its official member count (one source: the group record) */
+function rosterOK(g) { const n = rosterOf("kpop", g).length; return n >= 3 && (!g.members || n === g.members); }
 function rosterOf(w, x) {
   rosterOf.c = rosterOf.c || {}; const k = w + x.id; if (rosterOf.c[k]) return rosterOf.c[k];
   const norm = (t) => qnorm(t).replace(/^(fc|afc|ac|ss|as|rc|sc|vfb|vfl|tsg|sv|1fc)/, "");
@@ -250,9 +253,9 @@ function rosterOf(w, x) {
   return (rosterOf.c[k] = r);
 }
 /* Who's missing?: an idol whose group has at least three members in the data; the line-up is shown in a fixed order with the idol's slot empty */
-function mainGroup(p) { return (p.groups || []).map(groupOf).find((g) => g && rosterOf("kpop", g).length >= 3); }
+function mainGroup(p) { return (p.groups || []).map(groupOf).find((g) => g && rosterOK(g)); }
 function missingPool() { return (missingPool.c = missingPool.c || items("kpop", (p) => p.kind === "idol" && p.img && mainGroup(p) && rosterOf("kpop", mainGroup(p)).filter((m) => m.img).length >= 3)); }
-function missingTop(p) { const g = mainGroup(p), r = rosterOf("kpop", g).slice(0, 9); if (!r.includes(p)) r[r.length - 1] = p; return `<div class="label" style="text-align:center">${esc(g.n)}</div><div class="lineupgrid">${r.map((m, i) => m === p ? `<div class="lu miss" style="--i:${i}"><b>?</b></div>` : `<div class="lu" style="--i:${i}">${m.img ? `<img src="${m.img}" alt="">` : `<i>${esc(m.n[0])}</i>`}<small>${esc(m.n)}</small></div>`).join("")}</div>`; }
+function missingTop(p) { const g = mainGroup(p), r = rosterOf("kpop", g).slice(0, 14); if (!r.includes(p)) r[r.length - 1] = p; return `<div class="label" style="text-align:center">${esc(g.n)}</div><div class="lineupgrid">${r.map((m, i) => m === p ? `<div class="lu miss" style="--i:${i}"><b>?</b></div>` : `<div class="lu" style="--i:${i}">${m.img ? `<img src="${m.img}" alt="">` : `<i>${esc(m.n[0])}</i>`}<small>${esc(m.n)}</small></div>`).join("")}</div>`; }
 /* Album → song: one song per cover, so the cover gives a single answer */
 function albumPool() { if (albumPool.c) return albumPool.c; const n = {}; items("kpop", (x) => x.kind === "song" && x.cover).forEach((x) => { n[x.cover] = (n[x.cover] || 0) + 1; }); return (albumPool.c = items("kpop", (x) => x.kind === "song" && x.cover && n[x.cover] === 1)); }
 function labelPool() { if (labelPool.c) return labelPool.c; const m = {}; items("kpop", (g) => g.kind === "group").forEach((g) => (g.labels || []).forEach((l) => { m[l] = (m[l] || 0) + 1; })); return (labelPool.c = Object.entries(m).filter(([, n]) => n >= 4).map(([n, k]) => ({ id: "L" + n, n, fame: k }))); }
@@ -314,7 +317,7 @@ function t3Cpu() {
 /* Name them all (ballknowledge's Starting XI): a real line-up, every name to find before the clock runs out */
 const AL = { s: null, t: null };
 function newAll(mode) {
-  const g = gameOf(S.world, S.game), x = rnd(byFame(g.pool())), list = g.list(x);
+  const g = gameOf(S.world, S.game), pk = Pick.ctx(), x = S.world === "kpop" ? Pick.choose(byFame(g.pool()), pk) : rnd(byFame(g.pool())), list = g.list(x); if (S.world === "kpop") Pick.record(x, pk);
   AL.s = { w: S.world, game: S.game, mode, x, list, found: new Set(), hints: 0, wrong: 0, left: { easy: 180, medium: 140, hard: 100, elite: 70 }[S.diff] * (list.length > 6 ? 1 : 0.6), over: false, msg: "" };
   clearInterval(AL.t); AL.t = setInterval(() => { const s = AL.s; if (!s || s.over) return clearInterval(AL.t); s.left -= 0.25; const c = $("#alClock"); if (c) c.textContent = Math.ceil(s.left) + "s"; if (s.left <= 0) endAll(); }, 250); renderAll();
 }
@@ -438,7 +441,7 @@ const SECTIONS = ["home", "worldsPage", "league", "mixPage", "profilePage", "col
 function show(id) { SECTIONS.forEach((s) => { const el = $("#" + s); if (el) el.hidden = s !== id; }); scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); }
 function go(slug, ev) { try { if (location.hash !== "#" + slug) history.replaceState(null, "", "#" + slug); } catch (e) { /* no hash */ } route(ev); }
 function route(ev) {
-  const h = (location.hash || "#home").slice(1); stopQuiz(); document.body.classList.remove("ingame"); Snd.mode(h.startsWith("w-") && h.split("-").length > 2 ? "game" : "lobby");
+  const h = (location.hash || "#home").slice(1); if (!h.startsWith("w-kpop")) { try { const sd = localStorage.getItem("gp_diff"); if (sd && DIFFS.some((x) => x[0] === sd)) S.diff = sd; } catch (e) { /* blocked */ } } stopQuiz(); document.body.classList.remove("ingame"); Snd.mode(h.startsWith("w-") && h.split("-").length > 2 ? "game" : "lobby");
   if (h.startsWith("w-")) { const [, w, g] = h.split("-"); if (!WORLDS[w]) return go("worlds"); const changed = S.world !== w; S.world = w; setTheme(w, ev); show("league"); renderWorld(); if (g && gameOf(w, g)) openGame(g); else { S.game = null; renderHub(); } if (changed) setTimeout(() => Mascot.hello(), 700); return; }
   S.world = null;
   if (h === "worlds") { setTheme("HOME", ev); show("worldsPage"); renderWorlds(); return; }
@@ -510,11 +513,11 @@ const Aud = {
   stop() { this.pause(); if (this.a) { this.a.src = ""; this.a = null; } },
 };
 const gamesBar = (title) => `<div class="row" style="margin-bottom:12px"><button class="btn ghost" id="gamesBack" type="button">← Back</button><h2 style="font-size:24px">${title}</h2></div>`;
-const diffBar = () => `<div class="label" style="margin-top:14px">Difficulty</div><div class="diffbar" role="group" aria-label="Difficulty">${DIFFS.map(([k]) => [k, diffName(k)]).map(([k, n]) => `<button type="button" class="chip" data-diff="${k}" aria-pressed="${S.diff === k}">${n}</button>`).join("")}</div><div class="fine" id="diffNote" style="margin-top:6px">${DIFFNOTE[S.diff]}</div>`;
+const diffBar = () => S.world === "kpop" ? "" : `<div class="label" style="margin-top:14px">Difficulty</div><div class="diffbar" role="group" aria-label="Difficulty">${DIFFS.map(([k]) => [k, diffName(k)]).map(([k, n]) => `<button type="button" class="chip" data-diff="${k}" aria-pressed="${S.diff === k}">${n}</button>`).join("")}</div><div class="fine" id="diffNote" style="margin-top:6px">${DIFFNOTE[S.diff]}</div>`;
 const modeIntro = (title, blurb, opts) => `<div class="card">${gamesBar(title)}<p class="sub">${blurb}</p>${diffBar()}<div class="label" style="margin-top:16px">Players and devices</div><div class="modes">${opts.map((o) => `<button class="mode" data-mode="${o.id}" type="button"><b>${o.t}</b><span>${o.d}</span></button>`).join("")}</div><div id="roomBox"></div></div>`;
 const NAMES = () => { try { const n = JSON.parse(localStorage.getItem("gp_names") || "null"); return n && n.length === 2 ? n : ["Player 1", "Player 2"]; } catch (e) { return ["Player 1", "Player 2"]; } };
 function openGame(id) {
-  S.game = id; const g = gameOf(S.world, id); stopQuiz(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
+  S.game = id; if (S.world === "kpop") S.diff = "medium"; const g = gameOf(S.world, id); stopQuiz(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
   const how = { play: "The difficulty sets how strong the computer plays.", photo: "The picture is there from the start; hints arrive at one third and two thirds of the time.", clue: "Clues start hard and get easier.", blur: "The picture starts blurred and sharpens every few seconds.", scramble: "The letters of every word are shuffled. Hints arrive slowly.", hol: "Two picks, one question. Tap the right side.", all: "Type names in any order. Initials cost 30 points, a wrong name 20.", ttt: "Tap a square and name someone who fits its row and column. A wrong or repeated name loses your turn.", roulette: "Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.", audio: "A real song plays in short slices: 3 seconds, then 5 more, then the rest." }[g.kind];
   $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how} ${g.kind === "hol" ? "Solo: keep the streak going. Two players: take turns, five each." : "Buzz in whenever you think you know it. The sooner you are right, the more you score (up to 1,000); a wrong guess costs 150."}`, [
     { id: "solo", t: g.kind === "ttt" || g.kind === "play" ? "Solo, against the computer" : g.kind === "roulette" || g.kind === "all" ? "Solo, against the clock" : "Solo streak", d: g.kind === "ttt" ? "The computer gets smarter with the difficulty." : g.kind === "all" ? "Name everyone before the clock runs out." : g.kind === "roulette" ? "Name as many as you can before time runs out." : "Keep going for as long as you can. The run ends the first time you miss." },
@@ -534,7 +537,7 @@ function startMode(m) {
 const RO = { s: null, t: null };
 function newRou(mode) { RO.s = { w: S.world, game: S.game, mode, round: 0, wins: [0, 0], score: 0, phase: "play" }; nextRou(); }
 function nextRou() {
-  const s = RO.s, g = gameOf(s.w, s.game); s.round++; s.x = rnd(byFame(g.pool())); s.roster = g.roster(s.x); s.named = []; s.turn = (s.round - 1) % 2; s.phase = "play"; s.msg = "";
+  const s = RO.s, g = gameOf(s.w, s.game); s.round++; if (s.w === "kpop") { s.pk = s.pk || Pick.ctx(); s.x = Pick.choose(byFame(g.pool()), s.pk); Pick.record(s.x, s.pk); } else s.x = rnd(byFame(g.pool())); s.roster = g.roster(s.x); s.named = []; s.turn = (s.round - 1) % 2; s.phase = "play"; s.msg = "";
   s.left = rouTurn(s.mode === "solo"); clearInterval(RO.t); RO.t = setInterval(() => { s.left -= 0.25; const c = $("#roClock"); if (c) c.textContent = Math.ceil(s.left) + "s"; if (s.left <= 0) rouLose("time"); }, 250); renderRou();
 }
 function renderRou() {
@@ -569,9 +572,11 @@ function curDef() { const s = Q.s; return s.mix ? gameOf(s.mix[s.round - 1].w, s
 function curWorld() { const s = Q.s; return s.mix ? s.mix[s.round - 1].w : s.w; }
 function nextRound() {
   const s = Q.s; s.round++; const d = curDef(), pool = byFame(d.pool()); let r;
-  const bal = (list) => { if (curWorld() !== "kpop" || !list.length || !list[0].kind) return rnd(list); const L = list.filter((x) => kbucket(x) === "L"), M = list.filter((x) => kbucket(x) === "M"); return L.length && M.length ? (Math.random() < 0.18 ? rnd(L) : rnd(M)) : rnd(list); };
-  const pickR = s.daily ? (k) => pool[Math.floor(seeded(`${s.daily}:${s.round}:${k}`) * pool.length)] : () => bal(pool);
-  for (let k = 0; k < 60; k++) { r = pickR(k); if (!s.used.has(r.id) && (d.kind !== "scramble" || qnorm(r.n).length >= 4)) break; }
+  const kp = curWorld() === "kpop" && !s.daily; s.pk = s.pk || Pick.ctx();
+  const fresh = (x) => !s.used.has(x.id) && (d.kind !== "scramble" || qnorm(x.n).length >= 4);
+  const pickR = s.daily ? (k) => pool[Math.floor(seeded(`${s.daily}:${s.round}:${k}`) * pool.length)] : () => rnd(pool);
+  if (kp) { const cand = pool.filter(fresh); r = Pick.choose(cand.length ? cand : pool, s.pk); } else for (let k = 0; k < 60; k++) { r = pickR(k); if (fresh(r)) break; }
+  if (kp) Pick.record(r, s.pk);
   if (s.fixed) r = items(s.w).find((x) => x.id === s.fixed[s.round - 1]) || r;   // a challenge replays the challenger's exact rounds
   s.used.add(r.id); s.r = r; (s.picks = s.picks || []).push(r.id);
   s.clues = d.kind === "audio" ? [["Listen", "3 seconds"], ["Listen", "5 more seconds"], ["By", r.by], ["Year", r.year], ["Listen", "the whole preview"], ["Initials", first(r.n)]].filter((c) => c[1]) : d.kind === "blur" ? BLUR.map((b) => ["Blur", b]) : d.kind === "scramble" ? [["Letters", scrambleName(r.n)], ["It is", KIND_WORD[r.kind] || "a name"], ...(CLUES[r.kind] ? CLUES[r.kind](r).filter((c) => !/Initials|Starts|Letters/.test(c[0])).slice(-1) : []), ["Starts with", first(r.n)]] : d.kind === "photo" ? d.hints(r) : d.clues(r);
@@ -678,7 +683,8 @@ function holGapOK(g, a, b) {
   const gap = g.gaps ? Math.abs(x - y) : Math.max(x, y) / Math.max(1, Math.min(x, y)), t = g.gaps || [2.5, 1.5, 1.15];
   return S.diff === "easy" ? gap >= t[0] : S.diff === "medium" ? gap >= t[1] : S.diff === "hard" ? gap >= t[2] && gap < t[0] : gap < t[1];
 }
-function nextHol() { const s = H.s, g = gameOf(s.w, s.game), pool = byFame(g.pool()); let a, b; for (let k = 0; k < 400; k++) { [a, b] = shuffle(pool).slice(0, 2); if (a && b && holGapOK(g, a, b)) break; } if (!a || !b || g.stat(a) === g.stat(b)) for (let k = 0; k < 60; k++) { [a, b] = shuffle(pool).slice(0, 2); if (g.stat(a) !== g.stat(b)) break; } s.a = a; s.b = b; s.phase = "pick"; s.pick = null; renderHol(); }
+function nextHol() { const s = H.s, g = gameOf(s.w, s.game), pool = byFame(g.pool()); let a, b;
+  if (s.w === "kpop") { s.pk = s.pk || Pick.ctx(); a = Pick.choose(pool, s.pk); const c = pool.filter((y) => y !== a && g.stat(y) !== g.stat(a) && holGapOK(g, a, y)); b = Pick.choose(c.length ? c : pool.filter((y) => y !== a && g.stat(y) !== g.stat(a)), s.pk); Pick.record(a, s.pk); Pick.record(b, s.pk); s.a = a; s.b = b; s.phase = "pick"; s.pick = null; renderHol(); return; } for (let k = 0; k < 400; k++) { [a, b] = shuffle(pool).slice(0, 2); if (a && b && holGapOK(g, a, b)) break; } if (!a || !b || g.stat(a) === g.stat(b)) for (let k = 0; k < 60; k++) { [a, b] = shuffle(pool).slice(0, 2); if (g.stat(a) !== g.stat(b)) break; } s.a = a; s.b = b; s.phase = "pick"; s.pick = null; renderHol(); }
 function renderHol() {
   const s = H.s, g = gameOf(s.w, s.game), duo = s.mode === "duo", names = NAMES(), done = s.phase === "done";
   if (done) { const winner = s.scores[0] === s.scores[1] ? -1 : s.scores[0] > s.scores[1] ? 0 : 1; $("#room").innerHTML = `<div class="card">${gamesBar(esc(g.name))}${finale({ label: duo ? "Full time" : `Run over`, verdict: duo ? (winner < 0 ? "A draw." : esc(names[winner]) + " wins!") : s.streak >= 10 ? "Unreal." : s.streak >= 5 ? "Strong run." : "Go again.", players: duo ? [0, 1].map((k) => ({ name: names[k], score: s.scores[k] })) : [{ name: prof().nick || "You", score: s.streak, av: avatarHTML(prof().avatar, "lg", prof().nick || "You") }], winner: duo ? winner : null, good: duo || s.streak >= 5, tiles: duo ? [] : [[s.streak, "streak"]], buttons: `<button class="btn" id="hAgain" type="button">Play again</button>` })}</div>`; return; }

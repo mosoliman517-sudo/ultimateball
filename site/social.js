@@ -316,3 +316,53 @@ const BadgeUI = {
       <div class="fine" style="margin-top:8px">XP today ${((p.xpDay && p.xpDay.d === todayKey()) ? p.xpDay.total : 0)} of ${XP_DAY_CAP}. Repeating the same game and difficulty earns less each time.</div></div>`;
   },
 };
+
+/* ================= K-pop question selection: diversity, cooldown, weighted randomness =================
+   Replaces plain random picks. A candidate's weight multiplies:
+     popularity   0.6 to 2.0 by how known it is within its own kind (famous appears more, nobody is shut out)
+     recency      songs: 2025-26 x1.25, 2024 x1.15, 2023 x1.0, 2022 x0.8
+     cooldown     seen in the last 12 picks (across sessions) x0.05, last 40 x0.3, last 120 x0.7
+     group spread each time this session already used the group, weight / (1 + 1.5 x uses); the same group as the last pick x0.1
+     headcount    an idol's weight is divided by sqrt(group size), so a 13-member group does not get 13 shares
+   The four legacy groups (TWICE, BLACKPINK, BTS, IZ*ONE) get a fixed 18% share of the draws, the rest go to the modern groups. */
+var Pick = {
+  ctx() { return { gc: {}, last: null }; },
+  gkey(x) { return x.kind === "group" ? x.n : x.by || (x.groups || [])[0] || x.n; },
+  pct(x) {   // fame percentile within the same kind (1 = best known)
+    const k = x.kind; Pick._p = Pick._p || {}; if (!Pick._p[k]) { const f = items("kpop", (y) => y.kind === k).map((y) => y.fame || 0).sort((a, b) => a - b); Pick._p[k] = f; }
+    const f = Pick._p[k]; let lo = 0, hi = f.length; while (lo < hi) { const m = (lo + hi) >> 1; if (f[m] < (x.fame || 0)) lo = m + 1; else hi = m; } return f.length > 1 ? lo / (f.length - 1) : 0.5;
+  },
+  weight(x, c) {
+    const p = prof(), rc = p.rc || 0, last = (p.recent || {})[x.id];
+    let w = 0.6 + 1.4 * Pick.pct(x);
+    if (x.kind === "song") { const y = +(x.date || "").slice(0, 4); w *= y >= 2025 ? 1.25 : y === 2024 ? 1.15 : y === 2022 ? 0.8 : 1; }
+    if (last != null) { const age = rc - last; w *= age < 12 ? 0.05 : age < 40 ? 0.3 : age < 120 ? 0.7 : 1; }
+    const g = Pick.gkey(x); w /= 1 + 1.5 * (c.gc[g] || 0); if (c.last && c.last === g) w *= 0.1;
+    if (x.kind === "idol") { const gr = groupOf(g); const n = gr ? Math.max(1, rosterOf("kpop", gr).length) : 5; w /= Math.sqrt(n); }
+    return Math.max(w, 1e-6);
+  },
+  choose(pool, c) {
+    if (!pool.length) return null; c = c || Pick.ctx();
+    const L = pool.filter((x) => kbucket(x) === "L"), M = pool.filter((x) => kbucket(x) !== "L");
+    const from = L.length && M.length ? (Math.random() < 0.18 ? L : M) : pool;
+    const ws = from.map((x) => Pick.weight(x, c)), tot = ws.reduce((a, b) => a + b, 0); let r = Math.random() * tot;
+    for (let i = 0; i < from.length; i++) { r -= ws[i]; if (r <= 0) return from[i]; }
+    return from[from.length - 1];
+  },
+  record(x, c) {
+    if (!x) return; const p = prof(); p.recent = p.recent || {}; p.rc = (p.rc || 0) + 1; p.recent[x.id] = p.rc;
+    const g = Pick.gkey(x); c.gc[g] = (c.gc[g] || 0) + 1; c.last = g;
+    const keys = Object.keys(p.recent); if (keys.length > 400) { keys.sort((a, b) => p.recent[a] - p.recent[b]).slice(0, keys.length - 300).forEach((k) => delete p.recent[k]); }   // keep the history small
+    saveProf();
+  },
+};
+
+/* ================= pictures that never break: primary, then a verified fallback, then a clean placeholder =================
+   A failed picture is never swapped for another person's: the placeholder carries the idol's own initial and name. */
+document.addEventListener("error", (e) => {
+  const im = e.target; if (!im || im.tagName !== "IMG" || im.dataset.ph) return;
+  const alt = (im.getAttribute("alt") || "").trim(), fb = im.dataset.fallback;
+  if (fb && im.src !== fb && !im.dataset.tried) { im.dataset.tried = "1"; im.src = fb; return; }
+  im.dataset.ph = "1"; const ph = document.createElement("span"); ph.className = "imgph " + (im.className || ""); ph.setAttribute("role", "img"); ph.setAttribute("aria-label", alt || "no picture");
+  ph.textContent = (alt || "?").replace(/^(the|a)\s+/i, "")[0].toUpperCase(); im.replaceWith(ph);
+}, true);

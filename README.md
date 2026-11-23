@@ -36,6 +36,15 @@ Younger groups only (debut 2015 on, plus BTS by request); groups from 2020 on we
 - **Play chess** (`site/chessplay.js`): against Stockfish 17.1 lite (GPL-3, `site/engine/`, Stockfish 10 from a CDN as fallback) or a friend on one device.
 - **Sidekick voices**: each sidekick chatters in its own synthesised voice (no text-to-speech).
 
+## K-pop data: one source, validated
+
+`packs/kpop.json` is the only place group, idol and song facts live; every game reads it. Pipeline, in order:
+`kpop_curated.py` (named groups only) -> `kpop_songs.py` (Apple catalogue, 2022 on, quota by tier) -> `kpop_rosters.py` (current/former line-ups, official counts, debut, agency, fandom, from the K-pop wiki's group pages) -> `kpop_images_fix.py` (removes shared or placeholder pictures) -> `kpop_photos_fandom.py` (member pictures) -> `kpop_audit.py`.
+- **Audit:** `python3 pipelines/kpop_audit.py` blocks on: roster size != official count, parser misses, duplicate groups/members/songs, idols named like a song, unknown group references, missing picture files, one picture shared by different people. Output also in `packs/_kpop_audit.json`.
+- **Admin:** `python3 pipelines/kpop_admin.py add-group|add-idol|add-song|set-members|former|check-images|validate` (see the file's header). Every edit is stamped with source, date and verification status and logged in `packs/kpop_changes.log`. No site code changes when content is added.
+- **Games:** K-pop has no difficulty screen; every game draws from the whole eligible database through `Pick` (`site/social.js`): popularity, recency, cooldown across sessions, group spread, headcount balance, 18% legacy share. Roster games (Who's missing, Name every member, Member roulette, Name the group) only use groups whose line-up equals the official count.
+- **Pictures:** a failed picture becomes a placeholder with the idol's own initial, never another person's photo.
+
 ## Rules
 
 - Never invent data. Missing facts or pictures are left out and reported.
