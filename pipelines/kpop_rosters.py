@@ -96,7 +96,6 @@ for g in [x for x in items if x["kind"] == "group" and key(x["n"]) in {key(n) fo
     if yrs: g["status"] = "active" if re.search(r"present", yrs, re.I) else "disbanded"
     dd = re.search(r"([A-Z][a-z]+ \d{1,2}, \d{4})", ib.get("debut", ""))
     if dd: g["debut_date"] = dd.group(1)
-    g["former_members"] = [dsp for _, dsp in fmr_ib]
     tbl = parse_members(w, g["n"])
     # two sources for the current line-up: the infobox list and the Members table (the infobox can leave out members on hiatus);
     # take whichever is closer to the count the page's first sentence states
@@ -127,7 +126,7 @@ for g in [x for x in items if x["kind"] == "group" and key(x["n"]) in {key(n) fo
     for e in have:
         if e["id"] not in keep_ids:
             if e.get("src") == "K-pop wiki members table": e["drop"] = True
-            else: e["former"] = True
+            else: e["drop"] = True   # ex-members are removed from the data, not kept
     g["members"] = len(members)
     report.append(f"{g['n']}: {len(members)} members (+{added} added, {len(former)} marked former {former}) debut {g.get('debut')}")
     json.dump(d, open(P, "w"), ensure_ascii=False, separators=(",", ":")); time.sleep(0.5)

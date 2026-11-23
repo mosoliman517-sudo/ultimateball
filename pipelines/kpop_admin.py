@@ -59,8 +59,9 @@ elif a.cmd == "set-members":
 elif a.cmd == "former":
     n = 0
     for y in items:
-        if y["kind"] == "idol" and key(y["n"]) == key(a.name) and any(key(q) == key(a.group) for q in y.get("groups", [])): y["former"] = True; n += 1
-    save(d, f"former {a.name} ({a.group}) x{n}")
+        if y["kind"] == "idol" and key(y["n"]) == key(a.name) and any(key(q) == key(a.group) for q in y.get("groups", [])): y["drop"] = True; n += 1
+    d["items"] = [y for y in items if not y.get("drop")]; items = d["items"]
+    save(d, f"former {a.name} ({a.group}): removed x{n}")
 elif a.cmd == "check-images":
     seen = {}; bad = 0
     for x in items:
