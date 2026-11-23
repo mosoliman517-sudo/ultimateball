@@ -54,7 +54,7 @@ const FAMECUT = {};
 /* K-pop: the four legacy groups (TWICE, BLACKPINK, BTS, IZ*ONE) are a separate bucket, so each bucket gets its own fame cuts and
    Easy holds the famous of BOTH (a modern idol is not hidden behind BTS's page views), and questions draw 18% legacy, 82% modern */
 const LEGACY_K = new Set(["twice", "blackpink", "bts", "izone"]);
-const kbucket = (x) => (x.kind === "idol" ? (x.groups || []).some((g) => LEGACY_K.has(qnorm(g))) : x.kind === "song" ? LEGACY_K.has(qnorm(x.by || "")) : x.kind === "group" ? LEGACY_K.has(qnorm(x.n)) : false) ? "L" : "M";
+const kbucket = (x) => (x.kind === "idol" ? (x.groups || []).some((g) => LEGACY_K.has(qnorm(g))) : x.kind === "song" || x.kind === "release" || x.kind === "unit" ? LEGACY_K.has(qnorm(x.by || "")) : x.kind === "group" ? LEGACY_K.has(qnorm(x.n)) : false) ? "L" : "M";
 function fameCuts(w, kind, bucket) {
   const k = w + ":" + kind + ":" + (bucket || ""); if (FAMECUT[k]) return FAMECUT[k];
   const f = items(w, (x) => x.kind === kind && (!bucket || kbucket(x) === bucket)).map((x) => x.fame || 0).sort((a, b) => b - a), at = (q) => f[Math.min(f.length - 1, Math.floor(f.length * q))] || 0;
@@ -84,7 +84,7 @@ const groupOf = (n) => items("kpop", (g) => g.kind === "group" && g.n === n)[0];
 const first = (n) => String(n || "").split(/\s+/).filter(Boolean).map((w) => (w[0] || "").toUpperCase()).join(". ") + ".";
 const CLUES = {
   player: (p) => [["Born", p.born], ["Nationality", p.nat], ["Position", p.pos], ["Clubs", p.hist && p.hist.length ? `${new Set(p.hist).size} clubs on record` : null], ["Strong foot", p.foot], ["Caps", p.caps != null ? `${p.caps} for his country` : null], ["Now at", p.club], ["Initials", first(p.n)]].filter((c) => c[1]),
-  idol: (p) => [["Born", p.born], ["Birthplace", p.from], ["Group", p.groups && p.groups.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
+  idol: (p) => [["Born", p.born], ["Birthplace", p.from], ["Group", p.groups && p.groups.join(", ")], ["Role", p.role && p.role.filter((r) => r !== "Maknae" || p.role.length === 1).join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
   group: (g) => [["Generation", genOf(g)], ["Type", g.gender], ["Members", g.members ? `${g.members}-member group` : null], ["Agency", g.agency || (g.labels && g.labels.join(", "))], ["Fandom name", g.fandom], ["Debut", g.debut], ["Status", g.status === "disbanded" ? "Disbanded" : null], ["Initials", first(g.n)]].filter((c) => c[1]),
   country: (c) => [["Population", c.pop ? fmt(c.pop) + " people" : null], ["Area", c.area ? fmt(c.area) + " km²" : null], ["Currency", c.currency && c.currency.join(", ")], ["Language", c.language && c.language.join(", ")], ["Continent", c.continent], ["Capital", c.capital], ["Initials", first(c.n)]].filter((c) => c[1]),
   person: (p) => [["Born", p.born < 0 ? `${-p.born} BC` : p.born], ["Died", p.died != null ? (p.died < 0 ? `${-p.died} BC` : p.died) : null], ["Known as", p.occ && p.occ.join(", ")], ["Country", p.ctry && p.ctry.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
@@ -153,6 +153,13 @@ const GAMES = {
     G("whose", "Whose song is it?", "clue", { tag: "A song title appears. Type the group who sings it.", pool: () => items("kpop", (x) => x.kind === "song" && x.by && !qnorm(x.n).includes(qnorm(x.by)) && !qnorm(x.album || "").includes(qnorm(x.by))), clues: (x) => [["Song", x.n], ["Released", released(x)], ["Album", x.album && qnorm(x.album) !== qnorm(x.n) ? x.album : null], ["Generation", genOf(groupOf(x.by))], ["Starts with", x.by[0]]].filter((c) => c[1]), unit: "group", answer: (x) => x.by }),
     G("group", "Group: Who are we?", "clue", { tag: "A mystery group. Generation, members, label and debut year reveal it.", pool: () => items("kpop", (x) => x.kind === "group" && (x.debut || (x.labels || []).length)), clues: CLUES.group, unit: "group" }),
     G("logo", "Logo blur", "blur", { tag: "A blurred group logo that sharpens by the second.", pool: () => items("kpop", (x) => x.kind === "group" && x.logo), unit: "group", imgKey: "logo", min: 6 }),
+    G("relfirst", "Which release came first?", "hol", { gaps: [900, 365, 120], tag: "Two albums, EPs or singles from the full discographies. Which one came out first?", pool: () => releasePool().filter((x) => x.img || x.logo), stat: (x) => Math.round(Date.parse(x.date) / 864e5), show: (v) => { const t = new Date(v * 864e5); return `${MONTHS[t.getUTCMonth()]} ${t.getUTCFullYear()}`; }, ask: "Came out first?", higher: false }),
+    G("release", "Name the release", "clue", { tag: "An album, EP or single from a group's full discography. Its group, type and date come first. Type the title.", pool: () => releasePool().filter((x) => qnorm(x.n) !== qnorm(x.by) && x.n.length >= 3), clues: (x) => [["By", x.by], ["Type", x.ty === "ep" ? "EP" : x.ty === "single" ? "Single" : "Album"], ["Released", released(x)], ["Starts with", x.n[0].toUpperCase()]], unit: "release" }),
+    G("leader", "Name the leader", "photo", { tag: "A group's picture and name. Which member is its leader? Hints: the group's size, then the first letter.", pool: () => items("kpop", (x) => x.kind === "group" && rosterOK(x) && holderOf(x, "Leader")), top: (g) => `<div class="blurpic ${g.img ? "" : "logo"}">${g.img ? `<img src="${g.img}" alt="">` : g.logo ? `<img src="${g.logo}" alt="">` : ""}</div><div class="fine" style="text-align:center;font-weight:800;font-size:18px">${esc(g.n)}</div>`, hints: (g) => [["Members", g.members + " in the group"], ["Starts with", holderOf(g, "Leader").n[0].toUpperCase()]], answer: (g) => holderOf(g, "Leader").n, unit: "idol" }),
+    G("maknae", "Name the maknae", "photo", { tag: "A group's picture and name. Which member is the maknae, the youngest? Hints: the group's size, then the first letter.", pool: () => items("kpop", (x) => x.kind === "group" && rosterOK(x) && holderOf(x, "Maknae")), top: (g) => `<div class="blurpic ${g.img ? "" : "logo"}">${g.img ? `<img src="${g.img}" alt="">` : g.logo ? `<img src="${g.logo}" alt="">` : ""}</div><div class="fine" style="text-align:center;font-weight:800;font-size:18px">${esc(g.n)}</div>`, hints: (g) => [["Members", g.members + " in the group"], ["Starts with", holderOf(g, "Maknae").n[0].toUpperCase()]], answer: (g) => holderOf(g, "Maknae").n, unit: "idol" }),
+    G("fandomname", "Whose fandom is this?", "clue", { tag: "A fandom name appears. Type the group it belongs to. Agency and debut year follow.", pool: () => items("kpop", (x) => x.kind === "group" && x.fandom && x.fandom.length >= 3), clues: (g) => [["Fandom name", g.fandom], ["Agency", g.agency], ["Debut", g.debut], ["Starts with", g.n[0].toUpperCase()]].filter((c) => c[1]), unit: "group" }),
+    G("colors", "Whose colours are these?", "photo", { tag: "A group's official colours. Name the group. Hints: the agency, then the debut year.", pool: () => items("kpop", (x) => x.kind === "group" && x.colors && x.colors.length), top: (g) => `<div class="swatches">${g.colors.slice(0, 4).map((c) => `<i style="background:${c.hex}"><small>${esc(c.name)}</small></i>`).join("")}</div>`, hints: (g) => [["Agency", g.agency], ["Debut", g.debut]].filter((c) => c[1]), unit: "group" }),
+    G("unit", "Whose unit is it?", "clue", { tag: "A sub-unit or duo appears with its members. Name the group it comes from.", pool: () => unitPool().filter((u) => u.members.length >= 2), min: 12, clues: (u) => [["Unit", u.n], ["Members", u.members.join(", ")], ["Debut", u.debut], ["Starts with", u.by[0].toUpperCase()]].filter((c) => c[1]), unit: "group", answer: (u) => u.by }),
     G("newer", "Which song is newer?", "hol", { gaps: [730, 240, 60], tag: "Two songs with their covers. Which came out more recently? Keep the streak alive.", pool: () => items("kpop", (x) => x.kind === "song" && x.date && x.cover), stat: (x) => Math.round(Date.parse(x.date) / 864e5), show: (v) => { const t = new Date(v * 864e5); return `${MONTHS[t.getUTCMonth()]} ${t.getUTCFullYear()}`; }, ask: "Released more recently?", higher: true }),
     G("fandom", "Bigger fandom?", "hol", { tag: "Two groups. Whose English Wikipedia page got more views over the last year?", pool: () => items("kpop", (x) => x.kind === "group" && x.views && (x.img || x.logo)), stat: (x) => x.views, show: (v) => fmt(v) + " views", ask: "More popular?", higher: true }),
     G("members", "Member roulette", "roulette", { tag: "A group appears. Take turns naming its members. First to blank or repeat loses the round.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOK(g) && rosterOf("kpop", g).length >= 4), roster: (g) => rosterOf("kpop", g), unit: "idol" }),
@@ -235,6 +242,7 @@ function suggestPool(g, w) {
   if (g.unit === "capital") return [...new Set(items("geography").map((x) => x.capital).filter(Boolean))].map((n) => ({ n }));
   if (g.unit === "origin") return [...new Set(items("food").map((x) => x.origin).concat(items("geography").map((x) => x.n)))].map((n) => ({ n }));
   if (g.kind === "scramble") return [];
+  if (g.unit === "release") return releasePool();
   if (g.unit === "album") return [...new Set(items("kpop", (x) => x.kind === "song" && x.album).map((x) => x.album))].map((n) => ({ n }));
   if (g.unit === "trivia") return []; if (g.unit === "label") return labelPool(); const kinds = { anime: ["anime"], song: ["song"], bplayer: ["bplayer"], cplayer: ["cplayer"], opening: ["opening"], team: ["team"], player: ["player"], club: ["club"], idol: ["idol"], group: ["group"], kpop: ["idol", "group"], country: ["country"], person: ["person"], dish: ["dish"], landmark: ["landmark"], character: ["character"], event: ["event"], invention: ["invention"], oldstate: ["oldstate"] }[g.unit] || null;
   return items(w, (x) => !kinds || kinds.includes(x.kind));
@@ -258,6 +266,25 @@ function missingPool() { return (missingPool.c = missingPool.c || items("kpop", 
 function missingTop(p) { const g = mainGroup(p), r = rosterOf("kpop", g).slice(0, 14); if (!r.includes(p)) r[r.length - 1] = p; return `<div class="label" style="text-align:center">${esc(g.n)}</div><div class="lineupgrid">${r.map((m, i) => m === p ? `<div class="lu miss" style="--i:${i}"><b>?</b></div>` : `<div class="lu" style="--i:${i}">${m.img ? `<img src="${m.img}" alt="">` : `<i>${esc(m.n[0])}</i>`}<small>${esc(m.n)}</small></div>`).join("")}</div>`; }
 /* Album → song: one song per cover, so the cover gives a single answer */
 function albumPool() { if (albumPool.c) return albumPool.c; const n = {}; items("kpop", (x) => x.kind === "song" && x.cover).forEach((x) => { n[x.cover] = (n[x.cover] || 0) + 1; }); return (albumPool.c = items("kpop", (x) => x.kind === "song" && x.cover && n[x.cover] === 1)); }
+/* releases: every studio album, EP and single of a group, built from the group's `discography` (the one source). Language versions, live albums,
+   compilations and remixes are left out of the games but stay in the data. */
+function releasePool() {
+  if (releasePool.c) return releasePool.c; const out = [];
+  items("kpop", (g) => g.kind === "group" && g.discography).forEach((g) => { const seen = new Set(); g.discography.forEach((r) => {
+    if (r.ver || (r.sec && r.sec.length) || !/^\d{4}-\d{2}/.test(r.d) || !["album", "ep", "single"].includes(r.ty)) return;
+    const k = qnorm(r.t); if (!k || seen.has(k)) return; seen.add(k);
+    out.push({ id: "rel-" + r.id, n: r.t, kind: "release", by: g.n, ty: r.ty, date: r.d.length === 7 ? r.d + "-15" : r.d.length === 4 ? r.d + "-06-15" : r.d, year: +r.d.slice(0, 4), img: g.img || null, logo: g.logo || null, fame: g.fame || 0 });
+  }); });
+  return (releasePool.c = out);
+}
+/* units: sub-units and duo/trio projects, read from each group's `units` (members checked against the group's own line-up) */
+function unitPool() {
+  if (unitPool.c) return unitPool.c; const out = [];
+  items("kpop", (g) => g.kind === "group" && g.units).forEach((g) => g.units.forEach((u) => out.push({ id: "unit-" + qnorm(g.n) + qnorm(u.n), n: u.n, kind: "unit", by: g.n, members: u.members, debut: u.debut, img: g.img || null, logo: g.logo || null, fame: g.fame || 0 })));
+  return (unitPool.c = out);
+}
+/* the one member of a group who holds a role (Leader, Maknae): only groups where exactly one current member does */
+function holderOf(g, role) { const r = rosterOf("kpop", g).filter((m) => (m.role || []).includes(role)); return r.length === 1 ? r[0] : null; }
 function labelPool() { if (labelPool.c) return labelPool.c; const m = {}; items("kpop", (g) => g.kind === "group").forEach((g) => (g.labels || []).forEach((l) => { m[l] = (m[l] || 0) + 1; })); return (labelPool.c = Object.entries(m).filter(([, n]) => n >= 4).map(([n, k]) => ({ id: "L" + n, n, fame: k }))); }
 /* tic-tac-toe attributes: every one is a real fact from the data; a grid is only used when all nine cells have answers */
 function tttAttrsKpop() {
@@ -835,8 +862,12 @@ function openWiki(key) {
     const mem = rosterOf("kpop", x), songs = items("kpop", (s) => s.kind === "song" && s.by === x.n).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
     if (x.views) facts.push(["Wikipedia views", fmt(x.views) + " in the last year"]);
     if (mem.length) extra += `<div class="label">Members</div>${wikiChips(w, mem)}`;
-    if (songs.length) extra += `<div class="label">Songs</div>${wikiChips(w, songs.slice(0, 18))}`;
+    if (songs.length) extra += `<div class="label">Songs to play</div>${wikiChips(w, songs.slice(0, 18))}`;
+    if (x.units && x.units.length) extra += `<div class="label">Units and duos</div><div class="disco">${x.units.map((u) => `<div class="dr"><span class="dd num">${u.debut || ""}</span><b>${esc(u.n)}</b><small>${esc(u.members.join(", "))}</small></div>`).join("")}</div>`;
+    if (x.colors && x.colors.length) extra += `<div class="label">Official colours</div><div class="swatches sm">${x.colors.map((c) => `<i style="background:${c.hex}"><small>${esc(c.name)}</small></i>`).join("")}</div>`;
+    if (x.discography && x.discography.length) { const real = x.discography.filter((r) => ["album", "ep", "single"].includes(r.ty)); extra += `<div class="label">Full discography · ${real.length} releases${x.discography_source ? ` · <a href="https://${x.discography_source}" target="_blank" rel="noopener">MusicBrainz</a>` : ""}</div><div class="disco">${real.map((r) => `<div class="dr ${r.ty}"><span class="dd num">${esc(r.d.slice(0, 7))}</span><b>${esc(r.t)}</b><small>${esc(r.ty === "ep" ? "EP" : r.ty)}${r.sec ? " · " + esc(r.sec.join(", ")) : ""}${r.ver ? " · language version" : ""}</small></div>`).join("")}</div>`; }
   }
+  if (x.kind === "idol" && x.color) extra += `<div class="label">Member colour</div><div class="swatches sm"><i style="background:${x.color.hex}"><small>${esc(x.color.name)}${x.animal ? " · " + esc(x.animal) : ""}</small></i></div>`;
   if (x.kind === "idol") extra += `<div class="label">Group</div>${wikiChips(w, (x.groups || []).map(groupOf).filter(Boolean))}`;
   if (x.kind === "song") { const g = groupOf(x.by); if (g) extra += `<div class="label">By</div>${wikiChips(w, [g])}`; if (x.pv) extra += `<div class="row" style="margin-top:10px"><button class="btn" type="button" data-wplay="${esc(x.pv)}">▶ Play the preview</button>${x.am ? `<a class="btn ghost" href="${x.am}" target="_blank" rel="noopener">Apple Music</a>` : ""}</div>`; }
   if (x.kind === "club" || x.kind === "team") { const r = rosterOf(w, x); if (r.length) extra += `<div class="label">Players in our data</div>${wikiChips(w, r.slice(0, 24))}`; }

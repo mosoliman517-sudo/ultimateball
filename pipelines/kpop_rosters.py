@@ -88,7 +88,9 @@ for g in [x for x in items if x["kind"] == "group" and key(x["n"]) in {key(n) fo
     g["source"] = "kpop.fandom.com/wiki/" + title.replace(" ", "_"); g["verified_on"] = time.strftime("%Y-%m-%d")
     titles = {key(t) for s_ in items if s_["kind"] == "song" and s_.get("by") == g["n"] for t in (s_["n"], s_.get("album")) if t}
     ib = infobox(w); cur_ib = links_of(ib.get("current")); fmr_ib = links_of(ib.get("former"))
-    if ib.get("fandom"): g["fandom"] = clean(ib["fandom"])
+    if ib.get("fandom"):
+        f = re.sub(r"\[https?://[^\]]*\]", "", clean(ib["fandom"])); f = re.sub(r"\(([^)]*[\uAC00-\uD7AF\u3040-\u30FF][^)]*)\)", "", f)   # no link markup, no bracketed Korean spelling
+        g["fandom"] = re.sub(r"\s+", " ", f).strip(" ,;/")
     if ib.get("label"):
         lab = links_of(ib["label"]); g["agency"] = lab[0][1] if lab else clean(ib["label"]).split("(")[0].strip()
     if ib.get("hangul"): g["aliases"] = sorted(set(g.get("aliases", []) + [clean(ib["hangul"])] + ALT.get(key(g["n"]), [])))
