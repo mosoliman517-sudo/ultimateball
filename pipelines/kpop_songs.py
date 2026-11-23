@@ -8,14 +8,14 @@ is before 2012 (2nd generation) are removed with their members.
 Covers are linked from Apple, not copied (Apple lets its artwork be shown next to a link to the music).
 Run after build_packs.py kpop and kpop_names.py:  python3 pipelines/kpop_songs.py
 """
-import json, os, re, time, unicodedata
+import collections, json, os, re, time, unicodedata
 import requests
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 P = os.path.join(ROOT, "packs", "kpop.json")
 CACHE = os.path.join(ROOT, "packs", "_itunes_cache.json")   # raw answers, so a re-run does not ask Apple again
 norm = lambda s: re.sub(r"[^a-z0-9]", "", unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower())
-SKIP = re.compile(r"\b(inst|instrumental|remix|mix|ver|version|sped|slowed|live|acoustic|karaoke|english|japanese|chinese|japan|edit|demo|acapella|a cappella|orchestra|piano|intro|outro|interlude|skit|mr removed|reprise|clean|radio)\b", re.I)
+SKIP = re.compile(r"\b(mixed|remixed|remixx|inst|instrumental|remix|mix|ver|version|sped|slowed|live|acoustic|karaoke|english|japanese|chinese|japan|edit|demo|acapella|a cappella|orchestra|piano|intro|outro|interlude|skit|mr removed|reprise|clean|radio)\b", re.I)
 PER_GROUP = 18
 
 d = json.load(open(P, encoding="utf-8"))
@@ -95,7 +95,12 @@ for k, g in enumerate(groups):
                      "single": t.get("collectionName", "").endswith("- Single") or norm(alb) == key, "cover": (t.get("artworkUrl100") or "").replace("100x100bb", "600x600bb"),
                      "pv": t["previewUrl"], "am": t.get("trackViewUrl"), "_rank": score}
     quota = {1: 22, 2: 15, 3: 9}.get(g.get("tier"), 12)
-    top = sorted(seen.values(), key=lambda s: s["_rank"])[:quota]
+    top, per_album = [], collections.Counter()
+    for sg in sorted(seen.values(), key=lambda s: s["_rank"]):     # at most 4 songs per album, so one big release cannot crowd out the rest of the discography
+        ak = norm(sg["album"]) or sg["id"]
+        if per_album[ak] >= 4: continue
+        per_album[ak] += 1; top.append(sg)
+        if len(top) >= quota: break
     for i, s in enumerate(top):
         s["fame"] = s["fame0"] = round(g.get("fame0", g["fame"]) * (1 - i / (quota * 1.5)), 1); s.pop("_rank")
     songs += top

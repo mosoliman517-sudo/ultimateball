@@ -22,7 +22,7 @@ gnames = {x["n"] for x in groups}
 have = {key(x["n"]) for x in groups}
 missing = sorted(n for n in MODERN if key(n) not in have)
 for g in groups:
-    g["tier"] = 1 if g["n"] in TIER1 else 2 if g["n"] in TIER2 else 3
+    g["tier"] = 1 if key(g["n"]) in {key(t) for t in TIER1} else 2 if key(g["n"]) in {key(t) for t in TIER2} else 3   # case-insensitive: the data says "Itzy", the list says "ITZY"
     g["gen"] = 3 if (g.get("debut") or 0) < 2018 else 4 if (g.get("debut") or 0) < 2023 else 5
 out = []
 for x in d["items"]:
