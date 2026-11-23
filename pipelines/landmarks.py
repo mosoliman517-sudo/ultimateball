@@ -7,11 +7,10 @@ import json, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_packs as B
 
-TYPES = ("Q570116 Q4989906 Q12518 Q12280 Q23413 Q16560 Q44539 Q16970 Q32815 Q11303 Q179700 Q839954 Q2977 Q12570 Q57821 Q1081138 Q15243209 "
-         "Q33506 Q483453 Q1497364 Q2065736 Q41176 Q811979 Q1440300 Q162875 Q57346 Q153562 Q861951 Q24398318 Q5773747 Q1107656 Q174782 Q35112127")
+TYPES = ("Q570116 Q4989906 Q12518 Q12280 Q23413 Q16560 Q44539 Q16970 Q32815 Q11303 Q179700 Q839954 Q2977 Q12570 Q57821 Q1081138 Q15243209 Q33506 Q483453 Q1497364 Q2065736 Q41176 Q811979")
 SKIP = {"Auschwitz", "World Trade Center", "Bastille", "Buddhas of Bamiyan"}   # places of atrocity or destroyed buildings: not quiz material
 rows = B.sparql(f"""SELECT ?l ?lLabel ?cLabel ?cityLabel ?inc ?img ?sl WHERE {{ VALUES ?t {{ {" ".join("wd:" + t for t in TYPES.split())} }}
-  ?l wdt:P31 ?t; wdt:P18 ?img; wdt:P17 ?c; wikibase:sitelinks ?sl. FILTER(?sl > 55)
+  ?l wdt:P31 ?t; wdt:P18 ?img; wdt:P17 ?c; wikibase:sitelinks ?sl. FILTER(?sl > 70)
   OPTIONAL {{ ?l wdt:P131 ?city }} OPTIONAL {{ ?l wdt:P571 ?inc }}
   SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }} }}""")
 L = {}

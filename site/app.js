@@ -76,7 +76,7 @@ const clueSpeed = () => ({ easy: 1.35, medium: 1, hard: 0.8, elite: 0.6 })[S.dif
 
 /* ---------------- clue ladders from the real facts (hardest first) ---------------- */
 const LGN = { E0: "Premier League", SP1: "LaLiga", D1: "Bundesliga", I1: "Serie A", F1: "Ligue 1" };
-const yr = (y) => (y == null ? null : y < 0 ? `${-y} BC` : String(y));
+const yr = (y) => (y == null ? null : y <= 0 ? `${1 - y} BC` : String(y));   // Wikidata counts years astronomically: -479 is 480 BC
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const released = (x) => (x.date ? `${MONTHS[+x.date.slice(5, 7) - 1]} ${x.date.slice(0, 4)}` : x.year);
 const genOf = (g) => (g && g.gen ? ["", "", "", "3rd", "4th", "5th"][g.gen] + " generation" : null);
@@ -87,7 +87,7 @@ const CLUES = {
   idol: (p) => [["Born", p.born], ["Birthplace", p.from], ["Group", p.groups && p.groups.join(", ")], ["Role", p.role && p.role.filter((r) => r !== "Maknae" || p.role.length === 1).join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
   group: (g) => [["Generation", genOf(g)], ["Type", g.gender], ["Members", g.members ? `${g.members}-member group` : null], ["Agency", g.agency || (g.labels && g.labels.join(", "))], ["Fandom name", g.fandom], ["Debut", g.debut], ["Status", g.status === "disbanded" ? "Disbanded" : null], ["Initials", first(g.n)]].filter((c) => c[1]),
   country: (c) => [["Population", c.pop ? fmt(c.pop) + " people" : null], ["Area", c.area ? fmt(c.area) + " km²" : null], ["Currency", c.currency && c.currency.join(", ")], ["Language", c.language && c.language.join(", ")], ["Continent", c.continent], ["Capital", c.capital], ["Initials", first(c.n)]].filter((c) => c[1]),
-  person: (p) => [["Born", p.born < 0 ? `${-p.born} BC` : p.born], ["Died", p.died != null ? (p.died < 0 ? `${-p.died} BC` : p.died) : null], ["Known as", p.occ && p.occ.join(", ")], ["Country", p.ctry && p.ctry.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
+  person: (p) => [["Born", yr(p.born)], ["Died", p.died != null ? yr(p.died) : null], ["Known as", p.occ && p.occ.join(", ")], ["Country", p.ctry && p.ctry.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
   character: (c) => [["From", c.anime], ["Gender", c.gender]].filter((k) => k[1]),
   landmark: (l) => [["Country", l.country], ["City", l.city], ["Built", l.built != null ? yr(l.built) : null], ["Initials", first(l.n)]].filter((c) => c[1]),
   event: (e) => [["Type", e.type], ["Year", yr(e.year)], ["Where", e.where], ["Ended", e.end != null && e.end !== e.year ? yr(e.end) : null], ["Initials", first(e.n)]].filter((c) => c[1]),
@@ -177,6 +177,7 @@ const GAMES = {
     G("who", "Which anime am I?", "clue", { tag: "Genres, episodes, studio, creator, year. Name the series.", pool: () => items("anime", (x) => x.kind === "anime" && (x.studios || []).length + (x.genres || []).length + (x.authors || []).length + (x.eps ? 1 : 0) + (x.year ? 1 : 0) >= 3), clues: CLUES.anime, unit: "anime" }),
     G("from", "Which anime are they from?", "clue", { tag: "A character's name, then a co-star, the year and the studio. Name the series.", pool: () => items("anime", (x) => x.kind === "character" && items("anime", (a) => a.kind === "anime" && a.n === x.anime).length), clues: (c) => { const a = items("anime", (y) => y.kind === "anime" && y.n === c.anime)[0] || {}, co = items("anime", (y) => y.kind === "character" && y.anime === c.anime && y.id !== c.id); return [["Character", c.n], ["Also in it", co.length ? rnd(co).n : null], ["First aired", a.year], ["Studio", a.studios && a.studios.join(", ")], ["Starts with", c.anime[0]]].filter((k) => k[1]); }, answer: (c) => c.anime, unit: "anime" }),
     G("cast", "Character roulette", "roulette", { tag: "A series appears. Take turns naming its characters. First to blank loses.", pool: () => items("anime", (x) => x.kind === "anime").filter((a) => rosterOf("anime", a).length >= 4), roster: (a) => rosterOf("anime", a), unit: "character" }),
+    G("charface", "Who's that character?", "photo", { tag: "An anime character's portrait, right away. Name them. Hints: their series, then the first letter.", pool: () => items("anime", (x) => x.kind === "character" && x.img), hints: (c) => [["From", qnorm(c.anime).includes(qnorm(c.n)) ? null : c.anime], ["Initials", first(c.n)]].filter((h) => h[1]), unit: "character", min: 8 }),
     G("aired", "Which aired first?", "hol", { gaps: [10, 5, 2], tag: "Two series. Which one started earlier?", pool: () => items("anime", (x) => x.year), stat: (x) => x.year, show: String, ask: "Aired first?", higher: false }),
     G("scramble", "Scramble", "scramble", { tag: "An anime title with the letters shuffled.", pool: () => items("anime") }),
   ],
