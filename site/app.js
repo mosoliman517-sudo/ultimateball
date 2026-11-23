@@ -89,7 +89,7 @@ const CLUES = {
   country: (c) => [["Population", c.pop ? fmt(c.pop) + " people" : null], ["Area", c.area ? fmt(c.area) + " km²" : null], ["Currency", c.currency && c.currency.join(", ")], ["Language", c.language && c.language.join(", ")], ["Continent", c.continent], ["Capital", c.capital], ["Initials", first(c.n)]].filter((c) => c[1]),
   person: (p) => [["Born", yr(p.born)], ["Died", p.died != null ? yr(p.died) : null], ["Known as", p.occ && p.occ.join(", ")], ["Country", p.ctry && p.ctry.join(", ")], ["Initials", first(p.n)]].filter((c) => c[1]),
   character: (c) => [["From", c.anime], ["Gender", c.gender]].filter((k) => k[1]),
-  landmark: (l) => [["Country", l.country], ["City", l.city], ["Built", l.built != null ? yr(l.built) : null], ["Initials", first(l.n)]].filter((c) => c[1]),
+  landmark: (l) => [["Country", l.country], ["City", l.city], ["Built", l.built != null ? (l.built < 0 ? "Ancient: before AD 1" : yr(l.built)) : null], ["Initials", first(l.n)]].filter((c) => c[1]),
   event: (e) => [["Type", e.type], ["Year", yr(e.year)], ["Where", e.where], ["Ended", e.end != null && e.end !== e.year ? yr(e.end) : null], ["Initials", first(e.n)]].filter((c) => c[1]),
   invention: (x) => [["Year", yr(x.year)], ["By", x.by && x.by.join(", ")], ["Initials", first(x.n)]].filter((c) => c[1]),
   oldstate: (x) => [["Existed", x.from != null ? `${yr(x.from)} to ${yr(x.to)}` : `until ${yr(x.to)}`], ["Capital", x.capital], ["Initials", first(x.n)]].filter((c) => c[1]),
