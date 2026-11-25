@@ -1311,6 +1311,10 @@ body.ingame #tourChip,body:not(.athome) #tourChip{display:none}
 .redocard{display:flex;gap:14px;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;margin:0 0 14px;padding:14px 16px;border-radius:20px;border:1px solid var(--line);border-left:5px solid var(--accent2);background:var(--surface)}
 .redocard div{display:grid;gap:3px}.redocard b{font-size:18px}.redocard .btn{flex:none}
 
+/* picture sources */
+.srclist{list-style:none;padding:0;margin:8px 0;display:grid;gap:10px}.srclist li{display:grid;grid-template-columns:1fr auto;gap:2px 10px}.srclist li .fine{grid-column:1/-1}
+.foot a{color:inherit;text-decoration:underline}
+
 /* chess pieces and board, copied from ballknowledge's chess page (piece set: cburnett, CC BY-SA 3.0, via Lichess) */
 .pc-bb{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJjb2xvci1zY2hlbWU6bGlnaHQgb25seSIgd2lkdGg9IjQ1IiBoZWlnaHQ9IjQ1IiB2aWV3Qm94PSIwIDAgNDUgNDUiPjxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMS41Ij48ZyBmaWxsPSIjMDAwIiBzdHJva2UtbGluZWNhcD0iYnV0dCI+PHBhdGggZD0iTTkgMzZjMy40LTEgMTAuMS40IDEzLjUtMiAzLjQgMi40IDEwLjEgMSAxMy41IDIgMCAwIDEuNi41IDMgMi0uNyAxLTEuNiAxLTMgLjUtMy40LTEtMTAuMS41LTEzLjUtMS0zLjQgMS41LTEwLjEgMC0xMy41IDEtMS40LjUtMi4zLjUtMy0uNSAxLjQtMiAzLTIgMy0yeiIvPjxwYXRoIGQ9Ik0xNSAzMmMyLjUgMi41IDEyLjUgMi41IDE1IDAgLjUtMS41IDAtMiAwLTIgMC0yLjUtMi41LTQtMi41LTQgNS41LTEuNSA2LTExLjUtNS0xNS41LTExIDQtMTAuNSAxNC01IDE1LjUgMCAwLTIuNSAxLjUtMi41IDQgMCAwLS41LjUgMCAyeiIvPjxwYXRoIGQ9Ik0yNSA4YTIuNSAyLjUgMCAxIDEtNSAwIDIuNSAyLjUgMCAxIDEgNSAweiIvPjwvZz48cGF0aCBzdHJva2U9IiNlY2VjZWMiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIGQ9Ik0xNy41IDI2aDEwTTE1IDMwaDE1bS03LjUtMTQuNXY1TTIwIDE4aDUiLz48L2c+PC9zdmc+)}
 .pc-bk{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NSA0NSI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2U9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIxLjUiPjxwYXRoIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIGQ9Ik0yMi41IDExLjZWNiIvPjxwYXRoIGZpbGw9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJidXR0IiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBkPSJNMjIuNSAyNXM0LjUtNy41IDMtMTAuNWMwIDAtMS0yLjUtMy0yLjVzLTMgMi41LTMgMi41Yy0xLjUgMyAzIDEwLjUgMyAxMC41Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTExLjUgMzdhMjIuMyAyMi4zIDAgMCAwIDIxIDB2LTdzOS00LjUgNi0xMC41Yy00LTYuNS0xMy41LTMuNS0xNiA0VjI3di0zLjVjLTMuNS03LjUtMTMtMTAuNS0xNi00LTMgNiA1IDEwIDUgMTB6Ii8+PHBhdGggc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgZD0iTTIwIDhoNSIvPjxwYXRoIHN0cm9rZT0iI2VjZWNlYyIgZD0iTTMyIDI5LjVzOC41LTQgNi05LjdDMzQuMSAxNCAyNSAxOCAyMi41IDI0LjZ2Mi4xLTIuMUMyMCAxOCA5LjkgMTQgNyAxOS45Yy0yLjUgNS42IDQuOCA5IDQuOCA5Ii8+PHBhdGggc3Ryb2tlPSIjZWNlY2VjIiBkPSJNMTEuNSAzMGM1LjUtMyAxNS41LTMgMjEgMG0tMjEgMy41YzUuNS0zIDE1LjUtMyAyMSAwbS0yMSAzLjVjNS41LTMgMTUuNS0zIDIxIDAiLz48L2c+PC9zdmc+)}
@@ -1399,12 +1403,13 @@ body.ingame #tourChip,body:not(.athome) #tourChip{display:none}
   <section id="collPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button></nav><div id="collRoom"></div></section>
   <section id="wikiPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button><div class="trail"><span class="crumb cur">Wiki</span></div></nav><div id="wikiRoom"></div></section>
   <section id="calPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button><div class="trail"><span class="crumb cur">Calendar</span></div></nav><div id="calRoom"></div></section>
+  <section id="credPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button><div class="trail"><span class="crumb cur">Pictures</span></div></nav><div id="credRoom"></div></section>
   <section id="setPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button></nav><div id="setRoom"></div></section>
   </main>
 
   <div class="foot">
-    <span>Facts come from Wikidata (CC0) and ballknowledge's football data. Pictures are from Wikimedia Commons under free licences, each credited on its answer card.</span>
-    <span>Club crests and football player photos belong to their owners and appear only to identify them. An independent student project.</span>
+    <span>Facts come from Wikidata (CC0), ballknowledge's football data and other credited sources. Some pictures are freely licensed; many belong to their owners and are shown with credit.</span>
+    <span><a href="#credits">Picture sources and removal requests</a>. An independent student project, not affiliated with anyone shown.</span>
   </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" integrity="sha384-aH7F59TKSh8OEAivbclch9UUnWn/Uy8AQlYYKzpVaQkAp8W6IF2VocW/knEeRwT0" crossorigin="anonymous"></script>
@@ -2458,7 +2463,7 @@ const fmt = (n) => n >= 1e9 ? (n / 1e9).toFixed(1).replace(/\.0$/, "") + " bn" :
 const euro = (v) => (v >= 1e6 ? `€${(v / 1e6).toFixed(1).replace(/\.0$/, "")}m` : `€${Math.round(v / 1e3)}k`);
 const imgOf = (x) => x && (x.img || x.logo || x.flag || x.cover);
 const isCut = (x) => x && x.cut;
-const credOf = (x, k) => { const c = x && x.cr && (x.cr[k] || x.cr.img || x.cr.logo || x.cr.flag); return c ? `<div class="credit">${esc(c.by)} · ${esc(c.lic)} · <a href="${c.page}" target="_blank" rel="noopener">source</a></div>` : ""; };
+const credOf = (x, k) => { const c = x && x.cr && (x.cr[k] || x.cr.img || x.cr.logo || x.cr.flag); return c ? `<div class="credit">${esc(c.by)} · ${esc(c.lic)} · <a href="${c.page}" target="_blank" rel="noopener">source</a> · <a href="${removalLink(x.n)}" target="_blank" rel="noopener">request removal</a></div>` : ""; };
 const pic = (x, cls = "") => imgOf(x) ? `<img class="${cls} ${isCut(x) ? "cutpic" : ""} ${x.logo || x.flag ? "contain" : ""}" src="${imgOf(x)}" alt="${esc(x.n)}" loading="lazy">` : "";
 
 /* ---------------- the worlds ---------------- */
@@ -2872,7 +2877,7 @@ function setTheme(code, ev) {
   const wash = $("#wash"); wash.style.setProperty("--wx", ev.clientX + "px"); wash.style.setProperty("--wy", ev.clientY + "px"); wash.style.setProperty("--wash", getComputedStyle(root).getPropertyValue("--bg"));
   wash.classList.remove("go"); void wash.offsetWidth; wash.classList.add("go"); setTimeout(apply, 280);
 }
-const SECTIONS = ["home", "worldsPage", "league", "mixPage", "profilePage", "collPage", "setPage", "wikiPage", "calPage"];
+const SECTIONS = ["home", "worldsPage", "league", "mixPage", "profilePage", "collPage", "setPage", "wikiPage", "calPage", "credPage"];
 function show(id) { SECTIONS.forEach((s) => { const el = $("#" + s); if (el) el.hidden = s !== id; }); scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); }
 function go(slug, ev) { try { if (location.hash !== "#" + slug) history.replaceState(null, "", "#" + slug); } catch (e) { /* no hash */ } route(ev); }
 function route(ev) {
@@ -2890,6 +2895,7 @@ function route(ev) {
   if (h === "collection") { setTheme("HOME", ev); show("collPage"); renderCollection(); return; }
   if (h === "settings") { setTheme("HOME", ev); show("setPage"); renderSettings(); return; }
   if (h === "wiki") { setTheme("HOME", ev); show("wikiPage"); renderWiki(); return; }
+  if (h === "credits") { setTheme("HOME", ev); show("credPage"); renderCredits(); return; }
   if (h === "calendar") { setTheme("kpop", ev); show("calPage"); Cal.render(); return; }
   setTheme("HOME", ev); show("home"); renderHome();
 }
@@ -3258,7 +3264,7 @@ function renderProfile() {
 function afterProfile() { try { Season.board(); } catch (e) { /* not ready */ } }
 function renderSettings() {
   const g = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
-  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div><div class="card"><div class="label">Your sidekick in each category</div><p class="fine">The sidekick cheers you on, reacts to your answers and follows you into that category.</p>${WORLD_IDS.map(kickRow).join("")}</div>${outfitCardHTML()}${lookCardHTML()}${displayCardHTML()}${tourCardHTML()}<div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Photo credits</div><p class="fine">Every picture comes with its author and licence on the answer card. K-pop, geography, history and food pictures are from Wikimedia Commons (free licences or public domain), facts from Wikidata (CC0). Football data and crests come from ballknowledge (Transfermarkt CC0 data; crests and player photos shown only to identify them).</p></div>`;
+  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div><div class="card"><div class="label">Your sidekick in each category</div><p class="fine">The sidekick cheers you on, reacts to your answers and follows you into that category.</p>${WORLD_IDS.map(kickRow).join("")}</div>${outfitCardHTML()}${lookCardHTML()}${displayCardHTML()}${tourCardHTML()}<div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Pictures and removal</div><p class="fine">Not every picture here is free to reuse. See where they come from and how to have one taken down.</p><a class="btn ghost" href="#credits">Open</a></div>`;
 }
 
 /* ================= wiki: every group, idol, song, country, player... with its facts and links; any name with data-wiki opens it ================= */
@@ -4592,6 +4598,38 @@ var Redo = {
   return out;
 }; }
 document.addEventListener("click", (e) => { const t = e.target.closest("button"); if (t && t.dataset.redo) { Snd.tick(); Redo.start(); } });
+
+/* ================= pictures: where they come from, who owns them, and how to have one removed ================= */
+const REMOVAL = "https://github.com/mosoliman517-sudo/ultimateball/issues/new";
+const removalLink = (about) => `${REMOVAL}?title=${encodeURIComponent("Picture removal request" + (about ? ": " + about : ""))}&body=${encodeURIComponent("Which picture (name and where you saw it):\n\nYour connection to it (you, the owner, a representative):\n\nThis page is public, so please don't include private details.")}`;
+/* host of a credit link → how to describe the source, and whether it is free to reuse */
+const SOURCES = [
+  [/commons\.wikimedia\.org/, "Wikimedia Commons", "Free licences or public domain; each answer card names the author and licence."],
+  [/kpop\.fandom\.com/, "K-pop fan wiki", "Not freely licensed. Idol photos belong to their owners."],
+  [/anilist\.co/, "AniList", "Not freely licensed. Anime covers and character art belong to their studios and publishers."],
+  [/deezer\.com/, "Deezer", "Not freely licensed. Artist pictures belong to their owners."],
+  [/apple\.com|mzstatic\.com/, "Apple Music", "Album covers and song previews belong to the labels and are shown with a link to Apple Music."],
+  [/espn/, "ESPN", "Not freely licensed. NBA player pictures and team logos, shown only to identify them."],
+  [/ea\.com/, "EA Sports FC", "Not freely licensed. Player portraits, shown only to identify the player."],
+  [/thesportsdb\.com/, "TheSportsDB", "Not freely licensed. Player pictures, shown only to identify the player."],
+  [/transfermarkt\.com/, "Transfermarkt", "Club crests are trademarks of the clubs, shown only to identify them."],
+];
+function pictureCounts() {
+  const n = new Map(), add = (name) => n.set(name, (n.get(name) || 0) + 1);
+  Object.values(window.PACKS || {}).forEach((p) => (p.items || []).forEach((x) => ["img", "logo", "flag", "cover"].forEach((k) => {
+    if (!x[k]) return; const c = (x.cr && x.cr[k]) || null, where = c ? c.page || "" : k === "cover" ? "https://music.apple.com" : "";
+    const s = SOURCES.find(([re]) => re.test(where)); add(s ? s[1] : "Other");
+  })));
+  return n;
+}
+function renderCredits() {
+  const n = pictureCounts();
+  $("#credRoom").innerHTML = `<div class="hero"><h1>Pictures and <em>removal</em></h1><p class="sub">Where the pictures on this site come from, and how to have one taken down.</p></div>
+    <div class="card"><div class="label">Sources</div><ul class="srclist">${SOURCES.filter(([, name]) => n.get(name)).map(([, name, text]) => `<li><b>${name}</b><span class="num">${n.get(name).toLocaleString()}</span><span class="fine">${text}</span></li>`).join("")}${n.get("Other") ? `<li><b>Other</b><span class="num">${n.get("Other")}</span><span class="fine">See the answer card.</span></li>` : ""}</ul>
+      <p class="fine">Not every picture is free to reuse. Rights stay with their owners, and none of them endorses this site. It is an independent student project. Facts come from Wikidata (CC0), MusicBrainz, the K-pop fan wiki, Open Trivia DB, Lichess and ballknowledge's football and basketball data. Chess pieces are the cburnett set (CC BY-SA 3.0).</p></div>
+    <div class="card"><div class="label">Have a picture removed</div><p>If you are in a picture, own it, or act for someone who does, ask and it will be taken down. You don't need to give a reason to ask about a picture of yourself.</p>
+      <a class="btn" href="${removalLink("")}" target="_blank" rel="noopener">Request a removal</a><p class="fine">This opens a request on the project's GitHub page (a free GitHub account is needed). Requests there are public, so don't include private details.</p></div>`;
+}
 
 </script>
 </body>

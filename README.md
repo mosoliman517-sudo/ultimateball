@@ -22,6 +22,7 @@ python3 pipelines/kpop_audit.py
 The build writes `docs/index.html` and `docs/data.<hash>.js` (the game data, cached for a year because its name changes with its content).
 
 ## Facts and security
+- **Picture removal requests** arrive as GitHub issues. Add the item id (or image path) to `site/removed.json`, run the build, push, and close the issue. Older copies stay in git history; purge it too if the requester asks.
 - `pipelines/fix_facts.py` holds the hand-checked corrections (country capitals, languages and currencies, what historical figures are known for, dish origins). The builder applies it on every write; edit it, not the packs.
 - Anything from other players (public MQTT relay, challenge links) passes `cleanData()` in `site/bk_core.js` before use. Keep it that way for any new channel.
 - Third-party scripts carry integrity hashes: change the hash when changing a version. Security and cache headers are in `vercel.json`.

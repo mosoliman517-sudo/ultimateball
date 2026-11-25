@@ -38,10 +38,20 @@ if "kpop" in packs and os.path.exists(au):
     for x in packs["kpop"]["items"]:
         if A.get(x["id"]):
             x["pv"], x["am"] = A[x["id"]]["pv"], A[x["id"]]["url"]
+# pictures taken down on request (site/removed.json): strip them from the data here, and from the built folder below
+gone = json.loads(rd("site/removed.json"))
+gone_files = set(gone.get("files", []))
+for p in packs.values():
+    for x in p["items"]:
+        if x["id"] in set(gone.get("ids", [])):
+            gone_files.update(x[k] for k in ("img", "logo", "flag") if str(x.get(k, "")).startswith("img/"))
+            for k in ("img", "logo", "flag", "cover", "cut", "cr"): x.pop(k, None)
+        for k in ("img", "logo", "flag"):
+            if x.get(k) in gone_files: x.pop(k)
 html = rd("site/template.html")
 for k, v in {"/*FONTS*/": rd("site/fonts.html"), "/*BASE_CSS*/": rd("site/base.css"), "/*EXTRA_CSS*/": rd("site/extra.css") + "\n" + rd("site/chess.css"), "/*SPRITE*/": rd("site/sprite.html"),
              "/*PACKS*/{}": json.dumps(packs, ensure_ascii=False, separators=(",", ":")) + ";window.PUZZLES=" + rd("site/puzzles.json"), "/*CORE*/": core,
-             "/*MASCOTS*/": rd("site/mascot_lines.js") + "\n" + rd("site/coach_lines.js") + "\n" + rd("site/chess_coaches.js") + "\n" + rd("site/mascot_art.js") + "\n" + rd("site/mascots_worlds.js") + "\n" + rd("site/more_lines.js") + "\n" + rd("site/voice.js"), "/*APP*/": rd("site/app.js") + "\n" + rd("site/social.js") + "\n" + rd("site/chessplay.js") + "\n" + rd("site/extras.js") + "\n" + rd("site/gamefx.js") + "\n" + rd("site/missions.js") + "\n" + rd("site/fits_tour.js") + "\n" + rd("site/chess_train.js") + "\n" + rd("site/online_extras.js") + "\n" + rd("site/prefs.js") + "\n" + rd("site/redo.js")}.items():
+             "/*MASCOTS*/": rd("site/mascot_lines.js") + "\n" + rd("site/coach_lines.js") + "\n" + rd("site/chess_coaches.js") + "\n" + rd("site/mascot_art.js") + "\n" + rd("site/mascots_worlds.js") + "\n" + rd("site/more_lines.js") + "\n" + rd("site/voice.js"), "/*APP*/": rd("site/app.js") + "\n" + rd("site/social.js") + "\n" + rd("site/chessplay.js") + "\n" + rd("site/extras.js") + "\n" + rd("site/gamefx.js") + "\n" + rd("site/missions.js") + "\n" + rd("site/fits_tour.js") + "\n" + rd("site/chess_train.js") + "\n" + rd("site/online_extras.js") + "\n" + rd("site/prefs.js") + "\n" + rd("site/redo.js") + "\n" + rd("site/credits.js")}.items():
     html = html.replace(k, v, 1)
 out = os.path.join(ROOT, "docs")
 os.makedirs(out, exist_ok=True)
@@ -57,6 +67,9 @@ open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(page)
 if os.path.isdir(os.path.join(out, "img")):
     shutil.rmtree(os.path.join(out, "img"))
 shutil.copytree(os.path.join(ROOT, "img"), os.path.join(out, "img"))
+for f in gone_files:
+    p = os.path.join(out, f)
+    if os.path.isfile(p): os.remove(p)
 shutil.rmtree(os.path.join(out, "engine"), ignore_errors=True); shutil.copytree(os.path.join(ROOT, "site", "engine"), os.path.join(out, "engine"))   # Stockfish (GPL-3, licence inside)
 os.makedirs(os.path.join(out, "img"), exist_ok=True)
 for f in os.listdir(os.path.join(ROOT, "site", "pwa")): shutil.copy(os.path.join(ROOT, "site", "pwa", f), os.path.join(out, f))   # install as an app

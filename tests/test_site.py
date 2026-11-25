@@ -103,6 +103,22 @@ class Data(unittest.TestCase):
 
 
 class Deploy(unittest.TestCase):
+    def test_removed_pictures_are_gone(self):
+        gone = json.loads(rd("site", "removed.json"))
+        data = rd("docs", re.search(r'src="(data\.[0-9a-f]+\.js)"', rd("docs", "index.html")).group(1))
+        packs_built = json.loads(data[data.index("{"):data.index(";window.PUZZLES=")])
+        for p in packs_built.values():
+            for x in p["items"]:
+                if x["id"] in gone["ids"]:
+                    self.assertFalse(any(x.get(k) for k in ("img", "logo", "flag", "cover")), x["n"])
+        for f in gone["files"]:
+            self.assertFalse(os.path.exists(os.path.join(ROOT, "docs", f)), f)
+
+    def test_footer_does_not_claim_everything_is_free(self):
+        page = rd("docs", "index.html")
+        self.assertNotIn("Pictures are from Wikimedia Commons under free licences", page)
+        self.assertIn("#credits", page)
+
     def test_built_page(self):
         page = rd("docs", "index.html")
         self.assertTrue(page.lstrip().lower().startswith("<!doctype html>"), "page must not run in quirks mode")

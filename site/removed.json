@@ -1,0 +1,5 @@
+{
+  "note": "Pictures taken down on request. ids: item ids whose pictures are removed. files: extra image paths. Then run python3 build.py and push.",
+  "ids": [],
+  "files": []
+}

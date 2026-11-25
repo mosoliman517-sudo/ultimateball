@@ -13,7 +13,7 @@ const fmt = (n) => n >= 1e9 ? (n / 1e9).toFixed(1).replace(/\.0$/, "") + " bn" :
 const euro = (v) => (v >= 1e6 ? `€${(v / 1e6).toFixed(1).replace(/\.0$/, "")}m` : `€${Math.round(v / 1e3)}k`);
 const imgOf = (x) => x && (x.img || x.logo || x.flag || x.cover);
 const isCut = (x) => x && x.cut;
-const credOf = (x, k) => { const c = x && x.cr && (x.cr[k] || x.cr.img || x.cr.logo || x.cr.flag); return c ? `<div class="credit">${esc(c.by)} · ${esc(c.lic)} · <a href="${c.page}" target="_blank" rel="noopener">source</a></div>` : ""; };
+const credOf = (x, k) => { const c = x && x.cr && (x.cr[k] || x.cr.img || x.cr.logo || x.cr.flag); return c ? `<div class="credit">${esc(c.by)} · ${esc(c.lic)} · <a href="${c.page}" target="_blank" rel="noopener">source</a> · <a href="${removalLink(x.n)}" target="_blank" rel="noopener">request removal</a></div>` : ""; };
 const pic = (x, cls = "") => imgOf(x) ? `<img class="${cls} ${isCut(x) ? "cutpic" : ""} ${x.logo || x.flag ? "contain" : ""}" src="${imgOf(x)}" alt="${esc(x.n)}" loading="lazy">` : "";
 
 /* ---------------- the worlds ---------------- */
@@ -427,7 +427,7 @@ function setTheme(code, ev) {
   const wash = $("#wash"); wash.style.setProperty("--wx", ev.clientX + "px"); wash.style.setProperty("--wy", ev.clientY + "px"); wash.style.setProperty("--wash", getComputedStyle(root).getPropertyValue("--bg"));
   wash.classList.remove("go"); void wash.offsetWidth; wash.classList.add("go"); setTimeout(apply, 280);
 }
-const SECTIONS = ["home", "worldsPage", "league", "mixPage", "profilePage", "collPage", "setPage", "wikiPage", "calPage"];
+const SECTIONS = ["home", "worldsPage", "league", "mixPage", "profilePage", "collPage", "setPage", "wikiPage", "calPage", "credPage"];
 function show(id) { SECTIONS.forEach((s) => { const el = $("#" + s); if (el) el.hidden = s !== id; }); scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); }
 function go(slug, ev) { try { if (location.hash !== "#" + slug) history.replaceState(null, "", "#" + slug); } catch (e) { /* no hash */ } route(ev); }
 function route(ev) {
@@ -445,6 +445,7 @@ function route(ev) {
   if (h === "collection") { setTheme("HOME", ev); show("collPage"); renderCollection(); return; }
   if (h === "settings") { setTheme("HOME", ev); show("setPage"); renderSettings(); return; }
   if (h === "wiki") { setTheme("HOME", ev); show("wikiPage"); renderWiki(); return; }
+  if (h === "credits") { setTheme("HOME", ev); show("credPage"); renderCredits(); return; }
   if (h === "calendar") { setTheme("kpop", ev); show("calPage"); Cal.render(); return; }
   setTheme("HOME", ev); show("home"); renderHome();
 }
@@ -813,7 +814,7 @@ function renderProfile() {
 function afterProfile() { try { Season.board(); } catch (e) { /* not ready */ } }
 function renderSettings() {
   const g = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
-  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div><div class="card"><div class="label">Your sidekick in each category</div><p class="fine">The sidekick cheers you on, reacts to your answers and follows you into that category.</p>${WORLD_IDS.map(kickRow).join("")}</div>${outfitCardHTML()}${lookCardHTML()}${displayCardHTML()}${tourCardHTML()}<div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Photo credits</div><p class="fine">Every picture comes with its author and licence on the answer card. K-pop, geography, history and food pictures are from Wikimedia Commons (free licences or public domain), facts from Wikidata (CC0). Football data and crests come from ballknowledge (Transfermarkt CC0 data; crests and player photos shown only to identify them).</p></div>`;
+  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div><div class="card"><div class="label">Your sidekick in each category</div><p class="fine">The sidekick cheers you on, reacts to your answers and follows you into that category.</p>${WORLD_IDS.map(kickRow).join("")}</div>${outfitCardHTML()}${lookCardHTML()}${displayCardHTML()}${tourCardHTML()}<div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Pictures and removal</div><p class="fine">Not every picture here is free to reuse. See where they come from and how to have one taken down.</p><a class="btn ghost" href="#credits">Open</a></div>`;
 }
 
 /* ================= wiki: every group, idol, song, country, player... with its facts and links; any name with data-wiki opens it ================= */
