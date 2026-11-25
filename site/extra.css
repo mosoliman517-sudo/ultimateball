@@ -447,3 +447,7 @@ body.ingame #tourChip,body:not(.athome) #tourChip{display:none}
 @media (max-width:480px){:root[data-text="l"] .wrap{zoom:1.06}:root[data-text="xl"] .wrap{zoom:1.12}
   :root[data-text="l"] .wrap :is(h1,h2,h3,.gname,.wn),:root[data-text="xl"] .wrap :is(h1,h2,h3,.gname,.wn){overflow-wrap:anywhere}
   :root[data-text="l"] .wrap,:root[data-text="xl"] .wrap{overflow-x:clip}}
+
+/* redemption round */
+.redocard{display:flex;gap:14px;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;margin:0 0 14px;padding:14px 16px;border-radius:20px;border:1px solid var(--line);border-left:5px solid var(--accent2);background:var(--surface)}
+.redocard div{display:grid;gap:3px}.redocard b{font-size:18px}.redocard .btn{flex:none}

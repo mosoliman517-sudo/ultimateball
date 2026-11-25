@@ -569,12 +569,13 @@ function curDef() { const s = Q.s; return s.mix ? gameOf(s.mix[s.round - 1].w, s
 function curWorld() { const s = Q.s; return s.mix ? s.mix[s.round - 1].w : s.w; }
 function nextRound() {
   const s = Q.s; s.round++; const d = curDef(), pool = byFame(d.pool()); let r;
-  const kp = curWorld() === "kpop" && !s.daily; s.pk = s.pk || Pick.ctx();
+  const kp = curWorld() === "kpop" && !s.daily && !s.redo; s.pk = s.pk || Pick.ctx();
   const fresh = (x) => !s.used.has(x.id) && (d.kind !== "scramble" || qnorm(x.n).length >= 4);
   const pickR = s.daily ? (k) => pool[Math.floor(seeded(`${s.daily}:${s.round}:${k}`) * pool.length)] : () => rnd(pool);
   if (kp) { const cand = pool.filter(fresh); r = Pick.choose(cand.length ? cand : pool, s.pk); } else for (let k = 0; k < 60; k++) { r = pickR(k); if (fresh(r)) break; }
   if (kp) Pick.record(r, s.pk);
   if (s.fixed) r = items(s.w).find((x) => x.id === s.fixed[s.round - 1]) || r;   // a challenge replays the challenger's exact rounds
+  if (s.redo) r = d.pool().find((x) => x.id === s.redo[s.round - 1]) || r;
   s.used.add(r.id); s.r = r; (s.picks = s.picks || []).push(r.id);
   s.clues = d.kind === "audio" ? [["Listen", "3 seconds"], ["Listen", "5 more seconds"], ["By", r.by], ["Year", r.year], ["Listen", "the whole preview"], ["Initials", first(r.n)]].filter((c) => c[1]) : d.kind === "blur" ? BLUR.map((b) => ["Blur", b]) : d.kind === "scramble" ? [["Letters", scrambleName(r.n)], ["It is", KIND_WORD[r.kind] || "a name"], ...(CLUES[r.kind] ? CLUES[r.kind](r).filter((c) => !/Initials|Starts|Letters/.test(c[0])).slice(-1) : []), ["Starts with", first(r.n)]] : d.kind === "photo" ? d.hints(r) : d.clues(r);
   /* a hint must never contain the answer (Tottenham Hotspur Stadium for Tottenham, "Albanian lek" for Albania): drop it, unless the clue IS the prompt */
@@ -630,9 +631,9 @@ function endRound(winner, gave) {
 }
 function finishQuiz() {
   const s = Q.s; s.phase = "done"; stopQuiz();
-  if (s.mode === "solo") { const k = s.w + ":" + s.game, p = prof(), b = p.best[k]; if (!b || s.scores[0] > b.score) { p.best[k] = { score: s.scores[0], streak: s.best || 0 }; saveProf(); if (b) Mascot.react("best", true); } }
-  else award("duo");
-  if (s.mix) mixFinished(s);
+  if (s.mode === "solo" && !s.redo) { const k = s.w + ":" + s.game, p = prof(), b = p.best[k]; if (!b || s.scores[0] > b.score) { p.best[k] = { score: s.scores[0], streak: s.best || 0 }; saveProf(); if (b) Mascot.react("best", true); } }
+  else if (!s.redo) award("duo");
+  if (s.mix && !s.redo) mixFinished(s);
   if (s.mode === "solo" && !s.mix) { if (typeof recordGame === "function") recordGame(s); if (s.daily) Daily.finish(s); else if (Boards) Boards.record(`${s.w}:${s.game}`, s.scores[0]); }
   renderQuiz(); Net.sync();
 }
@@ -651,13 +652,13 @@ function answerCard() {
   return `<div class="rcard on"><div class="label">The answer</div><div class="row" style="gap:14px;margin:8px 0;align-items:center">${imgOf(x) ? `<img class="ansimg ${x.logo || x.flag ? "contain" : ""} ${isCut(x) ? "cutpic" : ""}" src="${imgOf(x)}" alt="">` : ""}<div><h3 style="font-size:28px">${wikiLink(curWorld(), ans === x.n ? x : wikiFind(curWorld(), ans) || x, esc(ans))}</h3>${ans !== x.n ? `<div class="fine">${esc(x.n)}</div>` : ""}<div class="fine">${facts}</div></div></div>${credOf(x, d.imgKey)}${x.am ? `<a class="credit" href="${x.am}" target="_blank" rel="noopener">Preview courtesy of Apple Music. Listen to the full song there.</a>` : ""}</div>`;
 }
 function renderQuiz() {
-  const s = Q.s, d = curDef(), duo = s.mode !== "solo", names = s.mode === "online" ? Net.names() : NAMES(), title = s.mix ? `Round ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : esc(d.name);
+  const s = Q.s, d = curDef(), duo = s.mode !== "solo", names = s.mode === "online" ? Net.names() : NAMES(), title = s.redo ? `Redemption ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : s.mix ? `Round ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : esc(d.name);
   const strip = s.mix ? `<div class="mixstrip" style="margin-bottom:10px">${s.mix.map((m, i) => { const x = items(m.w, (y) => y.img)[0]; return `<span class="${i === s.round - 1 ? "now" : ""} ${s.mixW && s.mixW[i] != null && s.mixW[i] >= 0 ? "w" + s.mixW[i] : ""}">${x ? `<img src="${x.img}" alt="">` : ""}${esc(WORLDS[m.w].name)}</span>`; }).join("")}</div>` : "";
   const head = gamesBar(title) + strip;
   if (s.phase === "done") {
     if (s.mode === "online") rankedDone(s);
     const best = Math.max(...s.scores), winner = duo ? (s.scores[0] === s.scores[1] ? -1 : s.scores[0] > s.scores[1] ? 0 : 1) : 0;
-    $("#room").innerHTML = `<div class="card">${head}${finale({ label: duo ? "Full time" : `${s.wins[0]} of ${s.rounds} right · best streak ${s.best || s.streak}`, verdict: duo ? (winner < 0 ? "A draw." : esc(names[winner]) + " wins!") : best >= 6000 ? "Serious knowledge." : best >= 3500 ? "Solid." : "Keep practising.", players: s.scores.map((sc, k) => ({ name: duo ? names[k] : prof().nick || "You", score: sc, av: duo ? null : avatarHTML(prof().avatar, "lg", prof().nick || "You") })), winner: duo ? winner : null, good: duo ? true : best >= 3500, tiles: duo ? [[`${s.wins[0]}–${s.wins[1]}`, "rounds won"]] : [[`${s.wins[0]}/${s.rounds}`, "right"], [s.best || 0, "best streak"], [best.toLocaleString(), "points"]], buttons: s.daily ? `<button class="btn" id="dShare" type="button">Copy my result</button><button class="btn ghost" data-go="home" type="button">Back home</button>` : `${s.chal ? challengeVerdict(s) : ""}<button class="btn" id="qAgain" type="button">Play again</button>${!duo && !s.mix ? `<button class="btn ghost" id="qChal" type="button">Challenge a friend</button>` : ""}${s.mix ? `<button class="btn ghost" data-go="mix" type="button">New match</button>` : ""}` })}</div>`; return;
+    $("#room").innerHTML = `<div class="card">${head}${finale({ label: duo ? "Full time" : `${s.wins[0]} of ${s.rounds} right · best streak ${s.best || s.streak}`, verdict: s.redo ? (s.wins[0] === s.rounds ? "All redeemed." : s.wins[0] ? "Getting there." : "They will be back.") : duo ? (winner < 0 ? "A draw." : esc(names[winner]) + " wins!") : best >= 6000 ? "Serious knowledge." : best >= 3500 ? "Solid." : "Keep practising.", players: s.scores.map((sc, k) => ({ name: duo ? names[k] : prof().nick || "You", score: sc, av: duo ? null : avatarHTML(prof().avatar, "lg", prof().nick || "You") })), winner: duo ? winner : null, good: s.redo ? s.wins[0] * 2 >= s.rounds : duo ? true : best >= 3500, tiles: duo ? [[`${s.wins[0]}–${s.wins[1]}`, "rounds won"]] : [[`${s.wins[0]}/${s.rounds}`, "right"], [s.best || 0, "best streak"], [best.toLocaleString(), "points"]], buttons: s.redo ? `${Redo.due().length ? `<button class="btn" type="button" data-redo="1">Next batch (${Redo.due().length} due)</button>` : ""}<button class="btn ghost" data-go="home" type="button">Back home</button>` : s.daily ? `<button class="btn" id="dShare" type="button">Copy my result</button><button class="btn ghost" data-go="home" type="button">Back home</button>` : `${s.chal ? challengeVerdict(s) : ""}<button class="btn" id="qAgain" type="button">Play again</button>${!duo && !s.mix ? `<button class="btn ghost" id="qChal" type="button">Challenge a friend</button>` : ""}${s.mix ? `<button class="btn ghost" data-go="mix" type="button">New match</button>` : ""}` })}</div>`; return;
   }
   const last = s.round >= s.rounds, hud = `<div class="qhud"><span class="label">Round ${s.round} of ${s.rounds}${duo ? "" : ` · streak ${s.streak}`}</span>${s.scores.map((v, i) => `<span class="num qscore"><small>${duo ? esc(names[i]) : "Score"}</small> <b>${v}</b></span>`).join("")}</div>`;
   if (s.phase === "reveal") { const r = s.result, nm = r.winner == null ? (duo ? "Nobody got it" : r.gave ? "Skipped" : "Not this time") : duo ? esc(names[r.winner]) + " got it" : "You got it"; $("#room").innerHTML = `<div class="card">${head}${hud}<div class="rcard on" style="margin-bottom:10px"><b style="font-size:20px">${nm}${r.winner != null ? `: +${r.pts}` : ""}</b></div>${answerCard()}<div class="row" style="margin-top:14px"><button class="btn" id="${last ? "qFinish" : "qNext"}" type="button">${last ? "See the final score" : "Next round"}</button>${!last && Net.role !== "guest" && !Q.hold ? `<button class="btn ghost" id="qHold" type="button">Pause</button>` : ""}</div>${!last && Net.role !== "guest" && !Q.hold ? `<div class="autometer"><i></i></div>` : ""}</div>`;
@@ -800,6 +801,7 @@ function renderProfile() {
   $("#profRoom").innerHTML = accountCardHTML() + friendsCardHTML() + `<div class="card pfcard" style="${bannerCSS(p.banner)}"><div class="pfhead" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">${avatarHTML(p.avatar, "xl", p.nick || "You")}<div><div class="label">Level ${lv.i + 1}</div><h2 style="font-size:34px;font-family:var(--display)">${esc(p.nick || "You")}</h2>${p.title && achOf(p.title) ? `<div class="pftitle">${esc(achOf(p.title)[1])}</div>` : ""}<div class="fine">${esc(lv.name)} · ${p.xp} XP${lv.next ? ` · ${lv.next - p.xp} to ${LEVELS[lv.i + 1][0]}` : ""}</div><div class="meter" style="margin-top:8px;max-width:320px"><i style="width:${pct}%"></i></div></div>${showcaseHTML(p)}<label class="fine" style="margin-left:auto">Nickname <input id="nick" aria-label="Nickname" value="${esc(p.nick)}" maxlength="16" style="width:150px"></label></div></div>
   ${myLinkHTML()}
   ${shareCardHTML()}
+  ${Redo.card()}
   ${historyHTML()}
   ${Season.card()}
   ${BadgeUI.html()}
@@ -899,7 +901,7 @@ document.addEventListener("click", (e) => {
   if (t.dataset.game) { Snd.tick(); go(`w-${S.world}-${t.dataset.game}`, e); return; }
   if (t.dataset.diff) { S.diff = t.dataset.diff; try { localStorage.setItem("gp_diff", S.diff); } catch (x) { /* blocked */ } Snd.tick(); document.querySelectorAll("[data-diff]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.diff === S.diff)); $("#diffNote").textContent = DIFFNOTE[S.diff]; return; }
   if (t.dataset.mode) { startMode(t.dataset.mode); return; }
-  if (t.id === "gamesBack") { if (Q.s && Q.s.mix) { Q.s = null; go("mix"); return; } go("w-" + S.world); return; }
+  if (t.id === "gamesBack") { if (Q.s && Q.s.redo) { Q.s = null; go("home"); return; } if (Q.s && Q.s.mix) { Q.s = null; go("mix"); return; } go("w-" + S.world); return; }
   if (t.id === "qB0") { buzz(0); return; } if (t.id === "qB1") { buzz(1); return; }
   if (t.id === "qGuess") { submitAnswer(null); return; } if (t.dataset.sug) { submitAnswer(t.dataset.sug); return; }
   if (t.id === "qHold") { Q.hold = true; clearTimeout(Q.auto); t.remove(); const m = $(".autometer"); if (m) m.remove(); return; }
