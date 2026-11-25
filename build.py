@@ -41,11 +41,19 @@ if "kpop" in packs and os.path.exists(au):
 html = rd("site/template.html")
 for k, v in {"/*FONTS*/": rd("site/fonts.html"), "/*BASE_CSS*/": rd("site/base.css"), "/*EXTRA_CSS*/": rd("site/extra.css") + "\n" + rd("site/chess.css"), "/*SPRITE*/": rd("site/sprite.html"),
              "/*PACKS*/{}": json.dumps(packs, ensure_ascii=False, separators=(",", ":")) + ";window.PUZZLES=" + rd("site/puzzles.json"), "/*CORE*/": core,
-             "/*MASCOTS*/": rd("site/mascot_lines.js") + "\n" + rd("site/coach_lines.js") + "\n" + rd("site/chess_coaches.js") + "\n" + rd("site/mascot_art.js") + "\n" + rd("site/mascots_worlds.js") + "\n" + rd("site/more_lines.js") + "\n" + rd("site/voice.js"), "/*APP*/": rd("site/app.js") + "\n" + rd("site/social.js") + "\n" + rd("site/chessplay.js") + "\n" + rd("site/extras.js") + "\n" + rd("site/gamefx.js") + "\n" + rd("site/missions.js") + "\n" + rd("site/fits_tour.js") + "\n" + rd("site/chess_train.js") + "\n" + rd("site/online_extras.js")}.items():
+             "/*MASCOTS*/": rd("site/mascot_lines.js") + "\n" + rd("site/coach_lines.js") + "\n" + rd("site/chess_coaches.js") + "\n" + rd("site/mascot_art.js") + "\n" + rd("site/mascots_worlds.js") + "\n" + rd("site/more_lines.js") + "\n" + rd("site/voice.js"), "/*APP*/": rd("site/app.js") + "\n" + rd("site/social.js") + "\n" + rd("site/chessplay.js") + "\n" + rd("site/extras.js") + "\n" + rd("site/gamefx.js") + "\n" + rd("site/missions.js") + "\n" + rd("site/fits_tour.js") + "\n" + rd("site/chess_train.js") + "\n" + rd("site/online_extras.js") + "\n" + rd("site/prefs.js")}.items():
     html = html.replace(k, v, 1)
 out = os.path.join(ROOT, "docs")
 os.makedirs(out, exist_ok=True)
-open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(html)
+# the public site: the game data goes in its own file named by its content, so an ordinary update does not re-download it
+import hashlib, glob as _glob
+start = html.index("window.PACKS = "); end = html.index("\n</script>", start)
+data = html[start:end]
+dname = "data." + hashlib.sha1(data.encode()).hexdigest()[:10] + ".js"
+for old in _glob.glob(os.path.join(out, "data.*.js")): os.remove(old)
+open(os.path.join(out, dname), "w", encoding="utf-8").write(data + "\n")
+page = html[:start] + "\n</script>\n<script src=\"" + dname + "\"></script>\n<script>\nif (!window.PACKS) document.body.innerHTML = '<p style=\"padding:24px;font:16px system-ui\">The game data did not load. Check your connection and <a href=\"\">reload</a>.</p>';" + html[end:]
+open(os.path.join(out, "index.html"), "w", encoding="utf-8").write(page)
 if os.path.isdir(os.path.join(out, "img")):
     shutil.rmtree(os.path.join(out, "img"))
 shutil.copytree(os.path.join(ROOT, "img"), os.path.join(out, "img"))
@@ -53,7 +61,7 @@ shutil.rmtree(os.path.join(out, "engine"), ignore_errors=True); shutil.copytree(
 os.makedirs(os.path.join(out, "img"), exist_ok=True)
 for f in os.listdir(os.path.join(ROOT, "site", "pwa")): shutil.copy(os.path.join(ROOT, "site", "pwa", f), os.path.join(out, f))   # install as an app
 n = sum(len(fs) for _, _, fs in os.walk(os.path.join(out, "img")))
-print(f"docs/index.html {len(html) // 1024} KB, {len(packs)} worlds ({', '.join(f'{w} {len(p['items'])}' for w, p in packs.items())}), {n} images")
+print(f"docs/index.html {len(page) // 1024} KB + {dname} {len(data) // 1024} KB, {len(packs)} worlds ({', '.join(f'{w} {len(p['items'])}' for w, p in packs.items())}), {n} images")
 
 # Artifact build: the artifact allows few files, so each category's pictures go into one script of data URIs (docs_art/img_<world>.js)
 import base64, sys

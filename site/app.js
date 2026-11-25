@@ -4,7 +4,9 @@
 const PK = window.PACKS || {};
 Object.values(PK).forEach((p) => { p.items = p.items.filter((x) => x.n && !/^Q\d+$/.test(x.n)); });   /* Wikidata entries with no English name are left out, never renamed */
 if (window.IMGDATA) Object.values(PK).forEach((p) => p.items.forEach((x) => ["img", "logo", "flag"].forEach((k) => { if (x[k]) { if (IMGDATA[x[k]]) x[k] = IMGDATA[x[k]]; else delete x[k]; } })));
-const items = (w, f) => ((PK[w] && PK[w].items) || []).filter((x) => !x.former && (!f || f(x)));   // former members are kept in the data but never used in a game
+const items = (w, f) => ((PK[w] && PK[w].items) || []).filter((x) => !x.former && !(x.kind === "anime" && x.year > new Date().getFullYear()) && (!f || f(x)));   // unaired series stay out too
+// market values are a snapshot: say from when
+const valuedAt = () => { const v = PK.football && PK.football.valAt; return v ? new Date(v + "-15").toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "the data"; };   // former members are kept in the data but never used in a game
 const rnd = (a) => a[Math.floor(Math.random() * a.length)];
 const shuffle = (a) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
 const fmt = (n) => n >= 1e9 ? (n / 1e9).toFixed(1).replace(/\.0$/, "") + " bn" : n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, "") + " m" : n >= 1e3 ? Math.round(n / 1e3) + "k" : String(n);
@@ -101,7 +103,7 @@ const CLUES = {
   trivia: (x) => [["Question", x.q], ["Category", x.cat], ["Letters", x.n.replace(/\S/g, "_ ")], ["Starts with", x.n[0]]],
   anime: (x) => [["Genres", x.genres && x.genres.join(", ")], ["Episodes", x.eps], ["Studio", x.studios && x.studios.join(", ")], ["Based on work by", x.authors && x.authors.join(", ")], ["First aired", x.year], ["Initials", first(x.n)]].filter((c) => c[1]),
   team: (t) => [["City", t.loc], ["Nickname", t.short]].filter((c) => c[1]),
-  club: (c) => [["League", LGN[c.lg]], ["Stadium", c.stadium], ["Coach", c.coach], ["Players in our data", (() => { const r = rosterOf("football", c).slice(0, 3).map((p) => p.n); return r.length ? r.join(", ") : null; })()], ["Initials", first(c.n)]].filter((c) => c[1]),
+  club: (c) => [["League", LGN[c.lg]], ["Stadium", c.stadium], [c.coachAt ? `Manager in ${new Date(c.coachAt + "-15").toLocaleDateString("en-GB", { month: "long", year: "numeric" })}` : "Manager", c.coach], ["Players in our data", (() => { const r = rosterOf("football", c).slice(0, 3).map((p) => p.n); return r.length ? r.join(", ") : null; })()], ["Initials", first(c.n)]].filter((c) => c[1]),
 };
 const BLUR = [34, 26, 19, 13, 8, 4, 0];
 const scrambleWord = (w) => { const a = [...w]; if (a.length < 3) return w; for (let k = 0; k < 20; k++) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } if (a.join("").toLowerCase() !== w.toLowerCase()) break; } return a.join(""); };
@@ -117,7 +119,7 @@ const GAMES = {
     G("club", "Name that club", "clue", { tag: "Its league, stadium, coach, then some of its players. Name the club.", pool: () => items("football", (x) => x.kind === "club" && x.stadium), clues: CLUES.club, unit: "club" }),
     G("blur", "Badge blur", "blur", { tag: "A blurry club crest that sharpens by the second.", pool: () => items("football", (x) => x.kind === "club" && x.logo), unit: "club", imgKey: "logo" }),
     G("photo", "Who's that player?", "photo", { tag: "A player's photo, right away. Buzz and name him. Hints come at a third and two thirds of the time.", pool: () => items("football", (x) => x.kind === "player" && x.img), hints: (p) => [["Club", p.club || p.nat], ["Initials", first(p.n)]].filter((c) => c[1]), unit: "player" }),
-    G("value", "Market value", "hol", { tag: "Two players. Who is worth more? Keep the streak alive.", pool: () => items("football", (x) => x.kind === "player" && x.val && x.img), stat: (x) => x.val, show: euro, ask: "Who is worth more?", higher: true }),
+    G("value", "Market value", "hol", { tag: `Two players. Who is worth more? Keep the streak alive. Values as of ${valuedAt()}.`, pool: () => items("football", (x) => x.kind === "player" && x.val && x.img), stat: (x) => x.val, show: euro, ask: "Who is worth more?", higher: true }),
     G("xi", "Starting XI", "all", { tag: "A real final or big match. Name the eleven who started, position by position.", pool: () => items("football", (x) => x.kind === "lineup"), list: (m) => m.players.map((p) => ({ n: p.n, pos: p.pos, x: items("football", (y) => y.kind === "player" && y.n === p.n)[0] })), unit: "player" }),
     G("ttt", "Football tic-tac-toe", "ttt", { tag: "Name a player who fits the row and the column: club, nationality or position. Three in a row wins.", pool: () => items("football", (x) => x.kind === "player"), attrs: () => tttAttrsBall("football"), unit: "player" }),
     G("roulette", "Club roulette", "roulette", { tag: "A club appears. Take turns naming players who played for it. First to blank loses.", pool: () => items("football", (x) => x.kind === "club").filter((c) => rosterOf("football", c).length >= 8), roster: (c) => rosterOf("football", c), unit: "player" }),
@@ -429,6 +431,7 @@ const SECTIONS = ["home", "worldsPage", "league", "mixPage", "profilePage", "col
 function show(id) { SECTIONS.forEach((s) => { const el = $("#" + s); if (el) el.hidden = s !== id; }); scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); }
 function go(slug, ev) { try { if (location.hash !== "#" + slug) history.replaceState(null, "", "#" + slug); } catch (e) { /* no hash */ } route(ev); }
 function route(ev) {
+  document.body.classList.toggle("athome", /^(#home)?$/.test(location.hash));
   const h = (location.hash || "#home").slice(1); if (!h.startsWith("w-kpop")) { try { const sd = localStorage.getItem("gp_diff"); if (sd && DIFFS.some((x) => x[0] === sd)) S.diff = sd; } catch (e) { /* blocked */ } } stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); document.body.classList.remove("ingame"); Snd.mode(h.startsWith("w-") && h.split("-").length > 2 ? "game" : "lobby");
   if (h.startsWith("w-")) { const [, w, g] = h.split("-"); if (!WORLDS[w]) return go("worlds"); const changed = S.world !== w; S.world = w; setTheme(w, ev); show("league"); renderWorld(); if (g && gameOf(w, g)) openGame(g); else { S.game = null; renderHub(); } if (changed) setTimeout(() => Mascot.hello(), 700); return; }
   S.world = null;
@@ -508,7 +511,7 @@ const Aud = {
 const gamesBar = (title) => `<div class="row" style="margin-bottom:12px"><button class="btn ghost" id="gamesBack" type="button">← Back</button><h2 style="font-size:24px">${title}</h2></div>`;
 const diffBar = () => S.world === "kpop" ? "" : `<div class="label" style="margin-top:14px">Difficulty</div><div class="diffbar" role="group" aria-label="Difficulty">${DIFFS.map(([k]) => [k, diffName(k)]).map(([k, n]) => `<button type="button" class="chip" data-diff="${k}" aria-pressed="${S.diff === k}">${n}</button>`).join("")}</div><div class="fine" id="diffNote" style="margin-top:6px">${DIFFNOTE[S.diff]}</div>`;
 const modeIntro = (title, blurb, opts) => `<div class="card">${gamesBar(title)}<p class="sub">${blurb}</p>${diffBar()}<div class="label" style="margin-top:16px">Players and devices</div><div class="modes">${opts.map((o) => `<button class="mode" data-mode="${o.id}" type="button"><b>${o.t}</b><span>${o.d}</span></button>`).join("")}</div><div id="roomBox"></div></div>`;
-const NAMES = () => { try { const n = JSON.parse(localStorage.getItem("gp_names") || "null"); return n && n.length === 2 ? n : ["Player 1", "Player 2"]; } catch (e) { return ["Player 1", "Player 2"]; } };
+const NAMES = () => { try { const n = JSON.parse(sessionStorage.getItem("gp_names") || "null"); return n && n.length === 2 ? n : ["Player 1", "Player 2"]; } catch (e) { return ["Player 1", "Player 2"]; } };
 function openGame(id) {
   S.game = id; if (S.world === "kpop") S.diff = "medium"; const g = gameOf(S.world, id); stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
   const how = { play: "The difficulty sets how strong the computer plays.", photo: "The picture is there from the start; hints arrive at one third and two thirds of the time.", clue: "Clues start hard and get easier.", blur: "The picture starts blurred and sharpens every few seconds.", scramble: "The letters of every word are shuffled. Hints arrive slowly.", hol: "Two picks, one question. Tap the right side.", all: "Type names in any order. Initials cost 30 points, a wrong name 20.", ttt: "Tap a square and name someone who fits its row and column. A wrong or repeated name loses your turn.", roulette: "Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.", audio: "A real song plays in short slices: 3 seconds, then 5 more, then the rest." }[g.kind];
@@ -516,6 +519,7 @@ function openGame(id) {
     { id: "solo", t: g.kind === "ttt" || g.kind === "play" ? "Solo, against the computer" : g.kind === "roulette" || g.kind === "all" ? "Solo, against the clock" : "Solo streak", d: g.kind === "ttt" ? "The computer gets smarter with the difficulty." : g.kind === "all" ? "Name everyone before the clock runs out." : g.kind === "roulette" ? "Name as many as you can before time runs out." : "Keep going for as long as you can. The run ends the first time you miss." },
     ...(g.kind === "all" ? [] : [{ id: "duo", t: "Two players, one device", d: g.kind === "play" ? "One board, pass the device after every move." : g.kind === "hol" ? "Take turns. Most right after five each wins." : g.kind === "roulette" ? "Three rounds. Take turns typing names on the same screen." : "Five rounds. Race to buzz: A for player 1, L for player 2." }]),
     ...(["hol", "roulette", "all", "ttt", "play"].includes(g.kind) ? [] : [{ id: "online", t: "Two players, two devices", d: "The same race on two phones or computers, with a four-letter room code." }])]);
+  if ($('#room [data-mode="duo"]')) { try { $("#room .modes").insertAdjacentHTML("afterend", duoNamesHTML()); } catch (e) { /* not ready */ } }
   if (["clue", "blur", "photo", "audio", "scramble", "hol"].includes(g.kind)) { $("#room").insertAdjacentHTML("beforeend", `<div class="card" id="boardBox"></div>`); if (Boards) Boards.paint(`${S.world}:${id}`, g.kind === "hol" ? "streak" : "points"); }
   Snd.mode("game");
 }
@@ -595,7 +599,13 @@ function buzz(who) {
   s.paused = true; s.buzzed = who; s.answerLeft = answerTime(); Aud.pause(); Snd.lock(); renderQuiz(); Net.sync(); focusIn();
 }
 const focusIn = () => setTimeout(() => { const i = $("#qIn"); if (i) { i.value = ""; i.focus({ preventScroll: true }); } }, 0);
-function isRight(typed, pickName) { const s = Q.s, d = curDef(), ans = nameOfAnswer(d, s.r); if (pickName != null) return qnorm(pickName) === qnorm(ans); if (nameOK(typed, ans, ans === s.r.n && s.r.full ? [s.r.full] : [])) return true; const m = resolveGuess(typed, suggestPool(d, curWorld()), (x) => x.n); return !!m && qnorm(m.n) === qnorm(ans); }
+/* other names the same answer goes by: "USA", a second capital, a full name */
+function altsFor(d, x, ans) {
+  if (d.id === "capital") return x.capAlt || [];
+  const out = ans === x.n ? [x.full, ...(x.alt || [])] : [], land = items("geography", (c) => c.kind === "country" && c.n === ans)[0];
+  return out.concat((land && land.alt) || []).filter(Boolean);
+}
+function isRight(typed, pickName) { const s = Q.s, d = curDef(), ans = nameOfAnswer(d, s.r); if (pickName != null) return qnorm(pickName) === qnorm(ans); if (nameOK(typed, ans, altsFor(d, s.r, ans))) return true; const m = resolveGuess(typed, suggestPool(d, curWorld()), (x) => x.n); return !!m && qnorm(m.n) === qnorm(ans); }
 function submitAnswer(pickName, typedRemote) {
   const s = Q.s; if (!s || !s.paused) return; const typed = typedRemote != null ? typedRemote : ($("#qIn") && $("#qIn").value) || "";
   if (Net.role === "guest") { Net.send({ k: "ans", t: typed, p: pickName }); return; }
@@ -787,9 +797,10 @@ function renderProfile() {
   const p = prof(), lv = levelOf(p.xp), pct = lv.next ? Math.round((100 * (p.xp - lv.from)) / (lv.next - lv.from)) : 100;
   const ian = items("kpop", (x) => x.kind === "idol" && x.n === "Ian" && (x.groups || []).includes("Hearts2Hearts") && x.img), h2h = items("kpop", (x) => x.kind === "idol" && (x.groups || []).includes("Hearts2Hearts") && x.img && x.n !== "Ian");
   const avs = [...ian, ...h2h].map((x) => ({ w: "kpop", x })).concat(WORLD_IDS.flatMap((w) => byFameAll(items(w, imgOf)).slice(0, 14).map((x) => ({ w, x })))).filter((v, i, A) => A.findIndex((y) => y.x === v.x) === i);
-  $("#profRoom").innerHTML = accountCardHTML() + friendsCardHTML() + `<div class="card pfcard" style="${bannerCSS(p.banner)}"><div class="pfhead" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">${avatarHTML(p.avatar, "xl", p.nick || "You")}<div><div class="label">Level ${lv.i + 1}</div><h2 style="font-size:34px;font-family:var(--display)">${esc(p.nick || "You")}</h2>${p.title && achOf(p.title) ? `<div class="pftitle">${esc(achOf(p.title)[1])}</div>` : ""}<div class="fine">${esc(lv.name)} · ${p.xp} XP${lv.next ? ` · ${lv.next - p.xp} to ${LEVELS[lv.i + 1][0]}` : ""}</div><div class="meter" style="margin-top:8px;max-width:320px"><i style="width:${pct}%"></i></div></div>${showcaseHTML(p)}<label class="fine" style="margin-left:auto">Nickname <input id="nick" value="${esc(p.nick)}" maxlength="16" style="width:150px"></label></div></div>
+  $("#profRoom").innerHTML = accountCardHTML() + friendsCardHTML() + `<div class="card pfcard" style="${bannerCSS(p.banner)}"><div class="pfhead" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">${avatarHTML(p.avatar, "xl", p.nick || "You")}<div><div class="label">Level ${lv.i + 1}</div><h2 style="font-size:34px;font-family:var(--display)">${esc(p.nick || "You")}</h2>${p.title && achOf(p.title) ? `<div class="pftitle">${esc(achOf(p.title)[1])}</div>` : ""}<div class="fine">${esc(lv.name)} · ${p.xp} XP${lv.next ? ` · ${lv.next - p.xp} to ${LEVELS[lv.i + 1][0]}` : ""}</div><div class="meter" style="margin-top:8px;max-width:320px"><i style="width:${pct}%"></i></div></div>${showcaseHTML(p)}<label class="fine" style="margin-left:auto">Nickname <input id="nick" aria-label="Nickname" value="${esc(p.nick)}" maxlength="16" style="width:150px"></label></div></div>
   ${myLinkHTML()}
   ${shareCardHTML()}
+  ${historyHTML()}
   ${Season.card()}
   ${BadgeUI.html()}
   ${flairHTML(p)}
@@ -800,7 +811,7 @@ function renderProfile() {
 function afterProfile() { try { Season.board(); } catch (e) { /* not ready */ } }
 function renderSettings() {
   const g = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
-  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div><div class="card"><div class="label">Your sidekick in each category</div><p class="fine">The sidekick cheers you on, reacts to your answers and follows you into that category.</p>${WORLD_IDS.map(kickRow).join("")}</div>${outfitCardHTML()}${lookCardHTML()}${tourCardHTML()}<div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Photo credits</div><p class="fine">Every picture comes with its author and licence on the answer card. K-pop, geography, history and food pictures are from Wikimedia Commons (free licences or public domain), facts from Wikidata (CC0). Football data and crests come from ballknowledge (Transfermarkt CC0 data; crests and player photos shown only to identify them).</p></div>`;
+  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div><div class="card"><div class="label">Your sidekick in each category</div><p class="fine">The sidekick cheers you on, reacts to your answers and follows you into that category.</p>${WORLD_IDS.map(kickRow).join("")}</div>${outfitCardHTML()}${lookCardHTML()}${displayCardHTML()}${tourCardHTML()}<div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Photo credits</div><p class="fine">Every picture comes with its author and licence on the answer card. K-pop, geography, history and food pictures are from Wikimedia Commons (free licences or public domain), facts from Wikidata (CC0). Football data and crests come from ballknowledge (Transfermarkt CC0 data; crests and player photos shown only to identify them).</p></div>`;
 }
 
 /* ================= wiki: every group, idol, song, country, player... with its facts and links; any name with data-wiki opens it ================= */
@@ -858,7 +869,7 @@ const Net = {
   open(code) { this.code = code; this.mq = BROKERS.map((u) => mqttConnect(u, "gamesite/v1/" + code, (m) => this.recv(m), () => this.paint())); },
   send(m) { m.id = Math.random().toString(36).slice(2); m.from = this.role; this.mq.forEach((c) => { try { c.send(m); } catch (e) { /* broker down */ } }); },
   recv(m) { if (!m || this.seen.has(m.id) || m.from === this.role) return; this.seen.add(m.id);
-    if (this.role === "host") { if (m.k === "hello") { if (this.guestName) return; this.guestName = m.nick || "Guest"; Snd.win(); addPlay(S.world); this.send({ k: "go", host: prof().nick || "Host", hav: prof().avatar }); Vs.match({ nick: prof().nick || "Host", avatar: prof().avatar }, { nick: this.guestName, avatar: m.av || "" }, () => newQuiz(S.world, S.game, "online")); } else if (m.k === "buzz") buzz(1); else if (m.k === "ans") submitAnswer(m.p, m.t); }
+    if (this.role === "host") { if (m.k === "hello") { if (this.guestName) return; this.guestName = m.nick || "Guest"; Snd.win(); addPlay(S.world); this.send({ k: "go", host: prof().nick || "Host", hav: prof().avatar }); Vs.match({ nick: prof().nick || "Host", avatar: prof().avatar }, { nick: this.guestName, avatar: m.av || "" }, () => newQuiz(S.world, S.game, "online")); } else if (m.k === "buzz") buzz(1); else if (m.k === "ans") submitAnswer(m.p, m.t); else if (m.k === "next" || m.k === "finish") { const b = $(m.k === "next" ? "#qNext" : "#qFinish"); if (b && Q.s && Q.s.phase === "reveal") b.click(); } }
     else if (m.k === "go") { Vs.match({ nick: m.host, avatar: m.hav || "" }, { nick: prof().nick || "Guest", avatar: prof().avatar }, () => {}); }
     else if (m.k === "state") { if (Vs.on && !Vs.matched) Vs.close(); this.hostName = m.host; Q.s = Object.assign(m.s, { used: new Set() }); if (S.world !== m.s.w || S.game !== m.s.game) { S.world = m.s.w; S.game = m.s.game; renderWorld(); } renderQuiz(); }
   },
@@ -867,7 +878,7 @@ const Net = {
   paint() {},
 };
 function openOnline() {
-  $("#roomBox").innerHTML = matchmakingHTML() + `<div class="card" style="margin-top:12px"><div class="label">Play a friend: room code</div><div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="mkRoom" type="button">Create a room</button><span class="fine">or</span><input id="roomCode" maxlength="4" placeholder="CODE" style="width:90px;text-transform:uppercase"><button class="btn ghost" id="joinRoom" type="button">Join</button></div><div id="roomMsg" class="fine" style="margin-top:8px"></div>${watchRowHTML()}</div>`;
+  $("#roomBox").innerHTML = matchmakingHTML() + `<div class="card" style="margin-top:12px"><div class="label">Play a friend: room code</div><div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="mkRoom" type="button">Create a room</button><span class="fine">or</span><input id="roomCode" aria-label="Room code" maxlength="4" placeholder="CODE" style="width:90px;text-transform:uppercase"><button class="btn ghost" id="joinRoom" type="button">Join</button></div><div id="roomMsg" class="fine" style="margin-top:8px"></div>${watchRowHTML()}</div>`;
 }
 const codeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 function makeRoom() { Net.guestName = ""; const code = Array.from({ length: 4 }, () => rnd([...codeChars])).join(""); Net.role = "host"; Net.open(code); Vs.wait(code, S.game); }
@@ -892,13 +903,13 @@ document.addEventListener("click", (e) => {
   if (t.id === "qB0") { buzz(0); return; } if (t.id === "qB1") { buzz(1); return; }
   if (t.id === "qGuess") { submitAnswer(null); return; } if (t.dataset.sug) { submitAnswer(t.dataset.sug); return; }
   if (t.id === "qHold") { Q.hold = true; clearTimeout(Q.auto); t.remove(); const m = $(".autometer"); if (m) m.remove(); return; }
-  if (t.id === "qNext") { if (Net.role === "guest") return; if (Q.s.mix) { Q.s.mixW = Q.s.mixW || []; Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } nextRound(); return; }
-  if (t.id === "qFinish") { if (Net.role === "guest") return; if (Q.s.mix) { Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } finishQuiz(); return; }
+  if (t.id === "qNext") { if (Net.role === "guest") { Net.send({ k: "next" }); return; } if (Q.s.mix) { Q.s.mixW = Q.s.mixW || []; Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } nextRound(); return; }
+  if (t.id === "qFinish") { if (Net.role === "guest") { Net.send({ k: "finish" }); return; } if (Q.s.mix) { Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } finishQuiz(); return; }
   if (t.id === "qAgain") { if (Q.s && Q.s.mix) { go("mix"); return; } startMode(Q.s.mode); return; }
   if (t.dataset.hol) { answerHol(t.dataset.hol); return; }
   if (t.id === "hNext") { if (H.s.mode === "solo" && H.s.over) { H.s.phase = "done"; if (Boards) Boards.record(`${H.s.w}:${H.s.game}`, H.s.streak); renderHol(); return; } if (H.s.mode === "duo") { if (H.s.over) { H.s.phase = "done"; award("duo"); renderHol(); return; } H.s.turn = 1 - H.s.turn; } nextHol(); return; }
   if (t.id === "hAgain") { newHol(H.s.mode); return; }
-  if (t.id === "mxStart") { try { localStorage.setItem("gp_names", JSON.stringify([$("#n0").value || "Player 1", $("#n1").value || "Player 2"])); } catch (x) { /* blocked */ } MX.s.stage = "pick"; renderMix(); return; }
+  if (t.id === "mxStart") { try { sessionStorage.setItem("gp_names", JSON.stringify([$("#n0").value || "Player 1", $("#n1").value || "Player 2"])); } catch (x) { /* blocked */ } MX.s.stage = "pick"; renderMix(); return; }
   if (t.dataset.mx === "pick") { mixPick(t.dataset.w); return; } if (t.dataset.mx === "ban") { mixBan(t.dataset.w); return; }
   if (t.dataset.coll) { S.coll = t.dataset.coll; renderCollection(); return; }
   if (t.dataset.av) { const p = prof(); p.avatar = t.dataset.av; saveProf(); award("avatar"); paintProfileBtn(); renderProfile(); return; }

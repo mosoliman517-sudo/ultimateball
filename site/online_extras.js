@@ -87,7 +87,7 @@ const Live = {
 setInterval(() => { try { Live.tick(); } catch (e) { /* not ready */ } }, 3000);
 /* a watcher never plays */
 { const b0 = buzz, a0 = submitAnswer; buzz = function () { if (Watch.code) return; return b0.apply(this, arguments); }; submitAnswer = function () { if (Watch.code) return; return a0.apply(this, arguments); }; }
-function watchRowHTML() { return `<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><span class="fine">Just watching?</span><input id="watchCode" maxlength="12" placeholder="CODE" style="width:110px;text-transform:uppercase"><button type="button" class="btn ghost" data-watch="1">Watch live</button></div>`; }
+function watchRowHTML() { return `<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><span class="fine">Just watching?</span><input id="watchCode" aria-label="Room code to watch" maxlength="12" placeholder="CODE" style="width:110px;text-transform:uppercase"><button type="button" class="btn ghost" data-watch="1">Watch live</button></div>`; }
 
 document.addEventListener("click", async (e) => {
   const t = e.target.closest("button"); if (!t) return;

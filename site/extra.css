@@ -415,3 +415,35 @@ body.watching #room .buzzers,body.watching #room input,body.watching #room butto
 .trmsg{margin:10px 0 0;min-height:1.4em}.trtip{margin-top:6px}.trtip summary{cursor:pointer}
 .trcoach{display:flex;gap:10px;align-items:center;margin:8px 0}.trcoach>span{width:56px;flex:none}.trcoach svg{width:100%;height:auto}.trcoach p{margin:0;display:grid}
 .trmoves{display:flex;flex-wrap:wrap;gap:4px;margin:12px 0 8px;max-height:130px;overflow:auto}.trmoves button{border:0;border-bottom:3px solid var(--g);background:var(--surface2);color:var(--ink);border-radius:8px;padding:4px 8px;font:600 13px system-ui,sans-serif;cursor:pointer}.trmoves button.on{outline:2px solid var(--accent)}
+
+/* display preferences */
+:root[data-text="s"] .wrap{zoom:.92}:root[data-text="l"] .wrap{zoom:1.12}:root[data-text="xl"] .wrap{zoom:1.25}
+:root[data-contrast="high"][data-league]{--muted:var(--ink);--line:color-mix(in srgb,var(--ink) 55%,transparent)}
+:root[data-contrast="high"] .fine,:root[data-contrast="high"] .label{opacity:1}
+:root[data-contrast="high"] .card,:root[data-contrast="high"] .gcard,:root[data-contrast="high"] .chip{border:1px solid var(--line)}
+.mixrow{display:grid;grid-template-columns:minmax(110px,1fr) 2fr 44px;gap:10px;align-items:center;margin-top:10px;font-size:14px}.mixrow input{width:100%;accent-color:var(--accent)}
+.duonames{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}.duonames span{flex-basis:100%}.duonames input{width:150px;max-width:46%}
+.histlist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
+.histlist button{width:100%;display:grid;grid-template-columns:10px auto 1fr auto;gap:10px;align-items:center;text-align:left;background:none;border:0;border-radius:10px;padding:8px;color:var(--ink);font:inherit;cursor:pointer}.histlist button:hover{background:var(--surface2)}
+.hdot{width:10px;height:10px;border-radius:50%;background:var(--wc)}
+/* keyboard */
+.skip{position:fixed;left:10px;top:-80px;z-index:10000;padding:10px 16px;border-radius:12px;background:var(--accent);color:var(--on-accent);border:0;font:700 14px system-ui,sans-serif}.skip:focus{top:10px}
+[data-csq]:focus-visible{outline:3px solid #ffd23f;outline-offset:-3px;z-index:2}
+/* readable label on the continue-playing bar (was gold text on gold) */
+.contbar .dgo{background:var(--c-accent);color:var(--c-bg)}
+#tourChip button{min-height:32px;min-width:32px}
+@media (max-width:420px){.histlist button{grid-template-columns:10px 1fr auto}.histlist button .fine{display:none}}
+/* contrast fixes found in the audit */
+.avpick button{background:transparent;border:0;cursor:pointer}
+.mbox .mrow.done .mtick{color:var(--on-accent)}
+:root[data-mode="light"] .achv span.fine,:root[data-mode="light"] .achv b{color:var(--ink)!important}
+/* narrow screens: wide display fonts must not push the profile button off screen */
+@media (max-width:480px){.bar .brand{flex:0 1 auto;min-width:0;font-size:14px}.bar .brand span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bar .brand i{flex:none}}
+:root[data-text="l"] .bar [data-go="collection"],:root[data-text="xl"] .bar [data-go="collection"]{display:none}
+@media (min-width:700px){:root[data-text="l"] .bar [data-go="collection"],:root[data-text="xl"] .bar [data-go="collection"]{display:inline-flex}}
+.mbox .mrow{grid-template-columns:28px minmax(0,1fr) auto}
+body.ingame #tourChip,body:not(.athome) #tourChip{display:none}
+/* phones have less room: larger text steps are gentler there, and long headings may wrap */
+@media (max-width:480px){:root[data-text="l"] .wrap{zoom:1.06}:root[data-text="xl"] .wrap{zoom:1.12}
+  :root[data-text="l"] .wrap :is(h1,h2,h3,.gname,.wn),:root[data-text="xl"] .wrap :is(h1,h2,h3,.gname,.wn){overflow-wrap:anywhere}
+  :root[data-text="l"] .wrap,:root[data-text="xl"] .wrap{overflow-x:clip}}

@@ -90,6 +90,9 @@ def attach_images(world, items, keys=("img",), alpha_keys=("logo", "flag"), widt
 
 def write(world, items, meta=None):
     os.makedirs(os.path.join(ROOT, "packs"), exist_ok=True)
+    import fix_facts
+    items = fix_facts.apply(world, items)     # hand-checked corrections: the source of truth for the fields it covers
+    if world == "football": _, valat, asof = fix_facts.refresh_football(items); meta = {**(meta or {}), "valAt": valat, "asOf": asof}
     json.dump({"world": world, "items": items, **(meta or {})}, open(os.path.join(ROOT, "packs", world + ".json"), "w"), ensure_ascii=False, separators=(",", ":"))
     print(f"{world}: {len(items)} items, {sum(1 for x in items if x.get('img'))} photos, {sum(1 for x in items if x.get('logo'))} logos, {sum(1 for x in items if x.get('flag'))} flags")
 

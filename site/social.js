@@ -20,7 +20,7 @@ function mergeProf(a, b) {
   o.badges = Object.assign({}, b.badges, a.badges); o.mseen = Object.assign({}, b.mseen, a.mseen); o.mchest = Object.assign({}, b.mchest, a.mchest); o.missions = Object.assign({}, a.missions, b.missions);
   Object.entries(a.missions || {}).forEach(([d, r]) => { const c = (b.missions || {})[d]; if (!c || Object.keys(r.done || {}).length >= Object.keys(c.done || {}).length) o.missions[d] = r; });
   o.stats = Object.assign({}, a.stats, b.stats); Object.keys(o.stats).forEach((k) => { o.stats[k] = mx((a.stats || {})[k], (b.stats || {})[k]); });
-  o.outfit = a.outfit || b.outfit; o.relo = Object.assign({}, a.relo, b.relo); o.season = ((b.season || {}).m || "") >= ((a.season || {}).m || "") ? b.season || a.season : a.season; o.chessTr = Object.assign({}, a.chessTr, b.chessTr); o.title = a.title || b.title; o.banner = a.banner || b.banner; o.showcase = (a.showcase && a.showcase.length ? a.showcase : b.showcase); o.kick = Object.assign({}, b.kick, a.kick); o.fits = Object.assign({}, b.fits, a.fits);
+  o.outfit = a.outfit || b.outfit; o.relo = Object.assign({}, a.relo, b.relo); o.season = ((b.season || {}).m || "") >= ((a.season || {}).m || "") ? b.season || a.season : a.season; o.chessTr = Object.assign({}, a.chessTr, b.chessTr); o.history = [...(a.history || []), ...(b.history || [])].filter((x, i, A) => A.findIndex((y) => y.t === x.t) === i).sort((x, y) => y.t - x.t).slice(0, 20); o.title = a.title || b.title; o.banner = a.banner || b.banner; o.showcase = (a.showcase && a.showcase.length ? a.showcase : b.showcase); o.kick = Object.assign({}, b.kick, a.kick); o.fits = Object.assign({}, b.fits, a.fits);
   return o;
 }
 
@@ -71,11 +71,11 @@ var Cloud = {
 function accountCardHTML() {
   if (!window.supabase) return `<div class="card"><div class="label">Account</div><p class="fine">Accounts could not load (offline or blocked). Your progress is saved in this browser.</p></div>`;
   if (!Cloud.user) return `<div class="card acct"><div class="label">Account</div><h3>Save your progress everywhere</h3><p class="fine">Sign in to keep your XP, ranks, Dex, loading screens and achievements on every device, and to get on the leaderboards. What you've earned here comes with you.</p>
-    <div class="acctform"><input id="acEmail" type="email" placeholder="Email" autocomplete="email"><input id="acPw" type="password" placeholder="Password (6+ characters)" autocomplete="current-password"></div>
+    <div class="acctform"><input id="acEmail" aria-label="Email" type="email" placeholder="Email" autocomplete="email"><input id="acPw" aria-label="Password" type="password" placeholder="Password (6+ characters)" autocomplete="current-password"></div>
     <div class="row" style="gap:8px;margin-top:10px"><button class="btn" id="acIn" type="button">Sign in</button><button class="btn ghost" id="acUp" type="button">Create account</button><button class="btn ghost" id="acReset" type="button">Forgot password</button></div><div class="fine" id="acMsg" style="margin-top:8px"></div></div>`;
-  if (Cloud.recovery) return `<div class="card acct"><div class="label">Account</div><h3>Choose a new password</h3><div class="acctform"><input id="acNew" type="password" placeholder="New password (6+ characters)" autocomplete="new-password"></div><div class="row" style="gap:8px;margin-top:10px"><button class="btn" id="acSetPw" type="button">Save password</button></div><div class="fine" id="acMsg" style="margin-top:8px"></div></div>`;
+  if (Cloud.recovery) return `<div class="card acct"><div class="label">Account</div><h3>Choose a new password</h3><div class="acctform"><input id="acNew" aria-label="New password" type="password" placeholder="New password (6+ characters)" autocomplete="new-password"></div><div class="row" style="gap:8px;margin-top:10px"><button class="btn" id="acSetPw" type="button">Save password</button></div><div class="fine" id="acMsg" style="margin-top:8px"></div></div>`;
   return `<div class="card acct"><div class="label">Account</div><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><div><b>Signed in</b> <span class="fine">${esc(Cloud.user.email || "")} · progress saved to your account</span></div><button class="btn ghost" id="acOut" type="button">Sign out</button></div>
-    <div class="label" style="margin-top:12px">Leaderboard name</div><div class="row" style="gap:8px"><input id="acNick" value="${esc(Cloud.nick || prof().nick || "")}" maxlength="16" placeholder="3 to 16 letters or numbers"><button class="btn" id="acNickGo" type="button">${Cloud.nick ? "Change" : "Save"}</button></div><div class="fine" id="acMsg" style="margin-top:6px">${Cloud.nick ? "" : "Pick a name to appear on the leaderboards."}</div></div>`;
+    <div class="label" style="margin-top:12px">Leaderboard name</div><div class="row" style="gap:8px"><input id="acNick" aria-label="Leaderboard name" value="${esc(Cloud.nick || prof().nick || "")}" maxlength="16" placeholder="3 to 16 letters or numbers"><button class="btn" id="acNickGo" type="button">${Cloud.nick ? "Change" : "Save"}</button></div><div class="fine" id="acMsg" style="margin-top:6px">${Cloud.nick ? "" : "Pick a name to appear on the leaderboards."}</div></div>`;
 }
 async function accountClick(id) {
   const msg = (t) => { const m = $("#acMsg"); if (m) m.textContent = t; }, em = ($("#acEmail") || {}).value, pw = ($("#acPw") || {}).value;
@@ -211,7 +211,7 @@ function playChallenge(c) {
   closeWiki(); S.diff = c.d || "medium"; S.world = c.w; S.game = c.g;
   loadingScreen(c.w, () => { go(`w-${c.w}`); setTimeout(() => { document.body.classList.add("ingame"); addPlay(c.w); newQuiz(c.w, c.g, "solo"); const s = Q.s; s.fixed = c.r; s.chal = c; s.rounds = c.r.length; s.used = new Set(); s.round = 0; s.picks = []; s.marks = []; s.scores = [0]; s.wins = [0, 0]; s.streak = 0; nextRound(); }, 60); });
 }
-function checkChallengeHash() { const h = location.hash; if (!h.startsWith("#ch=")) return; try { const c = b64u.dec(h.slice(4)); history.replaceState(null, "", "#home"); route(); setTimeout(() => openChallenge(c), 300); } catch (e) { /* broken link */ } }
+function checkChallengeHash() { const h = location.hash; if (!h.startsWith("#ch=")) return; try { const c = cleanData(b64u.dec(h.slice(4))); history.replaceState(null, "", "#home"); route(); setTimeout(() => openChallenge(c), 300); } catch (e) { /* broken link */ } }
 window.addEventListener("hashchange", checkChallengeHash); checkChallengeHash();
 document.addEventListener("click", (e) => { const t = e.target.closest("button"); if (!t) return; if (t.id === "qChal") shareChallenge(); if (t.id === "chPlay" && openChallenge.c) playChallenge(openChallenge.c); });
 
@@ -220,7 +220,7 @@ function friendsCardHTML() {
   if (!Cloud.user) return "";
   if (!Cloud.nick) return `<div class="card"><div class="label">Friends</div><p class="fine">Pick a leaderboard name above first; friends find you by it.</p></div>`;
   setTimeout(paintFriends, 0);
-  return `<div class="card"><div class="label">Friends</div><p class="fine">Add friends by their leaderboard name. Your name is <b>${esc(Cloud.nick)}</b>. Every game's leaderboard gets a Friends tab.</p><div class="row" style="gap:8px;margin-top:8px"><input id="frNick" placeholder="Their leaderboard name" maxlength="16"><button class="btn" id="frAdd" type="button">Add friend</button></div><div class="fine" id="frMsg" style="margin-top:6px"></div><div id="frList" class="frlist"></div></div>`;
+  return `<div class="card"><div class="label">Friends</div><p class="fine">Add friends by their leaderboard name. Your name is <b>${esc(Cloud.nick)}</b>. Every game's leaderboard gets a Friends tab.</p><div class="row" style="gap:8px;margin-top:8px"><input id="frNick" aria-label="Friend's leaderboard name" placeholder="Their leaderboard name" maxlength="16"><button class="btn" id="frAdd" type="button">Add friend</button></div><div class="fine" id="frMsg" style="margin-top:6px"></div><div id="frList" class="frlist"></div></div>`;
 }
 async function paintFriends() {
   const box = $("#frList"); if (!box) return; box.innerHTML = `<p class="fine">Loading…</p>`;

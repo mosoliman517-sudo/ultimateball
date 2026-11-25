@@ -14,6 +14,19 @@ python3 build.py                             # site -> docs/index.html + docs/im
 
 Preview: the `games-prototype` entry in `~/.claude/launch.json` serves this folder; open `/docs/index.html`.
 
+## Check before pushing
+```
+python3 build.py && python3 -m unittest discover -s tests
+python3 pipelines/kpop_audit.py
+```
+The build writes `docs/index.html` and `docs/data.<hash>.js` (the game data, cached for a year because its name changes with its content).
+
+## Facts and security
+- `pipelines/fix_facts.py` holds the hand-checked corrections (country capitals, languages and currencies, what historical figures are known for, dish origins). The builder applies it on every write; edit it, not the packs.
+- Anything from other players (public MQTT relay, challenge links) passes `cleanData()` in `site/bk_core.js` before use. Keep it that way for any new channel.
+- Third-party scripts carry integrity hashes: change the hash when changing a version. Security and cache headers are in `vercel.json`.
+- Restore point before the November 2026 audit: git tag `pre-audit-2026-11-25`.
+
 ## Layout
 
 - `site/base.css`, `site/sprite.html`, `site/bk_core.js`, `site/mascot_art.js`, `site/mascot_lines.js`, `site/coach_lines.js`, `site/chess_coaches.js`: copied from ballknowledge, unchanged except where marked.

@@ -1,4 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head>
 <title>ultimateball</title>
+<meta name="description" content="Typed-answer knowledge games: K-pop, football, basketball, chess, geography, history, food, anime and general knowledge. Solo or against a friend.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta charset="utf-8">
@@ -14,6 +18,9 @@
 /*BASE_CSS*/
 /*EXTRA_CSS*/
 </style>
+</head>
+<body>
+<button type="button" id="skipBtn" class="skip">Skip to content</button>
 /*SPRITE*/
 <div id="splash" class="splash k-star" role="status" aria-live="polite"><div class="sp-art" aria-hidden="true"></div><div class="sp-brand">ultimate<b>ball</b></div><div class="sp-foot"><div class="sp-tip" id="spTip">Loading…</div><div class="sp-bar"><i></i></div><div class="sp-meta"><span id="spName"></span><span id="spRar" class="sp-rar"></span><span id="spNew"></span></div><button type="button" class="sp-skip" id="spSkip">Tap to skip</button></div></div>
 <div id="stadium" class="stadium" aria-hidden="true"></div>
@@ -33,6 +40,7 @@
     <button class="pill profilebtn" id="profileBtn" data-go="profile" type="button" title="Your profile, ranks and achievements" aria-label="Open your profile"></button>
   </div>
 
+  <main id="main" tabindex="-1" style="display:contents">
   <section id="home" hidden>
     <div class="homehero">
       <div class="photowall" id="photowall" aria-hidden="true"></div>
@@ -75,17 +83,18 @@
   <section id="wikiPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button><div class="trail"><span class="crumb cur">Wiki</span></div></nav><div id="wikiRoom"></div></section>
   <section id="calPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button><div class="trail"><span class="crumb cur">Calendar</span></div></nav><div id="calRoom"></div></section>
   <section id="setPage" hidden><nav class="crumbs"><button class="back" data-go="home" type="button">← Menu</button></nav><div id="setRoom"></div></section>
+  </main>
 
   <div class="foot">
     <span>Facts come from Wikidata (CC0) and ballknowledge's football data. Pictures are from Wikimedia Commons under free licences, each credited on its answer card.</span>
     <span>Club crests and football player photos belong to their owners and appear only to identify them. An independent student project.</span>
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" integrity="sha384-aH7F59TKSh8OEAivbclch9UUnWn/Uy8AQlYYKzpVaQkAp8W6IF2VocW/knEeRwT0" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script>
 const $ = (s, r = document) => r.querySelector(s);
-const REDUCED = (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+const REDUCED = (() => { let own = ""; try { own = localStorage.getItem("gp_motion"); } catch (e) { /* blocked */ } if (own === "reduced") document.documentElement.setAttribute("data-motion", "reduced"); return own === "reduced" || !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); })();
 window.PACKS = /*PACKS*/{};
 </script>
 <script>
@@ -97,3 +106,5 @@ window.PACKS = /*PACKS*/{};
 <script>
 /*APP*/
 </script>
+</body>
+</html>

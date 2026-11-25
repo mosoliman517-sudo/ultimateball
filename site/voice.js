@@ -20,7 +20,7 @@ const Voice = {
       let buf = this.cache.get(url);
       if (!buf) { const r = await fetch(url); if (!r.ok) return false; buf = await this.ctx.decodeAudioData(await r.arrayBuffer()); this.cache.set(url, buf); if (this.cache.size > 60) this.cache.delete(this.cache.keys().next().value); }
       if (mine !== this.seq) return false;   // a newer line took over while this one was loading
-      const s = this.ctx.createBufferSource(), g = this.ctx.createGain(); s.buffer = buf; g.gain.value = typeof Snd !== "undefined" && Snd.level === 2 ? 1 : 0.75;
+      const s = this.ctx.createBufferSource(), g = this.ctx.createGain(); s.buffer = buf; g.gain.value = (typeof Snd !== "undefined" && Snd.level === 2 ? 1 : 0.75) * (window.MIXVOX == null ? 1 : window.MIXVOX);
       s.connect(g); g.connect(this.ctx.destination); s.start(); this.src = s; return true;
     } catch (e) { return false; }
   },

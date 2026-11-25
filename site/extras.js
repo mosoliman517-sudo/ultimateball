@@ -1,11 +1,13 @@
 /* ================= light / dark ================= */
 const Look = {
-  get() { try { return localStorage.getItem("gp_look") === "light" ? "light" : "dark"; } catch (e) { return "dark"; } },
-  apply() { const r = document.documentElement; if (this.get() === "light") r.setAttribute("data-mode", "light"); else r.removeAttribute("data-mode"); const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = this.get() === "light" ? "#f2f4fb" : "#0e1424"; },
-  set(v) { try { localStorage.setItem("gp_look", v); } catch (e) { /* blocked: lasts this visit */ } this.apply(); if (this.get() !== v) document.documentElement.setAttribute("data-mode", v); },
+  get() { try { const v = localStorage.getItem("gp_look"); return v === "light" || v === "device" ? v : "dark"; } catch (e) { return "dark"; } },
+  now() { const v = this.get(); return v === "device" ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : v; },
+  apply() { const r = document.documentElement; if (this.now() === "light") r.setAttribute("data-mode", "light"); else r.removeAttribute("data-mode"); const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = this.now() === "light" ? "#f2f4fb" : "#0e1424"; },
+  set(v) { try { localStorage.setItem("gp_look", v); } catch (e) { /* blocked: lasts this visit */ } this.apply(); },
 };
 Look.apply();
-function lookCardHTML() { return `<div class="card"><div class="label">Look</div><div class="row" style="gap:8px;margin-top:8px">${[["dark", "Dark"], ["light", "Light"]].map(([k, n]) => `<button type="button" class="chip" data-look="${k}" aria-pressed="${Look.get() === k}">${n}</button>`).join("")}</div></div>`; }
+matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => Look.apply());
+function lookCardHTML() { return `<div class="card"><div class="label">Look</div><div class="row" style="gap:8px;margin-top:8px">${[["dark", "Dark"], ["light", "Light"], ["device", "Follow my device"]].map(([k, n]) => `<button type="button" class="chip" data-look="${k}" aria-pressed="${Look.get() === k}">${n}</button>`).join("")}</div></div>`; }
 
 /* ================= profile share card: a picture of your profile to send or save ================= */
 const Share = {

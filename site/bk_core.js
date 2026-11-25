@@ -194,6 +194,22 @@ function resolveGuess(typed, items, key) {
   let best = null, bd = 99, tie = false; for (const x of items) { const d = lev(n, qnorm(key(x))); if (d < bd) { bd = d; best = x; tie = false; } else if (d === bd) tie = true; }
   return bd <= tol && !tie ? best : null;
 }
+/* Everything that arrives from another person (the public relay, a challenge link) is untrusted and some of it is drawn as HTML.
+   So it is cleaned once, where it enters: markup characters become look-alikes, picture and sound addresses must be ours or
+   from the sources the site already uses, and odd keys are dropped. */
+const SAFE_URL = /^(img\/[\w.\/-]+|https:\/\/([a-z0-9-]+\.)*(mzstatic\.com|apple\.com|wikimedia\.org)\/[^\s"'<>`\\()]*)$/i;
+const URL_KEYS = /^(img|logo|flag|cover|pv|am|page)$/;
+function cleanData(v, key, depth = 0) {
+  if (depth > 12) return null;
+  if (typeof v === "string") {
+    if (URL_KEYS.test(key || "")) return SAFE_URL.test(v) ? v : "";
+    return v.slice(0, 2000).replace(/</g, "‹").replace(/>/g, "›").replace(/"/g, "”").replace(/'/g, "’").replace(/`/g, "’").replace(/javascript\s*:/gi, "");
+  }
+  if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+  if (Array.isArray(v)) return v.slice(0, 2000).map((x) => cleanData(x, key, depth + 1));
+  if (v && typeof v === "object") { const o = {}; Object.keys(v).slice(0, 300).forEach((k) => { if (/^[\w:.|* -]{1,60}$/.test(k) && !/^(__proto__|constructor|prototype)$/.test(k)) o[k] = cleanData(v[k], k, depth + 1); }); return o; }
+  return typeof v === "boolean" ? v : null;
+}
 function mqttConnect(url, topic, onMsg, onState) {
   const enc = new TextEncoder(), dec = new TextDecoder(), st = { open: false, ws: null, ping: null, stopped: false, tries: 0 }; let buf = new Uint8Array(0);
   const str = (s) => { const b = enc.encode(s); return [b.length >> 8, b.length & 255, ...b]; };
@@ -215,7 +231,7 @@ function mqttConnect(url, topic, onMsg, onState) {
         if (buf.length < i + len) return;
         const hdr = buf[0], body = buf.slice(i, i + len); buf = buf.slice(i + len);
         if (hdr >> 4 === 2) { st.open = true; st.tries = 0; if (onState) onState(true); }
-        else if (hdr >> 4 === 3) { const tl = (body[0] << 8) | body[1], off = 2 + tl + (((hdr >> 1) & 3) ? 2 : 0); try { onMsg(JSON.parse(dec.decode(body.slice(off)))); } catch (e) { /* not ours */ } }
+        else if (hdr >> 4 === 3) { const tl = (body[0] << 8) | body[1], off = 2 + tl + (((hdr >> 1) & 3) ? 2 : 0); try { if (body.length < 200000) onMsg(cleanData(JSON.parse(dec.decode(body.slice(off))))); } catch (e) { /* not ours */ } }
       }
     };
     ws.onclose = () => { const was = st.open; st.open = false; clearInterval(st.ping); if (was && onState) onState(false); retry(); };
@@ -241,6 +257,7 @@ function sizeFx() { fx.width = innerWidth * devicePixelRatio; fx.height = innerH
 function seedParts() { parts = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: 1 + Math.random() * 3, s: 0.02 + Math.random() * 0.05, p: Math.random() * 6.28, a: 0.15 + Math.random() * 0.4 })); }
 function frame(ts) {
   fctx.clearRect(0, 0, fx.width, fx.height);
+  if (document.body.classList.contains("ingame")) { if (!document.hidden) requestAnimationFrame(frame); return; }   // no background particles during a round: less work, fewer distractions
   const W = fx.width, H = fx.height, dpr = devicePixelRatio;
   parts.forEach((q) => {
     q.y -= q.s / 60; if (q.y < -0.05) { q.y = 1.05; q.x = Math.random(); }
