@@ -76,8 +76,13 @@ def main():
             wav = model.generate(re.sub(r"\*", "", text), audio_prompt_path=ref, exaggeration=max(0.25, min(1.0, ex)), cfg_weight=0.3 if kind in CALM else 0.45)
             dst = os.path.join(OUT, name)
             sf.write(dst + ".part", wav.squeeze(0).cpu().numpy(), model.sr, format="MP3"); os.replace(dst + ".part", dst)
+            del wav
+            if dev == "mps": torch.mps.empty_cache()      # memory creeps up over a long run
         except Exception as e:
-            print("  failed:", who, text[:60], e, flush=True); continue
+            print("  failed:", who, text[:60], e, flush=True)
+            if "out of memory" in str(e):    # every later line would fail too: start afresh, finished lines are kept
+                status("queued", lines, done, {"waiting": "memory to free up"}); time.sleep(120); os.execv(sys.executable, [sys.executable, "-u"] + sys.argv)
+            continue
         done.add(name); made += 1; recent = ([f"{who}: {text}"] + recent)[:6]
         json.dump(sorted(done), open(DONE, "w"))
         per = (time.time() - t0) / made
