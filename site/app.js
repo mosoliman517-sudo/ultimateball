@@ -223,7 +223,8 @@ GAMES.anime.push(
   tileGame("Tile reveal: the series", "anime", () => items("anime", (x) => x.kind === "anime" && x.img)),
   G("faces", "Series from its cast", "photo", { tag: "Characters from one series, side by side. Name the series.", pool: () => items("anime", (x) => x.kind === "anime" && facesOf(x).length >= 3), top: (a) => faceRow(facesOf(a).slice(0, 4)), hints: (a) => [["First aired", a.year], ["Initials", first(a.n)]].filter((h) => h[1]), unit: "anime" }),
   G("episodes", "More episodes?", "hol", { gaps: [150, 40, 8], tag: "Two series. Which one has more episodes?", pool: () => items("anime", (x) => x.kind === "anime" && x.eps && x.img), stat: (x) => x.eps, show: (v) => `${v} episodes`, ask: "More episodes?", higher: true }));
-GAMES.anime.push(G("opening", "Hear the opening", "audio", { tag: "A few seconds of a theme song. Name the anime. Artist and year come as hints.", pool: () => (PK.anime && PK.anime.themes) || [], answer: (t) => t.anime, unit: "anime", min: 8 }));
+GAMES.anime.push(G("opening", "Hear the opening", "audio", { tag: "A few seconds of a theme song. Name the anime. Artist and year come as hints.", pool: () => ((PK.anime && PK.anime.themes) || []).filter((t) => t.part !== "ending"), answer: (t) => t.anime, unit: "anime", min: 8 }),
+  G("ending", "Hear the ending", "audio", { tag: "A few seconds of an ending song. Name the anime.", pool: () => ((PK.anime && PK.anime.themes) || []).filter((t) => t.part === "ending"), answer: (t) => t.anime, unit: "anime", min: 8 }));
 GAMES.kpop.push(tileGame("Tile reveal: the idol", "idol", () => items("kpop", (x) => x.kind === "idol" && x.img)));
 GAMES.football.push(zoomGame("Zoom out: the player", "player", () => items("football", (x) => x.kind === "player" && x.img)));
 GAMES.basketball.push(zoomGame("Zoom out: the player", "bplayer", () => items("basketball", (x) => x.kind === "bplayer" && x.img)));

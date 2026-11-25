@@ -69,6 +69,39 @@ Hell's Paradise|WORK|millennium parade
 Gintama|Pray|Tommy heavenly6
 """
 
+ENDINGS = """
+Attack on Titan|Utsukushiki Zankoku na Sekai|Yoko Hikasa
+Naruto|Wind|Akeboshi
+Death Note|Alumina|Nightmare
+Fullmetal Alchemist: Brotherhood|Uso|SID
+Fullmetal Alchemist|Kesenai Tsumi|Nana Kitade
+Demon Slayer: Kimetsu no Yaiba;Demon Slayer|from the edge|FictionJunction
+Jujutsu Kaisen;JUJUTSU KAISEN|LOST IN PARADISE|ALI
+Chainsaw Man|CHAINSAW BLOOD|Vaundy
+Spy × Family;SPY x FAMILY|Comedy|Gen Hoshino
+Oshi no Ko;My Star|Mephisto|QUEEN BEE
+Frieren;Frieren: Beyond Journey's End|Anytime Anywhere|milet
+Tokyo Ghoul|Seijatachi|People In The Box
+Sword Art Online|Yume Sekai|Haruka Tomatsu
+Bleach|Life is Like a Boat|Rie fu
+Hunter × Hunter;Hunter x Hunter|Just Awake|Fear, and Loathing in Las Vegas
+Neon Genesis Evangelion|Fly Me To The Moon|Claire
+Cowboy Bebop|The Real Folk Blues|Seatbelts
+Your Lie in April|Kirameki|wacci
+Toradora!|Vanilla Salt|Yui Horie
+Re:Zero|STYX HELIX|MYTH & ROID
+Dandadan;Dan Da Dan|TAIDADA|ZUTOMAYO
+Vinland Saga|Torches|Aimer
+Erased;ERASED|Sore wa Chiisana Hikari no Youna|Sayuri
+Parasyte;Parasyte: The Maxim|IT'S THE RIGHT TIME|Daichi Miura
+Kaguya-sama: Love Is War;Kaguya-sama: Love is War|Chikatto Chika Chika|Konomi Kohara
+Violet Evergarden|Michishirube|Minori Chihara
+Blue Exorcist|Take off|2PM
+Haikyu!!|Tenchi Gaeshi|NICO Touches the Walls
+Bocchi the Rock!;BOCCHI THE ROCK!|Distortion|kessoku band
+Solo Leveling|request|krage
+"""
+
 norm = lambda s: re.sub(r"[^a-z0-9]", "", unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower())
 
 def search(term, country):
@@ -86,10 +119,13 @@ for x in d["items"]:
     if x["kind"] == "anime":
         for n in [x["n"]] + x.get("alt", []): shows.setdefault(norm(n), x)
 themes, missing_show, no_match = [], [], []
-for line in LIST.strip().split("\n"):
+had = {(t["anime"], t["n"], t.get("part", "opening")): t for t in d.get("themes", [])}   # confirmed before: keep, do not ask again
+for part, line in [("opening", l) for l in LIST.strip().split("\n")] + [("ending", l) for l in ENDINGS.strip().split("\n")]:
     names, song, artist = line.split("|")
     show = next((shows[norm(n)] for n in names.split(";") if norm(n) in shows), None)
     if not show: missing_show.append(names.split(";")[0]); continue
+    old = had.get((show["n"], song, part))
+    if old: themes.append({**old, "part": part}); continue
     hit = None
     for country in ("US", "JP"):
         for t in search(f"{song} {artist}", country):
@@ -98,7 +134,7 @@ for line in LIST.strip().split("\n"):
                 hit = t; break
         if hit: break
     if not hit: no_match.append(f"{show['n']}: {song}"); continue
-    themes.append({"id": f"th{hit['trackId']}", "n": song, "kind": "theme", "anime": show["n"], "by": artist, "year": show.get("year"), "fame": show.get("fame", 0),
+    themes.append({"id": f"th{hit['trackId']}", "n": song, "kind": "theme", "part": part, "anime": show["n"], "by": artist, "year": show.get("year"), "fame": show.get("fame", 0),
                    "cover": (hit.get("artworkUrl100") or "").replace("100x100bb", "600x600bb"), "pv": hit["previewUrl"], "am": hit.get("trackViewUrl")})
     print("ok", show["n"], "-", song, flush=True)
 d["themes"] = themes     # kept apart from the items: only "Hear the opening" uses them
