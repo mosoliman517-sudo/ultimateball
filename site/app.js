@@ -18,7 +18,7 @@ const pic = (x, cls = "") => imgOf(x) ? `<img class="${cls} ${isCut(x) ? "cutpic
 
 /* ---------------- the worlds ---------------- */
 const WORLDS = {
-  kpop: { name: "K-pop", kicker: "Idols, groups, songs, fandoms", tag: "The current generation: 4th and 5th gen groups plus TWICE, BLACKPINK, BTS and IZ*ONE, with their idols, hits since 2022, album covers and song previews.", mascot: "bongi", kicks: ["bongi", "mic", "pocha"] },
+  kpop: { name: "K-pop", kicker: "Idols, groups, songs, fandoms", tag: "The current generation: 4th and 5th gen groups plus TWICE, BLACKPINK, BTS and IZ*ONE, with their idols, songs from 2022 on (every era for TWICE, BLACKPINK, BTS and IZ*ONE), album covers and song previews.", mascot: "bongi", kicks: ["bongi", "mic", "pocha"] },
   football: { name: "Football", kicker: "Five leagues, real data", tag: "Players, careers, crests and market values from ballknowledge's real data.", mascot: "bench", kicks: ["bench", "boot", "rita"] },
   basketball: { name: "Basketball", kicker: "25 seasons of the NBA", tag: "Players, careers, team logos and career points from ballknowledge's basketball data.", mascot: "rim", kicks: ["rim", "clock", "sneak"] },
   chess: { name: "Chess", kicker: "Grandmasters and openings", tag: "Elite players with their peak ratings, and the real openings from Lichess.", mascot: "pip", kicks: ["pip", "vera", "bea"] },
@@ -56,7 +56,7 @@ const FAMECUT = {};
 /* K-pop: the four legacy groups (TWICE, BLACKPINK, BTS, IZ*ONE) are a separate bucket, so each bucket gets its own fame cuts and
    Easy holds the famous of BOTH (a modern idol is not hidden behind BTS's page views), and questions draw 18% legacy, 82% modern */
 const LEGACY_K = new Set(["twice", "blackpink", "bts", "izone"]);
-const kbucket = (x) => (x.kind === "idol" ? (x.groups || []).some((g) => LEGACY_K.has(qnorm(g))) : x.kind === "song" || x.kind === "release" || x.kind === "unit" ? LEGACY_K.has(qnorm(x.by || "")) : x.kind === "group" ? LEGACY_K.has(qnorm(x.n)) : false) ? "L" : "M";
+const kbucket = (x) => (x.kind === "idol" ? (x.groups || []).some((g) => LEGACY_K.has(qnorm(g))) : x.kind === "song" || x.kind === "release" || x.kind === "unit" || x.kind === "album" ? LEGACY_K.has(qnorm(x.by || "")) : x.kind === "group" ? LEGACY_K.has(qnorm(x.n)) : false) ? "L" : "M";
 function fameCuts(w, kind, bucket) {
   const k = w + ":" + kind + ":" + (bucket || ""); if (FAMECUT[k]) return FAMECUT[k];
   const f = items(w, (x) => x.kind === kind && (!bucket || kbucket(x) === bucket)).map((x) => x.fame || 0).sort((a, b) => b - a), at = (q) => f[Math.min(f.length - 1, Math.floor(f.length * q))] || 0;
@@ -95,6 +95,8 @@ const CLUES = {
   event: (e) => [["Type", e.type], ["Year", yr(e.year)], ["Where", e.where], ["Ended", e.end != null && e.end !== e.year ? yr(e.end) : null], ["Initials", first(e.n)]].filter((c) => c[1]),
   invention: (x) => [["Year", yr(x.year)], ["By", x.by && x.by.join(", ")], ["Initials", first(x.n)]].filter((c) => c[1]),
   oldstate: (x) => [["Existed", x.from != null ? `${yr(x.from)} to ${yr(x.to)}` : `until ${yr(x.to)}`], ["Capital", x.capital], ["Initials", first(x.n)]].filter((c) => c[1]),
+  album: (a) => [["Group", a.by], ["Year", a.year], ["Initials", first(a.n)]].filter((c) => c[1]),
+  theme: (t) => [["Song", t.n], ["Artist", t.by], ["Series from", t.year]].filter((c) => c[1]),
   dish: (d) => [...(d.made || []).map((m) => ["Made with", m]), ["From", d.origin], ["Initials", first(d.n)]].filter((c) => c[1]),
   song: (x) => [["Released", released(x)], ["Album", x.album && qnorm(x.album) !== qnorm(x.n) ? x.album : null], ["By", x.by], ["Starts with", x.n[0].toUpperCase()]].filter((c) => c[1]),
   bplayer: (p) => [["Born", p.born], ["Nationality", p.nat], ["Height", p.h ? Math.round(p.h) + " cm" : null], ["Position", p.pos], ["First season", p.first], ["Teams", p.hist && p.hist.length ? `${new Set(p.hist).size} teams` : null], ["Career", p.pts ? `${p.pts.toLocaleString()} points in ${p.gp} games` : null], ["Titles", p.titles ? `${p.titles} championship${p.titles > 1 ? "s" : ""}` : null], ["Team", p.club], ["Initials", first(p.n)]].filter((c) => c[1]),
@@ -111,7 +113,11 @@ const scrambleName = (n) => n.split(/\s+/).map((w) => scrambleWord(w.replace(/[^
 
 /* ---------------- the games of each world: every game plays exactly what its name says ---------------- */
 const G = (id, name, kind, o) => ({ id, name, kind, ...o });
-const KIND_WORD = { trivia: "a quiz answer", anime: "an anime", song: "a song", bplayer: "a basketball player", cplayer: "a chess player", opening: "a chess opening", team: "a team", player: "a footballer", club: "a club", idol: "an idol", group: "a group", country: "a country", person: "a historical figure", dish: "a dish", landmark: "a landmark", character: "an anime character", event: "a historical event", invention: "an invention", oldstate: "a former country" };
+const KIND_WORD = { trivia: "a quiz answer", theme: "a theme song", album: "an album", anime: "an anime", song: "a song", bplayer: "a basketball player", cplayer: "a chess player", opening: "a chess opening", team: "a team", player: "a footballer", club: "a club", idol: "an idol", group: "a group", country: "a country", person: "a historical figure", dish: "a dish", landmark: "a landmark", character: "an anime character", event: "a historical event", invention: "an invention", oldstate: "a former country" };
+const faceRow = (list) => `<div class="facerow">${list.map((c) => `<img src="${imgOf(c)}" alt="">`).join("")}</div>`;
+const facesOf = (a) => items("anime", (c) => c.kind === "character" && c.anime === a.n && c.img);
+const zoomGame = (name, unit, pool, extra = {}) => G("zoom", name, "blur", { tag: "A close-up that slowly zooms out. Buzz as soon as you know it.", reveal: "zoom", pool, unit, ...extra });
+const tileGame = (name, unit, pool, extra = {}) => G("tiles", name, "blur", { tag: "A picture hidden behind tiles that fall away. Buzz as soon as you know it.", reveal: "tiles", pool, unit, ...extra });
 const GAMES = {
   football: [
     G("who", "Who am I?", "clue", { tag: "A mystery player. Clues go from obscure to obvious. Buzz in early for more points.", pool: () => items("football", (x) => x.kind === "player"), clues: CLUES.player, unit: "player" }),
@@ -149,6 +155,7 @@ const GAMES = {
     G("missing", "Who's missing?", "photo", { tag: "A group's line-up with one empty slot. Name the missing member.", pool: () => missingPool(), top: missingTop, hints: (p) => [["Born", p.born], ["Initials", first(p.n)]].filter((c) => c[1]), unit: "idol" }),
     G("fromMembers", "Name the group", "clue", { tag: "Member names appear one by one. Buzz with the group they're in.", pool: () => items("kpop", (x) => x.kind === "group").filter((g) => rosterOK(g)), clues: (g) => [...shuffle(rosterOf("kpop", g)).slice(0, 6).map((p) => ["Member", p.n]), ["Debut", g.debut]].filter((c) => c[1]), unit: "group" }),
     G("album", "Album → song", "photo", { tag: "An album cover and its year. Name the song. The group's name is the first hint.", pool: () => albumPool(), top: (x) => `<div class="blurpic cover"><img src="${x.cover}" alt=""></div><div class="fine" style="text-align:center">Released ${esc(released(x))}</div>`, hints: (x) => [["By", x.by], ["Starts with", x.n[0].toUpperCase()]], unit: "song" }),
+    G("cover", "Blurred album cover", "blur", { tag: "An album cover that sharpens every few seconds. Name the album, or the group it belongs to.", pool: () => coverPool(), imgKey: "cover", unit: "album" }),
     G("hear", "Hear the song", "audio", { tag: "Three seconds of a real song. Then five more. Buzz and type the title before the hints arrive.", pool: () => items("kpop", (x) => x.kind === "song" && x.pv), unit: "song", min: 6 }),
     G("song", "Guess the song", "clue", { tag: "A real song: when it came out, its album, then the group. Type the title.", pool: () => items("kpop", (x) => x.kind === "song" && x.date), clues: CLUES.song, unit: "song" }),
     G("albumname", "Which album is it from?", "clue", { tag: "A song, its group and when it came out. Name the album it is on. Harder on Hard and Elite: deeper album tracks.", pool: () => items("kpop", (x) => x.kind === "song" && x.album && qnorm(x.album) !== qnorm(x.n) && qnorm(x.album) !== qnorm(x.by)), clues: (x) => [["Song", x.n], ["By", x.by], ["Released", released(x)], ["Starts with", x.album[0]]], unit: "album", answer: (x) => x.album }),
@@ -210,6 +217,26 @@ const GAMES = {
     G("scramble", "Scramble", "scramble", { tag: "A dish with the letters shuffled.", pool: () => items("food") }),
   ],
 };
+/* games added later: reveal games, anime and general-knowledge topics */
+GAMES.anime.push(
+  zoomGame("Zoom out: who is it?", "character", () => items("anime", (x) => x.kind === "character" && x.img)),
+  tileGame("Tile reveal: the series", "anime", () => items("anime", (x) => x.kind === "anime" && x.img)),
+  G("faces", "Series from its cast", "photo", { tag: "Characters from one series, side by side. Name the series.", pool: () => items("anime", (x) => x.kind === "anime" && facesOf(x).length >= 3), top: (a) => faceRow(facesOf(a).slice(0, 4)), hints: (a) => [["First aired", a.year], ["Initials", first(a.n)]].filter((h) => h[1]), unit: "anime" }),
+  G("episodes", "More episodes?", "hol", { gaps: [150, 40, 8], tag: "Two series. Which one has more episodes?", pool: () => items("anime", (x) => x.kind === "anime" && x.eps && x.img), stat: (x) => x.eps, show: (v) => `${v} episodes`, ask: "More episodes?", higher: true }));
+GAMES.anime.push(G("opening", "Hear the opening", "audio", { tag: "A few seconds of a theme song. Name the anime. Artist and year come as hints.", pool: () => (PK.anime && PK.anime.themes) || [], answer: (t) => t.anime, unit: "anime", min: 8 }));
+GAMES.kpop.push(tileGame("Tile reveal: the idol", "idol", () => items("kpop", (x) => x.kind === "idol" && x.img)));
+GAMES.football.push(zoomGame("Zoom out: the player", "player", () => items("football", (x) => x.kind === "player" && x.img)));
+GAMES.basketball.push(zoomGame("Zoom out: the player", "bplayer", () => items("basketball", (x) => x.kind === "bplayer" && x.img)));
+GAMES.chess.push(zoomGame("Zoom out: the grandmaster", "cplayer", () => items("chess", (x) => x.kind === "cplayer" && x.img)));
+GAMES.geography.push(zoomGame("Zoom out: the landmark", "landmark", () => items("geography", (x) => x.kind === "landmark" && x.img)),
+  tileGame("Tile reveal: the flag", "country", () => items("geography", (x) => x.kind === "country" && x.flag), { imgKey: "flag" }));
+GAMES.history.push(zoomGame("Zoom out: the figure", "person", () => items("history", (x) => x.kind === "person" && x.img)),
+  tileGame("Tile reveal: the moment", "event", () => items("history", (x) => x.kind === "event" && x.img)));
+GAMES.food.push(zoomGame("Zoom out: the dish", "dish", () => items("food", (x) => x.img)));
+[["t-science", "Science and nature", /Science|Animals/], ["t-history", "History and myth", /History|Mythology|Politics/], ["t-film", "Film and TV", /Film|Television|Cartoon|Musicals/],
+  ["t-music", "Music", /Music$/], ["t-vg", "Video games", /Video Games|Board Games/], ["t-sport", "Sport and vehicles", /Sports|Vehicles/], ["t-geo", "Places", /Geography/], ["t-books", "Books, comics and art", /Books|Comics|Art$|Anime/]]
+  .forEach(([id, name, re]) => GAMES.general.push(G(id.replace("-", ""), name, "clue", { tag: `Quiz questions about ${name.toLowerCase()}. Type the answer.`, pool: () => items("general", (x) => re.test(x.cat)), clues: CLUES.trivia, unit: "trivia" })));
+GAMES.general.push(G("thard", "Hard questions only", "clue", { tag: "Only the questions Open Trivia DB rates hard.", pool: () => items("general", (x) => x.diff === "hard"), clues: CLUES.trivia, unit: "trivia" }));
 Object.keys(GAMES).forEach((w) => { GAMES[w] = GAMES[w].filter((g) => g.pool().length >= (g.min || 4)); });
 const gameOf = (w, id) => (GAMES[w] || []).find((g) => g.id === id);
 /* forgiving answer check: the full name, any distinctive word of it (a first name, a stage name, a surname), the legal name,
@@ -269,6 +296,16 @@ function missingPool() { return (missingPool.c = missingPool.c || items("kpop", 
 function missingTop(p) { const g = mainGroup(p), r = rosterOf("kpop", g).slice(0, 14); if (!r.includes(p)) r[r.length - 1] = p; return `<div class="label" style="text-align:center">${esc(g.n)}</div><div class="lineupgrid">${r.map((m, i) => m === p ? `<div class="lu miss" style="--i:${i}"><b>?</b></div>` : `<div class="lu" style="--i:${i}">${m.img ? `<img src="${m.img}" alt="">` : `<i>${esc(m.n[0])}</i>`}<small>${esc(m.n)}</small></div>`).join("")}</div>`; }
 /* Album → song: one song per cover, so the cover gives a single answer */
 function albumPool() { if (albumPool.c) return albumPool.c; const n = {}; items("kpop", (x) => x.kind === "song" && x.cover).forEach((x) => { n[x.cover] = (n[x.cover] || 0) + 1; }); return (albumPool.c = items("kpop", (x) => x.kind === "song" && x.cover && n[x.cover] === 1)); }
+/* one entry per album cover: name the album, or the group it belongs to */
+function coverPool() {
+  if (coverPool.c) return coverPool.c; const seen = new Map();
+  items("kpop", (x) => x.kind === "song" && x.cover && x.album).forEach((x) => {
+    const k = x.by + "|" + qnorm(x.album); if (!qnorm(x.album) || seen.has(k)) return;
+    const short = x.album.replace(/\s*[\(\[][^\)\]]*[\)\]]/g, "").replace(/\s*-\s*(The )?\d(st|nd|rd|th) (Mini )?Album.*$/i, "").trim();
+    seen.set(k, { id: "alb-" + x.id, n: x.album, kind: "album", by: x.by, year: x.year, cover: x.cover, fame: x.fame || 0, alt: [x.by, ...(short && short !== x.album ? [short] : [])] });
+  });
+  return (coverPool.c = [...seen.values()]);
+}
 /* releases: every studio album, EP and single of a group, built from the group's `discography` (the one source). Language versions, live albums,
    compilations and remixes are left out of the games but stay in the data. */
 function releasePool() {
@@ -395,7 +432,7 @@ const ACH = [
 const achOf = (id) => ACH.find((a) => a[0] === id);
 function award(id) { const p = prof(); if (p.ach[id]) return; p.ach[id] = todayKey(); saveProf(); const a = achOf(id); if (!a) return; toast(`<b>Achievement unlocked</b><br>${esc(a[1])}: ${esc(a[2])}`, "ach"); Snd.win(); setTimeout(() => Mascot.react("achieve", true), 1400); }
 function addXP(n, w) { const p = prof(), lv0 = levelOf(p.xp).i; n = xpGate(n); if (n <= 0) return; p.xp += n; if (w) { const W = p.worlds[w] || (p.worlds[w] = { xp: 0, plays: 0 }); const r0 = wRank(W.xp); W.xp += n; if (wRank(W.xp) !== r0) { toast(`<b>Rank up in ${esc(WORLDS[w].name)}</b><br>${rkIcon(wRank(W.xp))} ${wRank(W.xp)}`, "ach"); Mascot.react("rankup", true); } } p.days[todayKey()] = (p.days[todayKey()] || 0) + 1; saveProf(); if (levelOf(p.xp).i > lv0) toast(`<b>Level up</b><br>${levelOf(p.xp).name}`, "ach"); paintProfileBtn(); }
-function collect(w, x) { if (!x || !imgOf(x)) return; const p = prof(), k = w + ":" + x.id; p.dex[k] = (p.dex[k] || 0) + 1; if (p.dex[k] === 3) toast(`<b>New card</b><br>${esc(x.n)} joined your Dex`, "ach"); saveProf(); const n = Object.values(p.dex).filter((c) => c >= 3).length; if (n >= 10) award("dex10"); if (n >= 50) award("dex50"); }
+function collect(w, x) { if (!x || !imgOf(x) || x.kind === "album" || x.kind === "theme") return; const p = prof(), k = w + ":" + x.id; p.dex[k] = (p.dex[k] || 0) + 1; if (p.dex[k] === 3) toast(`<b>New card</b><br>${esc(x.n)} joined your Dex`, "ach"); saveProf(); const n = Object.values(p.dex).filter((c) => c >= 3).length; if (n >= 10) award("dex10"); if (n >= 50) award("dex50"); }
 const dexHas = (k) => (prof().dex[k] || 0) >= 3;
 
 /* ---------------- sidekick dock (ballknowledge's #mascot markup and CSS; the sidekick follows the world you are in) ---------------- */
@@ -578,7 +615,7 @@ function nextRound() {
   if (s.fixed) r = items(s.w).find((x) => x.id === s.fixed[s.round - 1]) || r;   // a challenge replays the challenger's exact rounds
   if (s.redo) r = d.pool().find((x) => x.id === s.redo[s.round - 1]) || r;
   s.used.add(r.id); s.r = r; (s.picks = s.picks || []).push(r.id);
-  s.clues = d.kind === "audio" ? [["Listen", "3 seconds"], ["Listen", "5 more seconds"], ["By", r.by], ["Year", r.year], ["Listen", "the whole preview"], ["Initials", first(r.n)]].filter((c) => c[1]) : d.kind === "blur" ? BLUR.map((b) => ["Blur", b]) : d.kind === "scramble" ? [["Letters", scrambleName(r.n)], ["It is", KIND_WORD[r.kind] || "a name"], ...(CLUES[r.kind] ? CLUES[r.kind](r).filter((c) => !/Initials|Starts|Letters/.test(c[0])).slice(-1) : []), ["Starts with", first(r.n)]] : d.kind === "photo" ? d.hints(r) : d.clues(r);
+  s.clues = d.kind === "audio" ? [["Listen", "3 seconds"], ["Listen", "5 more seconds"], [r.kind === "theme" ? "Performed by" : "By", r.by], [r.kind === "theme" ? "Series from" : "Year", r.year], ["Listen", "the whole preview"], ...(r.kind === "theme" ? [["Song", r.n], ["Series initials", first(r.anime)]] : [["Initials", first(r.n)]])].filter((c) => c[1]) : d.kind === "blur" ? BLUR.map((b) => ["Blur", b]) : d.kind === "scramble" ? [["Letters", scrambleName(r.n)], ["It is", KIND_WORD[r.kind] || "a name"], ...(CLUES[r.kind] ? CLUES[r.kind](r).filter((c) => !/Initials|Starts|Letters/.test(c[0])).slice(-1) : []), ["Starts with", first(r.n)]] : d.kind === "photo" ? d.hints(r) : d.clues(r);
   /* a hint must never contain the answer (Tottenham Hotspur Stadium for Tottenham, "Albanian lek" for Albania): drop it, unless the clue IS the prompt */
   if (!["capital", "whose", "albumname", "where", "from", "quiz"].includes(d.id) && d.kind !== "scramble" && d.kind !== "audio") { const an = qnorm(nameOfAnswer(d, r)); if (an.length >= 5) { const stem = an.slice(0, Math.max(5, an.length - 2)), keep = s.clues.filter((c, i) => i === 0 || !qnorm(String(c[1])).includes(stem) || /^(Initials|Starts with)$/.test(c[0])); if (keep.length >= 2) s.clues = keep; } }
   s.elapsed = 0; s.paused = false; s.buzzed = null; s.locked = [false, false]; s.phase = "run"; s.result = null; s.hn = 0;
@@ -639,9 +676,18 @@ function finishQuiz() {
   renderQuiz(); Net.sync();
 }
 function paintClues() { const b = $("#qClues"); if (b) b.innerHTML = cluesHTML(); }
+const ZOOMS = [6, 4.4, 3.2, 2.3, 1.7, 1.3, 1], UNCOVER = [2, 6, 10, 16, 23, 30, 36];
+const seedOf = (t) => [...String(t)].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0, 2166136261);
+function revealHTML(d, x, step) {
+  const src = (d.imgKey && x[d.imgKey]) || imgOf(x), h = seedOf(x.id), shape = `${x.logo || x.flag ? "logo" : ""} ${x.cover ? "cover" : ""}`;
+  if (d.reveal === "zoom") return `<div class="blurpic rev ${shape}"><img src="${src}" alt="" style="transform:scale(${ZOOMS[step]});transform-origin:${28 + (h % 45)}% ${18 + ((h >>> 8) % 40)}%"></div><div class="fine" style="text-align:center">Zooming out every few seconds</div>`;
+  const order = Array.from({ length: 36 }, (_, i) => i).sort((a, b) => seedOf(x.id + ":" + a) - seedOf(x.id + ":" + b)), open = new Set(order.slice(0, UNCOVER[step]));
+  return `<div class="blurpic rev ${shape}"><img src="${src}" alt=""><div class="tiles">${Array.from({ length: 36 }, (_, i) => `<i class="${open.has(i) ? "gone" : ""}"></i>`).join("")}</div></div><div class="fine" style="text-align:center">Tiles fall away every few seconds</div>`;
+}
 function cluesHTML() {
   const s = Q.s, d = curDef(), n = shownCount(), x = s.r;
-  if (d.kind === "blur") { const k = d.imgKey, src = x[k] || imgOf(x); return `<div class="blurpic ${k === "logo" ? "logo" : k === "flag" ? "flag" : ""} ${isCut(x) ? "cut cutpic" : ""}"><img src="${src}" alt="" style="filter:blur(${BLUR[Math.min(n - 1, BLUR.length - 1)]}px)"></div><div class="fine" style="text-align:center">Sharpens every few seconds</div>`; }
+  if (d.kind === "blur" && d.reveal) return revealHTML(d, x, Math.min(n - 1, BLUR.length - 1));
+  if (d.kind === "blur") { const k = d.imgKey, src = x[k] || imgOf(x); return `<div class="blurpic ${k === "logo" ? "logo" : k === "flag" ? "flag" : k === "cover" ? "cover" : ""} ${isCut(x) ? "cut cutpic" : ""}"><img src="${src}" alt="" style="filter:blur(${BLUR[Math.min(n - 1, BLUR.length - 1)]}px)"></div><div class="fine" style="text-align:center">Sharpens every few seconds</div>`; }
   if (d.kind === "audio") { return `<div class="blurpic" style="width:min(240px,60vw);display:grid;place-items:center;background:radial-gradient(circle,var(--accent2),var(--surface2))"><div class="eq">${Array.from({ length: 9 }, (_, i) => `<i style="--i:${i}"></i>`).join("")}</div></div><div class="fine" id="audNote" style="text-align:center">${!Aud.ok ? (window.ARTIFACT ? "Audio can't play in this preview. It plays on moultimateball.vercel.app." : "This preview didn't load. Skip it or use the hints.") : Aud.blocked ? `<button class="btn" id="audReplay" type="button">▶ Tap to play</button>` : "Listening… replay with the button below"}</div><div class="row" style="justify-content:center"><button class="btn ghost" id="audReplay" type="button">Replay what you've heard</button></div>` + s.clues.slice(2).map((c, i) => i + 2 < n ? `<div class="clue on"><span class="label">${esc(c[0])}</span><b>${esc(c[1])}</b></div>` : `<div class="clue off"><span class="label">${esc(c[0])}</span><b>?</b></div>`).join(""); }
   if (d.kind === "scramble") { let k = 0; const words = s.clues[0][1].split(/\s{2,}/).map((wd) => `<div class="scw">${[...wd].map((c) => `<i class="sct" style="--i:${++k}">${esc(c)}</i>`).join("")}</div>`).join(""); return `<div class="scr seen">${words}</div><div class="schints">${s.clues.slice(1, n).map((c) => `<div class="schint"><span class="label">${esc(c[0])}</span><b>${esc(c[1])}</b></div>`).join("")}</div>`; }
   if (d.kind === "photo") return (d.top ? d.top(x) : `<div class="blurpic ${isCut(x) ? "cut cutpic" : ""} ${x.flag && !x.img ? "flag" : ""}"><img src="${imgOf(x)}" alt=""></div>`) + s.clues.map((c, i) => i < n ? `<div class="clue on ${i === n - 1 ? "new" : ""}"><span class="label">Hint ${i + 1} · ${esc(c[0])}</span><b>${esc(c[1])}</b></div>` : `<div class="clue off"><span class="label">Hint ${i + 1}</span><b>at ${i + 1}/3 of the time</b></div>`).join("");
@@ -820,7 +866,7 @@ function renderSettings() {
 /* ================= wiki: every group, idol, song, country, player... with its facts and links; any name with data-wiki opens it ================= */
 const WIKI_SKIP = new Set(["lineup", "trivia"]);
 const wikiKey = (w, x) => `${w}:${x.id}`;
-const wikiLink = (w, x, label) => (x && x.id ? `<a class="wlink" href="#wiki" data-wiki="${esc(wikiKey(w, x))}">${label}</a>` : label);
+const wikiLink = (w, x, label) => (x && x.id && x.kind !== "album" && x.kind !== "theme" ? `<a class="wlink" href="#wiki" data-wiki="${esc(wikiKey(w, x))}">${label}</a>` : label);
 const wikiFind = (w, n) => items(w, (x) => !WIKI_SKIP.has(x.kind) && qnorm(x.n) === qnorm(n))[0];
 const KIND_NAME = { idol: "Idol", group: "Group", song: "Song", player: "Footballer", club: "Club", bplayer: "NBA player", team: "NBA team", cplayer: "Chess player", opening: "Chess opening", country: "Country", person: "Historical figure", dish: "Dish", anime: "Anime", event: "Event", invention: "Invention", oldstate: "Former country", landmark: "Landmark", character: "Anime character" };
 let WQ = { q: "", w: "all" };

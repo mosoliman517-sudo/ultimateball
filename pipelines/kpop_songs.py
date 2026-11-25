@@ -16,7 +16,14 @@ P = os.path.join(ROOT, "packs", "kpop.json")
 CACHE = os.path.join(ROOT, "packs", "_itunes_cache.json")   # raw answers, so a re-run does not ask Apple again
 norm = lambda s: re.sub(r"[^a-z0-9]", "", unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower())
 SKIP = re.compile(r"\b(mixed|remixed|remixx|inst|instrumental|remix|mix|ver|version|sped|slowed|live|acoustic|karaoke|english|japanese|chinese|japan|edit|demo|acapella|a cappella|orchestra|piano|intro|outro|interlude|skit|mr removed|reprise|clean|radio)\b", re.I)
-PER_GROUP = 18
+PER_ALBUM = 9
+QUOTA = {1: 90, 2: 70, 3: 50}
+OLDER = 50   # on top of the recent ones, for the legacy four: their best-known songs from before 2022
+# live recordings, edits and spoken tracks that the version words above do not catch
+SKIP_MORE = re.compile(r"\b(arena tour|dome tour|world tour|concert|voice memo|commentary|medley|full length|edition|interview|eng|jpn?)\b|\bbts on\b|~|ano bashode", re.I)
+SKIP_ALBUM = re.compile(r"\b(arena tour|dome tour|world tour|concert|commentary|interview)\b", re.I)   # "Edition" albums are real releases
+CREDIT = re.compile(r"\s*[\(\[](from|music from|sung by|prod|feat|with)\b[^\)\]]*[\)\]]|\s*[\(\[][^\)\]]*\bost[\)\]]", re.I)   # credits are not part of the title
+LEGACY_ALL_YEARS = {"twice", "bts", "blackpink", "izone"}   # these four draw from their whole careers; everyone else from 2022 on
 
 d = json.load(open(P, encoding="utf-8"))
 import sys
@@ -81,26 +88,30 @@ for k, g in enumerate(groups):
     seen = {}
     for t in fetch(g, names):
         if not credited(t.get("artistName"), names) or not t.get("previewUrl"): continue
-        title = re.sub(r"\s*[\(\[](feat|with|prod)[^\)\]]*[\)\]]", "", t["trackName"]).strip()
+        title = CREDIT.sub("", t["trackName"]).strip()
+        if SKIP_MORE.search(title) or SKIP_ALBUM.search(t.get("collectionName", "")): continue
         if SKIP.search(title) or SKIP.search(t.get("collectionName", "")) and "ver" in t.get("collectionName", "").lower(): continue
         date = (t.get("releaseDate") or "")[:10]
         if not date: continue
         firsts[g["id"]] = min(firsts.get(g["id"], "9999"), date)
-        if date[:4] < "2022": continue        # recent music only: older songs would crowd out the quota before the cutoff
+        if date[:4] < "2022" and norm(g["n"]) not in LEGACY_ALL_YEARS: continue        # recent music only: older songs would crowd out the quota before the cutoff
         key = norm(title)
         score = t["_ord"][1] if t["_ord"][0] == "pop" else 100 + t["_ord"][1]      # appears early in Apple's popular order: best; recent-only: after
         if not key or (key in seen and seen[key]["_rank"] <= score): continue
-        alb = re.sub(r"\s*-\s*(Single|EP)$", "", t.get("collectionName", "")).strip()
+        alb = re.sub(r"\s*-\s*(Single|EP)$|\s*\(Apple Music Edition\)", "", re.sub(r"\s*-\s*(Single|EP)$", "", t.get("collectionName", ""))).strip()
         seen[key] = {"id": "s" + str(t["trackId"]), "n": title, "kind": "song", "by": g["n"], "gid": g["id"], "date": date, "year": int(date[:4]), "album": alb,
                      "single": t.get("collectionName", "").endswith("- Single") or norm(alb) == key, "cover": (t.get("artworkUrl100") or "").replace("100x100bb", "600x600bb"),
                      "pv": t["previewUrl"], "am": t.get("trackViewUrl"), "_rank": score}
-    quota = {1: 22, 2: 15, 3: 9}.get(g.get("tier"), 12)
-    top, per_album = [], collections.Counter()
-    for sg in sorted(seen.values(), key=lambda s: s["_rank"]):     # at most 4 songs per album, so one big release cannot crowd out the rest of the discography
+        short = re.sub(r"\s*[\(\[][^\)\]]*[\)\]]", "", title).strip()
+        if short and short != title: seen[key]["alt"] = [short]     # typing the title without its bracket counts
+    quota = QUOTA.get(g.get("tier"), 30)
+    top, per_album, n_new, n_old = [], collections.Counter(), 0, 0
+    for sg in sorted(seen.values(), key=lambda s: s["_rank"]):     # a cap per album, so one big release cannot crowd out the rest of the discography
         ak = norm(sg["album"]) or sg["id"]
-        if per_album[ak] >= 4: continue
+        old = sg["year"] < 2022
+        if per_album[ak] >= PER_ALBUM or (old and n_old >= (OLDER if norm(g["n"]) != "izone" else quota)) or (not old and n_new >= quota): continue
         per_album[ak] += 1; top.append(sg)
-        if len(top) >= quota: break
+        n_old += old; n_new += not old
     for i, s in enumerate(top):
         s["fame"] = s["fame0"] = round(g.get("fame0", g["fame"]) * (1 - i / (quota * 1.5)), 1); s.pop("_rank")
     songs += top

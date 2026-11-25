@@ -49,6 +49,8 @@ Younger groups only (debut 2015 on, plus BTS by request); groups from 2020 on we
 - **Home**: continue playing, daily challenges, and "For you" picks from what you play.
 - **Wiki**: search every group, idol, song, country, player, event and invention; any underlined name opens its page.
 - **Play chess** (`site/chessplay.js`): against Stockfish 17.1 lite (GPL-3, `site/engine/`, Stockfish 10 from a CDN as fallback) or a friend on one device.
+- **Reveal games, anime and topic games**: zoom-out and tile reveals (`revealHTML` in `site/app.js`), "Hear the opening" (`pipelines/anime_openings.py`).
+- **Adding content**: `pipelines/more_content.py anime|trivia|events`, `pipelines/player_photos.py`, `pipelines/bk_voices.py` (ballknowledge's Chatterbox lines).
 - **Redemption round** (`site/redo.js`): solo quiz questions you miss come back, 1, 3, 7 and 16 days apart as you get them right, then retire.
 - **Daily missions, combo effects** (`site/missions.js`, `site/gamefx.js`), from ballknowledge.
 - **Outfits and guided tour** (`site/fits_tour.js`); **light/dark, share card, comeback calendar** (`site/extras.js`).

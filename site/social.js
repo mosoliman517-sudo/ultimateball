@@ -357,7 +357,7 @@ var Pick = {
   weight(x, c) {
     const p = prof(), rc = p.rc || 0, last = (p.recent || {})[x.id];
     let w = 0.6 + 1.4 * Pick.pct(x);
-    if (x.kind === "song") { const y = +(x.date || "").slice(0, 4); w *= y >= 2025 ? 1.25 : y === 2024 ? 1.15 : y === 2022 ? 0.8 : 1; }
+    if (x.kind === "song" && (x.date || "") >= "2022") { const y = +(x.date || "").slice(0, 4); w *= y >= 2025 ? 1.25 : y === 2024 ? 1.15 : y === 2022 ? 0.8 : 1; }
     if (last != null) { const age = rc - last; w *= age < 12 ? 0.05 : age < 40 ? 0.3 : age < 120 ? 0.7 : 1; }
     const g = Pick.gkey(x); w /= 1 + 1.5 * (c.gc[g] || 0); if (c.last && c.last === g) w *= 0.1;
     if (x.kind === "idol") { const gr = groupOf(g); const n = gr ? Math.max(1, rosterOf("kpop", gr).length) : 5; w /= Math.sqrt(n); }

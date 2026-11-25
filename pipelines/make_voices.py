@@ -13,9 +13,9 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 BK = os.path.expanduser("~/Desktop/football-prediction-model")
 OUT = os.path.join(ROOT, "docs", "voice")
 JSC = "/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc"
-FILES = ["mascot_lines.js", "coach_lines.js", "chess_coaches.js", "mascot_art.js", "mascots_worlds.js", "more_lines.js"]
+FILES = ["mascot_lines.js", "coach_lines.js", "chess_coaches.js", "mascot_art.js", "mascots_worlds.js", "more_lines.js", "more_lines2.js", "bk_lines.js"]
 SPEED = {"bongi": 1.1, "mic": 1.12, "neko": 1.12, "sneak": 1.1, "clock": 1.12, "tock": 0.88, "pin": 0.95, "bea": 0.95, "vera": 0.95}
-KINDS = ["welcome", "hit", "bighit", "miss", "streak", "best", "over", "rankup", "achieve", "idle", "tour"]   # the moments the site speaks at
+KINDS = ["welcome", "hit", "bighit", "miss", "streak", "best", "over", "rankup", "achieve", "idle", "tour", "g_audio", "g_photo", "g_hol", "morning", "evening", "night", "duo_start", "duo_point", "duo_end", "hit_blur", "hit_career", "hit_ttt", "hit_value"]   # the moments the site speaks at
 
 def lines():
     src = "\n".join(open(os.path.join(ROOT, "site", f), encoding="utf-8").read() for f in FILES)
