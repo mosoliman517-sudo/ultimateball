@@ -17,20 +17,37 @@ function mergeProf(a, b) {
   o.best = Object.assign({}, a.best); Object.entries(b.best || {}).forEach(([k, v]) => { if (!o.best[k] || v.score > o.best[k].score) o.best[k] = v; });
   o.daily = Object.assign({}, b.daily, a.daily); o.gplays = Object.assign({}, b.gplays, a.gplays); o.boards = Object.assign({}, b.boards, a.boards);
   o.nick = a.nick || b.nick; o.avatar = a.avatar || b.avatar;
+  o.badges = Object.assign({}, b.badges, a.badges); o.mseen = Object.assign({}, b.mseen, a.mseen); o.mchest = Object.assign({}, b.mchest, a.mchest); o.missions = Object.assign({}, a.missions, b.missions);
+  Object.entries(a.missions || {}).forEach(([d, r]) => { const c = (b.missions || {})[d]; if (!c || Object.keys(r.done || {}).length >= Object.keys(c.done || {}).length) o.missions[d] = r; });
+  o.stats = Object.assign({}, a.stats, b.stats); Object.keys(o.stats).forEach((k) => { o.stats[k] = mx((a.stats || {})[k], (b.stats || {})[k]); });
+  o.outfit = a.outfit || b.outfit; o.relo = Object.assign({}, a.relo, b.relo); o.season = ((b.season || {}).m || "") >= ((a.season || {}).m || "") ? b.season || a.season : a.season; o.chessTr = Object.assign({}, a.chessTr, b.chessTr); o.title = a.title || b.title; o.banner = a.banner || b.banner; o.showcase = (a.showcase && a.showcase.length ? a.showcase : b.showcase); o.kick = Object.assign({}, b.kick, a.kick); o.fits = Object.assign({}, b.fits, a.fits);
   return o;
 }
 
+/* what an email link (confirm / reset / expired) put in the address bar: read it before the library clears it */
+const AUTH_LINK = (() => { const h = new URLSearchParams(location.hash.slice(1)); return { error: h.get("error_description") || h.get("error"), code: h.get("error_code"), type: h.get("type") }; })();
+const acctError = (m) => /rate limit|only request this after|security purposes/i.test(m) ? "Too many emails sent just now. Wait a while (up to an hour) and try again."
+  : /not authorized|error sending/i.test(m) ? "The account server could not send email to that address. The site owner needs to finish the email setup."
+  : /not confirmed/i.test(m) ? "That email isn't confirmed yet. Open the link in the email we sent you."
+  : /invalid login/i.test(m) ? "Wrong email or password. New here? Press Create account."
+  : /already registered/i.test(m) ? "That email already has an account. Press Sign in."
+  : /failed to fetch|network/i.test(m) ? "Can't reach the account server. Check your connection." : m;
+
 var Cloud = {
-  sb: null, user: null, nick: "", t: null, busy: false,
+  sb: null, user: null, nick: "", t: null, busy: false, recovery: false,
   on() { return !!(SB.url && window.supabase && this.sb); },
   async init() {
     if (!window.supabase || !SB.url) return;
     try { this.sb = supabase.createClient(SB.url, SB.key); } catch (e) { return; }
+    paintProfileBtn();
     const { data } = await this.sb.auth.getSession(); this.user = data.session ? data.session.user : null;
-    this.sb.auth.onAuthStateChange((_e, ses) => { const was = this.user; this.user = ses ? ses.user : null; if (this.user && !was) this.pull(); this.repaint(); });
+    this.sb.auth.onAuthStateChange((ev, ses) => { if (ev === "PASSWORD_RECOVERY") { this.recovery = true; setTimeout(() => go("profile"), 0); } const was = this.user; this.user = ses ? ses.user : null; if (this.user && !was) this.pull(); this.repaint(); });
     if (this.user) await this.pull(); this.repaint();
+    if (AUTH_LINK.error) { go("profile"); toast(esc(AUTH_LINK.code === "otp_expired" ? "That email link has expired or was already used. Sign in, or ask for a new one." : AUTH_LINK.error), "ach"); }
+    else if (AUTH_LINK.type === "recovery" && this.user) { this.recovery = true; go("profile"); this.repaint(); }
+    else if (AUTH_LINK.type === "signup" && this.user) { go("profile"); toast("<b>Email confirmed</b><br>You're signed in.", "ach"); }
   },
-  repaint() { paintProfileBtn(); if ($("#profilePage") && !$("#profilePage").hidden) renderProfile(); },
+  repaint() { paintProfileBtn(); if ($("#profilePage") && !$("#profilePage").hidden) { renderProfile(); afterProfile(); } },
   async pull() {
     try {
       const { data } = await this.sb.from("progress").select("data").eq("user_id", this.user.id).maybeSingle();
@@ -41,9 +58,10 @@ var Cloud = {
   },
   push() { if (!this.user) return; clearTimeout(this.t); this.t = setTimeout(() => this.pushNow(), 3000); },
   async pushNow() { if (!this.user) return; try { await this.sb.from("progress").upsert({ user_id: this.user.id, data: prof(), updated_at: new Date().toISOString() }); } catch (e) { /* retry on the next save */ } },
-  async signUp(email, pw) { const r = await this.sb.auth.signUp({ email, password: pw, options: { emailRedirectTo: location.origin + location.pathname } }); return r.error ? r.error.message : r.data.session ? "ok" : "check"; },
-  async signIn(email, pw) { const r = await this.sb.auth.signInWithPassword({ email, password: pw }); return r.error ? r.error.message : "ok"; },
-  async reset(email) { const r = await this.sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname + "#profile" }); return r.error ? r.error.message : "sent"; },
+  async signUp(email, pw) { const r = await this.sb.auth.signUp({ email, password: pw, options: { emailRedirectTo: location.origin + location.pathname } }); return r.error ? acctError(r.error.message) : r.data.session ? "ok" : r.data.user && r.data.user.identities && !r.data.user.identities.length ? acctError("already registered") : "check"; },
+  async signIn(email, pw) { const r = await this.sb.auth.signInWithPassword({ email, password: pw }); return r.error ? acctError(r.error.message) : "ok"; },
+  async newPassword(pw) { const r = await this.sb.auth.updateUser({ password: pw }); if (!r.error) this.recovery = false; return r.error ? acctError(r.error.message) : "ok"; },
+  async reset(email) { const r = await this.sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); return r.error ? acctError(r.error.message) : "sent"; },
   async signOut() { await this.pushNow(); await this.sb.auth.signOut(); this.user = null; this.nick = ""; this.repaint(); },
   async setNick(n) { const { data, error } = await this.sb.rpc("set_nickname", { p_nick: n }); if (!error && data === "ok") { this.nick = n; prof().nick = n; saveProf(); } return error ? error.message : data; },
   async result(key, score) { if (!this.user || !this.nick) return; try { await this.sb.from("results").insert({ game: gameKey(key), score: Math.round(score), week: isoWeek(), day: todayKey() }); } catch (e) { /* ignore */ } },
@@ -55,18 +73,20 @@ function accountCardHTML() {
   if (!Cloud.user) return `<div class="card acct"><div class="label">Account</div><h3>Save your progress everywhere</h3><p class="fine">Sign in to keep your XP, ranks, Dex, loading screens and achievements on every device, and to get on the leaderboards. What you've earned here comes with you.</p>
     <div class="acctform"><input id="acEmail" type="email" placeholder="Email" autocomplete="email"><input id="acPw" type="password" placeholder="Password (6+ characters)" autocomplete="current-password"></div>
     <div class="row" style="gap:8px;margin-top:10px"><button class="btn" id="acIn" type="button">Sign in</button><button class="btn ghost" id="acUp" type="button">Create account</button><button class="btn ghost" id="acReset" type="button">Forgot password</button></div><div class="fine" id="acMsg" style="margin-top:8px"></div></div>`;
+  if (Cloud.recovery) return `<div class="card acct"><div class="label">Account</div><h3>Choose a new password</h3><div class="acctform"><input id="acNew" type="password" placeholder="New password (6+ characters)" autocomplete="new-password"></div><div class="row" style="gap:8px;margin-top:10px"><button class="btn" id="acSetPw" type="button">Save password</button></div><div class="fine" id="acMsg" style="margin-top:8px"></div></div>`;
   return `<div class="card acct"><div class="label">Account</div><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><div><b>Signed in</b> <span class="fine">${esc(Cloud.user.email || "")} · progress saved to your account</span></div><button class="btn ghost" id="acOut" type="button">Sign out</button></div>
     <div class="label" style="margin-top:12px">Leaderboard name</div><div class="row" style="gap:8px"><input id="acNick" value="${esc(Cloud.nick || prof().nick || "")}" maxlength="16" placeholder="3 to 16 letters or numbers"><button class="btn" id="acNickGo" type="button">${Cloud.nick ? "Change" : "Save"}</button></div><div class="fine" id="acMsg" style="margin-top:6px">${Cloud.nick ? "" : "Pick a name to appear on the leaderboards."}</div></div>`;
 }
 async function accountClick(id) {
   const msg = (t) => { const m = $("#acMsg"); if (m) m.textContent = t; }, em = ($("#acEmail") || {}).value, pw = ($("#acPw") || {}).value;
   if (id === "acOut") return Cloud.signOut();
+  if (id === "acSetPw") { const n = ($("#acNew") || {}).value || ""; if (n.length < 6) return msg("Passwords need at least 6 characters."); const r = await Cloud.newPassword(n); if (r !== "ok") return msg(r); toast("Password changed.", "ach"); return Cloud.repaint(); }
   if (id === "acNickGo") { const r = await Cloud.setNick((($("#acNick") || {}).value || "").trim()); return r === "ok" ? Cloud.repaint() : msg(r === "taken" ? "That name is taken." : r === "invalid" ? "3 to 16 letters, numbers, spaces, dots or dashes." : r); }
   if (!em || !/@/.test(em)) return msg("Type your email first.");
-  if (id === "acReset") return msg((await Cloud.reset(em)) === "sent" ? "Check your email for a reset link." : "Could not send the email.");
+  if (id === "acReset") return msg(await Cloud.reset(em).then((r) => (r === "sent" ? "Check your email (and spam) for a reset link." : r)));
   if (!pw || pw.length < 6) return msg("Passwords need at least 6 characters.");
   msg("…"); const r = id === "acUp" ? await Cloud.signUp(em, pw) : await Cloud.signIn(em, pw);
-  msg(r === "ok" ? "Welcome!" : r === "check" ? "Almost there: open the link in the email we sent, then sign in." : r);
+  msg(r === "ok" ? "Welcome!" : r === "check" ? "Almost there: open the link in the email we sent (check spam), then sign in." : r);
 }
 
 /* ================= leaderboards: your own best runs on this device, plus the public boards when signed in ================= */
@@ -113,8 +133,9 @@ function homeTopHTML() {
   const p = prof(), last = p.last && gameOf(p.last.w, p.last.g) ? p.last : null, st = Daily.streak();
   const daily = WORLD_IDS.filter((w) => Daily.game(w)).map((w, i) => { const r = Daily.rec(w), g = Daily.game(w); return `<button type="button" class="dcard ${r ? "done" : ""}" data-daily="${w}" style="${wvars(w)};--d:${i * 50}ms">${gameFace(w, g)}<span class="dk">${esc(WORLDS[w].name)}</span><b>${esc(g.name)}</b><span class="dm">${r ? `${r.marks.map((m) => (m ? "🟩" : "⬛")).join("")} ${r.score.toLocaleString()}` : "5 rounds · play now"}</span></button>`; }).join("");
   const picks = forYou().map(({ w, g, why }, i) => `<button type="button" class="fycard" data-go="w-${w}-${g.id}" style="${wvars(w)};--d:${i * 60}ms">${gameFace(w, g)}<div><span class="dk">${esc(why)}</span><b>${esc(g.name)}</b><small>${esc(WORLDS[w].name)}</small></div></button>`).join("");
-  return `${last ? `<button type="button" class="contbar" data-go="w-${last.w}-${last.g}" style="${wvars(last.w)}">${gameFace(last.w, gameOf(last.w, last.g))}<div><span class="dk">Continue playing</span><b>${esc(gameOf(last.w, last.g).name)}</b><small>${esc(WORLDS[last.w].name)}</small></div><span class="dgo">Play →</span></button>` : ""}
+  return `${typeof Mis !== "undefined" && Mis ? Mis.html() : ""}${last ? `<button type="button" class="contbar" data-go="w-${last.w}-${last.g}" style="${wvars(last.w)}">${gameFace(last.w, gameOf(last.w, last.g))}<div><span class="dk">Continue playing</span><b>${esc(gameOf(last.w, last.g).name)}</b><small>${esc(WORLDS[last.w].name)}</small></div><span class="dgo">Play →</span></button>` : ""}
     <h2 class="sec">Daily challenges ${st ? `<span class="fine">🔥 ${st}-day streak</span>` : ""}</h2><p class="secsub">The same five rounds for everyone today, one per category. Come back tomorrow for new ones.</p><div class="dailyrow">${daily}</div>
+    ${calDoorHTML()}
     ${picks ? `<h2 class="sec">For you</h2><p class="secsub">Picked from what you play.</p><div class="fyrow">${picks}</div>` : ""}`;
 }
 
@@ -123,8 +144,9 @@ document.addEventListener("click", (e) => {
   if (t.dataset.daily) { const w = t.dataset.daily; if (Daily.rec(w)) { const txt = Daily.share(w); try { navigator.clipboard.writeText(txt); toast("Result copied. Share it!", "ach"); } catch (x) { toast(esc(txt)); } return; } Snd.tick(); Daily.start(w); return; }
   if (t.id === "dShare" && Q.s) { const txt = Daily.share(Q.s.w); try { navigator.clipboard.writeText(txt); toast("Result copied. Share it!", "ach"); } catch (x) { toast(esc(txt)); } return; }
   if (t.dataset.board) { Boards.paint(t.dataset.bkey, t.dataset.bunit, t.dataset.board); return; }
-  if (/^ac(In|Up|Out|Reset|NickGo)$/.test(t.id)) { accountClick(t.id); return; }
+  if (/^ac(In|Up|Out|Reset|NickGo|SetPw)$/.test(t.id)) { accountClick(t.id); return; }
 });
+document.addEventListener("keydown", (e) => { if (e.key !== "Enter") return; const b = { acEmail: "acIn", acPw: "acIn", acNew: "acSetPw", acNick: "acNickGo" }[e.target.id]; if (b) { e.preventDefault(); accountClick(b); } });
 Cloud.init();
 if ($("#home") && !$("#home").hidden && $("#homeTop")) $("#homeTop").innerHTML = homeTopHTML();
 if (S.game && $("#boardBox")) Boards.paint(`${S.world}:${S.game}`, "points");
@@ -204,7 +226,7 @@ async function paintFriends() {
   const box = $("#frList"); if (!box) return; box.innerHTML = `<p class="fine">Loading…</p>`;
   const { data, error } = await Cloud.sb.rpc("my_friends"); if (!$("#frList")) return;
   if (error) { box.innerHTML = `<p class="fine">Friends aren't switched on yet (db/002_friends.sql still needs to run).</p>`; return; }
-  box.innerHTML = data && data.length ? data.map((f) => { const lv = levelOf(f.xp || 0); const t = f.title && achOf(f.title); return `<div class="frrow">${avatarHTML(f.avatar || "", "md", f.nick)}<div><b>${esc(f.nick)}</b>${t ? ` <span class="pftitle sm">${esc(t[1])}</span>` : ""}<div class="fine">Level ${lv.i + 1} · ${esc(lv.name)} · ${(f.xp || 0).toLocaleString()} XP${f.follows_back ? " · friends both ways" : ""}</div></div><button class="btn ghost" type="button" data-unfriend="${esc(f.nick)}">Remove</button></div>`; }).join("") : `<p class="fine">No friends yet. Add someone by name, or send a challenge link from any game's final score.</p>`;
+  box.innerHTML = data && data.length ? data.map((f) => { const lv = levelOf(f.xp || 0); const t = f.title && achOf(f.title); return `<div class="frrow">${avatarHTML(f.avatar || "", "md", f.nick)}<div><b>${esc(f.nick)}</b>${t ? ` <span class="pftitle sm">${esc(t[1])}</span>` : ""}<div class="fine">Level ${lv.i + 1} · ${esc(lv.name)} · ${(f.xp || 0).toLocaleString()} XP${f.follows_back ? " · friends both ways" : ""}</div></div><span class="row" style="gap:6px"><button class="btn ghost" type="button" data-watchfr="${esc(f.nick)}">Watch</button><button class="btn ghost" type="button" data-unfriend="${esc(f.nick)}">Remove</button></span></div>`; }).join("") : `<p class="fine">No friends yet. Add someone by name, or send a challenge link from any game's final score.</p>`;
 }
 document.addEventListener("click", async (e) => {
   const t = e.target.closest("button"); if (!t || !Cloud.sb) return;
@@ -308,7 +330,7 @@ const BadgeUI = {
     const p = prof(), st = Object.assign(STAT0(), p.stats), got = p.badges || {};
     const rows = BADGES.map((b) => {
       const on = !!got[b.id], col = RARITY[b.r][1];
-      return `<div class="bdg ${on ? "on" : "locked"}" style="--rc:${col}" title="${esc(b.how)}"><svg class="ic"><use href="#i-${b.icon}"/></svg><b>${esc(b.name)}</b><span class="fine">${on ? RARITY[b.r][0] : "🔒 " + esc(b.how)}</span></div>`;
+      return `<div class="bgcard ${on ? "on" : "locked"}" style="--rc:${col}" title="${esc(b.how)}"><svg class="ic"><use href="#i-${b.icon}"/></svg><b>${esc(b.name)}</b><span class="fine">${on ? RARITY[b.r][0] : "🔒 " + esc(b.how)}</span></div>`;
     }).join("");
     const win = st.games ? Math.round((100 * st.wins) / st.games) : 0;
     return `<div class="card"><div class="label">Badges ${Object.keys(got).length} of ${BADGES.length}</div><div class="bdgrid" style="margin-top:8px">${rows}</div>

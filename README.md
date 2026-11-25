@@ -29,12 +29,17 @@ Younger groups only (debut 2015 on, plus BTS by request); groups from 2020 on we
 ## Features beyond the games
 
 - **Accounts** (`site/social.js`): email and password through Supabase (project `qzskqkfidobxbxqlgexh`, separate from ballknowledge). Progress is merged with the browser's on sign-in and saved as you play. Run `db/001_accounts.sql` once in that project's SQL editor, and set Authentication → URL Configuration → Site URL to `https://moultimateball.vercel.app`.
+- **Account emails** need two things set in the Supabase dashboard (only the project owner can): Authentication → URL Configuration → Site URL and Redirect URLs `https://moultimateball.vercel.app`; and either turn off Authentication → Sign In / Providers → Email → "Confirm email", or add your own SMTP sender (Supabase's built-in sender is limited to the project team and a few emails an hour).
 - **Leaderboards**: on every game's start screen; your own best runs always, public boards (today, week, all time) when signed in with a leaderboard name.
 - **Daily challenge**: one game per category, the same five rounds for everyone that day (seeded by the date), with a share line.
 - **Home**: continue playing, daily challenges, and "For you" picks from what you play.
 - **Wiki**: search every group, idol, song, country, player, event and invention; any underlined name opens its page.
 - **Play chess** (`site/chessplay.js`): against Stockfish 17.1 lite (GPL-3, `site/engine/`, Stockfish 10 from a CDN as fallback) or a friend on one device.
-- **Sidekick voices**: each sidekick chatters in its own synthesised voice (no text-to-speech).
+- **Daily missions, combo effects** (`site/missions.js`, `site/gamefx.js`), from ballknowledge.
+- **Outfits and guided tour** (`site/fits_tour.js`); **light/dark, share card, comeback calendar** (`site/extras.js`).
+- **Chess training** (`site/chess_train.js`): puzzles and puzzle rush (Lichess puzzles, CC0; `pipelines/chess_puzzles.py`), endgame trainer, game review with Stockfish.
+- **Ranked seasons, player links, watching live** (`site/online_extras.js`): shared boards and links need `db/003_seasons_profiles.sql` run once.
+- **Sidekick voices** (`site/voice.js`, `pipelines/make_voices.py`): recorded clips in `docs/voice/`, one Kokoro voice per sidekick. Lines ballknowledge already recorded are copied (some are its expressive Chatterbox takes). Extra lines are in `site/more_lines.js`. After changing any line, run `~/Desktop/football-prediction-model/.venv-tts/bin/python pipelines/make_voices.py` and commit `docs/voice/`.
 
 ## K-pop data: one source, validated
 

@@ -4,7 +4,7 @@ Object.assign(MASCOTS, {
   bongi: { name: "Bongi", voice: "af_heart", blurb: "A lightstick who thinks every song is a comeback. Has never missed a fan chant.", sport: "kpop" },
   pin: { name: "Pin", voice: "am_adam", blurb: "A map pin who has never once been where it is now. Very calm about it.", sport: "geography" },
   tock: { name: "Tock", voice: "bm_lewis", blurb: "An old hourglass who was there for most of history and remembers about half of it.", sport: "history" },
-  dumpling: { name: "Dumpling", voice: "bf_isabella", blurb: "A dumpling and a very strict judge. Pleats must be perfect. Answers too.", sport: "food" },
+  dumpling: { name: "Dumpling", voice: "bf_lily", blurb: "A dumpling and a very strict judge. Pleats must be perfect. Answers too.", sport: "food" },
 });
 Object.assign(MASCOT_SVG, {
   bongi: (md) => `<svg viewBox="0 0 120 120" class="msvg"><ellipse cx="60" cy="114" rx="26" ry="5" fill="#000" opacity=".2"/><defs><radialGradient id="bgl" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#ffb3d9"/><stop offset="1" stop-color="#ff3e9a"/></radialGradient></defs><circle cx="60" cy="44" r="40" fill="#ff3e9a" opacity=".18"><animate attributeName="r" values="36;42;36" dur="1.6s" repeatCount="indefinite"/></circle><rect x="50" y="72" width="20" height="40" rx="8" fill="#2b2233" stroke="#120d18" stroke-width="3"/><rect x="54" y="84" width="12" height="5" rx="2" fill="#ff3e9a"/><rect x="46" y="68" width="28" height="10" rx="4" fill="#d9d4e3" stroke="#120d18" stroke-width="3"/><circle cx="60" cy="42" r="30" fill="url(#bgl)" stroke="#a3125b" stroke-width="3"/><path d="M60 8l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z" fill="#ffe066" stroke="#a3125b" stroke-width="2"/>${mascotFace(md, 60, 40, 0.95)}</svg>`,
@@ -68,7 +68,7 @@ MASCOT_LINES.neko = { welcome: ["Nya. Neko here. Opening theme, start!", "Back f
 /* two more K-pop sidekicks */
 Object.assign(MASCOTS, {
   mic: { name: "Maknae Mic", voice: "af_bella", blurb: "The youngest microphone in the studio. Hits every high note, forgets every lyric.", sport: "kpop" },
-  pocha: { name: "Pocha", voice: "af_nicole", blurb: "A rare photocard who knows she is rare. Has been traded eleven times.", sport: "kpop" },
+  pocha: { name: "Pocha", voice: "af_nova", blurb: "A rare photocard who knows she is rare. Has been traded eleven times.", sport: "kpop" },
 });
 Object.assign(MASCOT_SVG, {
   mic: (md) => `<svg viewBox="0 0 120 120" class="msvg"><ellipse cx="60" cy="114" rx="24" ry="5" fill="#000" opacity=".2"/><rect x="52" y="70" width="16" height="40" rx="6" fill="#3a3346" stroke="#15111c" stroke-width="3"/><rect x="48" y="66" width="24" height="10" rx="4" fill="#c9c2d6" stroke="#15111c" stroke-width="3"/><circle cx="60" cy="40" r="30" fill="#b7aecb" stroke="#15111c" stroke-width="3"/><path d="M34 30h52M32 42h56M36 54h48M46 14v52M60 10v60M74 14v52" stroke="#7d7392" stroke-width="2" opacity=".55"/><circle cx="60" cy="40" r="22" fill="#e9e4f2"/>${mascotFace(md, 60, 38, 0.8)}<path d="M90 18l4-6M96 26l7-2M30 18l-4-6" stroke="#ff5fb4" stroke-width="3" stroke-linecap="round"/></svg>`,

@@ -10,7 +10,7 @@ const Engine = {
       const start = (modern) => {
         try { this.w = modern ? new Worker(SF17) : new Worker(URL.createObjectURL(new Blob([`importScripts("${SF10}");`], { type: "text/javascript" }))); } catch (e) { if (modern) return start(false); return res(false); }
         const to = setTimeout(() => { try { this.w.terminate(); } catch (e) { /* gone */ } if (modern) start(false); else res(false); }, modern ? 15000 : 25000);
-        this.w.onmessage = (e) => { const s = String(e.data); if (s === "uciok") this.w.postMessage("isready"); else if (s === "readyok") { clearTimeout(to); res(true); } else if (s.startsWith("bestmove") && this.cb) { const c = this.cb; this.cb = null; c(s.split(" ")[1]); } };
+        this.w.onmessage = (e) => { const s = String(e.data); if (s.startsWith("info") && s.includes(" score ")) this.info = s; if (s === "uciok") this.w.postMessage("isready"); else if (s === "readyok") { clearTimeout(to); res(true); } else if (s.startsWith("bestmove") && this.cb) { const c = this.cb; this.cb = null; c(s.split(" ")[1]); } };
         this.w.onerror = () => { clearTimeout(to); if (modern) start(false); else res(false); };
         this.w.postMessage("uci");
       };
@@ -49,7 +49,7 @@ function renderChess() {
   const top = solo ? (s.you === "w" ? "b" : "w") : "b", bottom = top === "w" ? "b" : "w";
   const status = s.over ? "" : s.think ? `${esc(lv[2].split(" (")[0])} is thinking…` : c.in_check() ? "Check!" : solo ? (c.turn() === s.you ? "Your move." : "") : `${esc(who(c.turn()))} to move.`;
   const moves = c.history(); let ml = ""; for (let i = 0; i < moves.length; i += 2) ml += `<span><small>${i / 2 + 1}.</small> ${esc(moves[i])} ${moves[i + 1] ? esc(moves[i + 1]) : ""}</span>`;
-  const over = s.over ? `<div class="cpover ${s.over.cls}"><h3>${esc(s.over.title)}</h3><p class="fine">${esc(s.over.why)}</p><div class="row" style="justify-content:center;gap:8px"><button class="btn" id="cpAgain" type="button">Play again</button></div></div>` : "";
+  const over = s.over ? `<div class="cpover ${s.over.cls}"><h3>${esc(s.over.title)}</h3><p class="fine">${esc(s.over.why)}</p><div class="row" style="justify-content:center;gap:8px"><button class="btn" id="cpAgain" type="button">Play again</button><button class="btn ghost" id="cpReview" type="button">Review game</button></div></div>` : "";
   $("#room").innerHTML = `<div class="card cpwrap">${gamesBar(solo ? `Play chess · ${esc(lv[2])}` : "Play chess · two players")}${bar(top)}<div class="cpboard">${chessBoard(s)}${over}</div>${bar(bottom)}
     <div class="row" style="justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:8px"><span class="fine">${status}</span><span class="row" style="gap:6px"><button class="btn ghost" id="cpUndo" type="button" ${!moves.length || s.think || s.over ? "disabled" : ""}>Undo</button><button class="btn ghost" id="cpResign" type="button" ${s.over ? "disabled" : ""}>${solo ? "Resign" : "Offer draw / resign"}</button></span></div>
     <div class="cpmoves">${ml || `<span class="fine">${solo ? `You have ${s.you === "w" ? "White" : "Black"}. Tap a piece, then a square.` : "White starts. Tap a piece, then a square. Pass the device after each move."}</span>`}</div><p class="fine" style="margin-top:8px">Engine: Stockfish (free software, GPL), running in your browser. Pieces: cburnett set (CC BY-SA 3.0).</p></div>`;

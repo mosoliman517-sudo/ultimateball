@@ -396,59 +396,19 @@ function addXP(n, w) { const p = prof(), lv0 = levelOf(p.xp).i; n = xpGate(n); i
 function collect(w, x) { if (!x || !imgOf(x)) return; const p = prof(), k = w + ":" + x.id; p.dex[k] = (p.dex[k] || 0) + 1; if (p.dex[k] === 3) toast(`<b>New card</b><br>${esc(x.n)} joined your Dex`, "ach"); saveProf(); const n = Object.values(p.dex).filter((c) => c >= 3).length; if (n >= 10) award("dex10"); if (n >= 50) award("dex50"); }
 const dexHas = (k) => (prof().dex[k] || 0) >= 3;
 
-/* ---------------- sidekick voices: each one "talks" in its own made-up chatter (short sung syllables), no robot speech ---------------- */
-const VOICES = {   // base pitch Hz, waveform, syllable length s, pitch spread, vibrato, brightness (filter Hz)
-  bongi: [520, "triangle", 0.07, 0.35, 6, 2600], mic: [660, "square", 0.06, 0.45, 9, 3200], pocha: [300, "sawtooth", 0.09, 0.25, 4, 1500],
-  bench: [150, "sawtooth", 0.11, 0.2, 3, 1100], boot: [240, "square", 0.08, 0.3, 5, 1800], rita: [440, "triangle", 0.075, 0.4, 7, 2400],
-  rim: [200, "square", 0.09, 0.25, 4, 1400], clock: [380, "square", 0.05, 0.15, 0, 3000], sneak: [470, "sawtooth", 0.065, 0.5, 8, 2200],
-  pin: [560, "sine", 0.07, 0.35, 5, 2800], tock: [170, "triangle", 0.12, 0.18, 2, 1000], dumpling: [480, "sine", 0.085, 0.3, 10, 2000],
-  dogear: [330, "triangle", 0.08, 0.3, 3, 1700], neko: [720, "sine", 0.06, 0.55, 12, 3600],
-};
-const Babble = {
-  ctx: null, until: 0, queue: [],
-  // browsers only let sound start after a click or key press: start the voice context on the first one, then play anything queued
-  ready() {
-    try { const C = this.ctx || (this.ctx = new (window.AudioContext || window.webkitAudioContext)()); if (C.state !== "running") C.resume().then(() => this.flush()).catch(() => {}); else this.flush(); } catch (e) { /* no audio */ }
-  },
-  flush() { const q = this.queue.splice(0); q.forEach(([w, t]) => this.say(w, t)); },
-  say(who, text) {
-    if (typeof Snd !== "undefined" && Snd.level === 0) return;
-    if (!this.ctx || this.ctx.state !== "running") { this.queue = [[who, text]]; this.ready(); return; }
-    const h = [...String(who)].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0;
-    const v = VOICES[who] || [220 + (h % 400), ["sine", "triangle", "square"][h % 3], 0.06 + (h % 5) / 100, 0.3, h % 9, 1500 + (h % 2000)];
-    const C = this.ctx || (this.ctx = new (window.AudioContext || window.webkitAudioContext)()); if (C.state === "suspended") C.resume();
-    if (this.out) { try { this.out.gain.setTargetAtTime(0, C.currentTime, 0.03); } catch (e) { /* gone */ } }   // a new line cuts the old one
-    let t = C.currentTime + 0.03; const out = C.createGain(); out.gain.value = 0.13 * (typeof Snd !== "undefined" && Snd.level === 2 ? 1.5 : 1); this.out = out;
-    const f = C.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = v[5]; f.connect(out); out.connect(C.destination);
-    const words = String(text).replace(/[^\p{L}\p{N}\s?!.,]/gu, "").split(/\s+/).slice(0, 14);
-    for (const w of words) {
-      const syl = Math.max(1, Math.min(4, Math.round(w.length / 3)));
-      for (let k = 0; k < syl; k++) {
-        const ch = (w.charCodeAt(k * 2 % w.length) || 97) % 12, o = C.createOscillator(), g = C.createGain();
-        o.type = v[1]; o.frequency.setValueAtTime(v[0] * (1 + (ch / 12 - 0.5) * v[3]), t);
-        if (/[?]$/.test(w) && k === syl - 1) o.frequency.linearRampToValueAtTime(v[0] * 1.5, t + v[2]);
-        if (v[4]) { const l = C.createOscillator(), lg = C.createGain(); l.frequency.value = v[4]; lg.gain.value = v[0] * 0.03; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t + v[2] + 0.02); }
-        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + 0.01); g.gain.exponentialRampToValueAtTime(0.001, t + v[2]);
-        o.connect(g); g.connect(f); o.start(t); o.stop(t + v[2] + 0.02); t += v[2] * 1.15;
-      }
-      t += v[2] * (/[.,!?]$/.test(w) ? 2.2 : 0.8);
-    }
-    this.until = t;
-  },
-};
 /* ---------------- sidekick dock (ballknowledge's #mascot markup and CSS; the sidekick follows the world you are in) ---------------- */
 const Mascot = (() => {
   let hideT = null, last = 0; const said = [];
   const id = () => { const w = S.world && WORLDS[S.world] ? S.world : null, k = w ? (prof().kick || {})[w] : prof().kickHome; return k && MASCOT_SVG[k] ? k : w ? WORLDS[w].mascot : "bongi"; };
   const mode = () => { try { return localStorage.getItem("gp_mascot") || "on"; } catch (e) { return "on"; } };
   const pick = (arr) => { const fresh = arr.filter((x) => !said.includes(x)), pool = fresh.length ? fresh : arr, x = rnd(pool); said.push(x); if (said.length > 30) said.shift(); return x; };
-  function dock() { if (mode() === "off") { const d = $("#mascot"); if (d) d.remove(); return null; } let el = $("#mascot"); if (!el) { el = document.createElement("div"); el.id = "mascot"; el.setAttribute("role", "status"); el.setAttribute("aria-live", "polite"); document.body.appendChild(el); el.addEventListener("click", () => api.react("idle", true)); } if (el.dataset.who !== id()) { el.dataset.who = id(); el.innerHTML = `<div class="mbody calm">${MASCOT_SVG[id()]("calm")}</div><div class="mbubble"></div>`; el.className = "on"; } return el; }
+  function dock() { if (mode() === "off") { const d = $("#mascot"); if (d) d.remove(); return null; } let el = $("#mascot"); if (!el) { el = document.createElement("div"); el.id = "mascot"; el.setAttribute("role", "status"); el.setAttribute("aria-live", "polite"); document.body.appendChild(el); el.addEventListener("click", () => api.react("idle", true)); setTimeout(() => { try { outfitPaint(); } catch (e) { /* not loaded */ } }, 0); } if (el.dataset.who !== id()) { el.dataset.who = id(); el.innerHTML = `<div class="mbody calm">${MASCOT_SVG[id()]("calm")}</div><div class="mbubble"></div>`; el.className = "on"; setTimeout(() => { try { outfitPaint(); } catch (e) { /* not loaded */ } }, 0); } return el; }
   function show(kind, text) {
     const el = dock(); if (!el) return; const mood = MOOD_OF[kind] || "calm";
     el.querySelector(".mbody").className = "mbody " + mood; el.querySelector(".mbody").innerHTML = MASCOT_SVG[id()](mood);
-    el.querySelector(".mbubble").innerHTML = `<b>${MASCOTS[id()].name}</b>${esc(text)}`; el.className = "on talk k-" + kind;
-    clearTimeout(hideT); hideT = setTimeout(() => { el.className = "on"; const b = el.querySelector(".mbody"); b.className = "mbody calm"; b.innerHTML = MASCOT_SVG[id()]("calm"); }, Math.min(9000, 3000 + text.length * 45));
-    try { if ((localStorage.getItem("gp_voice") || "1") === "1") Babble.say(id(), text); } catch (e) { /* no audio */ }
+    el.querySelector(".mbubble").innerHTML = `<b>${MASCOTS[id()].name}</b>${esc(text)}`; el.className = "on talk k-" + kind; try { outfitPaint(); } catch (e) { /* outfits not loaded yet */ }
+    clearTimeout(hideT); hideT = setTimeout(() => { el.className = "on"; const b = el.querySelector(".mbody"); b.className = "mbody calm"; b.innerHTML = MASCOT_SVG[id()]("calm"); try { outfitPaint(); } catch (e) { /* not loaded */ } }, Math.min(9000, 3000 + text.length * 45));
+    try { if ((localStorage.getItem("gp_voice") || "1") === "1") Voice.say(id(), text); } catch (e) { /* no audio */ }
   }
   const api = {
     id, mode, dock, name: () => MASCOTS[id()].name, face: (m) => MASCOT_SVG[id()](m), setCtx() {},
@@ -465,19 +425,24 @@ function setTheme(code, ev) {
   const wash = $("#wash"); wash.style.setProperty("--wx", ev.clientX + "px"); wash.style.setProperty("--wy", ev.clientY + "px"); wash.style.setProperty("--wash", getComputedStyle(root).getPropertyValue("--bg"));
   wash.classList.remove("go"); void wash.offsetWidth; wash.classList.add("go"); setTimeout(apply, 280);
 }
-const SECTIONS = ["home", "worldsPage", "league", "mixPage", "profilePage", "collPage", "setPage", "wikiPage"];
+const SECTIONS = ["home", "worldsPage", "league", "mixPage", "profilePage", "collPage", "setPage", "wikiPage", "calPage"];
 function show(id) { SECTIONS.forEach((s) => { const el = $("#" + s); if (el) el.hidden = s !== id; }); scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); }
 function go(slug, ev) { try { if (location.hash !== "#" + slug) history.replaceState(null, "", "#" + slug); } catch (e) { /* no hash */ } route(ev); }
 function route(ev) {
-  const h = (location.hash || "#home").slice(1); if (!h.startsWith("w-kpop")) { try { const sd = localStorage.getItem("gp_diff"); if (sd && DIFFS.some((x) => x[0] === sd)) S.diff = sd; } catch (e) { /* blocked */ } } stopQuiz(); document.body.classList.remove("ingame"); Snd.mode(h.startsWith("w-") && h.split("-").length > 2 ? "game" : "lobby");
+  const h = (location.hash || "#home").slice(1); if (!h.startsWith("w-kpop")) { try { const sd = localStorage.getItem("gp_diff"); if (sd && DIFFS.some((x) => x[0] === sd)) S.diff = sd; } catch (e) { /* blocked */ } } stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); document.body.classList.remove("ingame"); Snd.mode(h.startsWith("w-") && h.split("-").length > 2 ? "game" : "lobby");
   if (h.startsWith("w-")) { const [, w, g] = h.split("-"); if (!WORLDS[w]) return go("worlds"); const changed = S.world !== w; S.world = w; setTheme(w, ev); show("league"); renderWorld(); if (g && gameOf(w, g)) openGame(g); else { S.game = null; renderHub(); } if (changed) setTimeout(() => Mascot.hello(), 700); return; }
   S.world = null;
+  if (h.startsWith("join-")) {   // an invite link: join that room
+    const code = h.slice(5).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+    if (code) { try { history.replaceState(null, "", "#home"); } catch (e) { /* keep the hash */ } S.world = "kpop"; setTheme("kpop", ev); show("league"); renderWorld(); S.game = null; $("#room").innerHTML = `<div class="card">${gamesBar("Joining a room")}<p class="fine">Waiting for the host (room ${esc(code)})…</p></div>`; Net.role = "guest"; Net.open(code); setTimeout(() => Net.send({ k: "hello", nick: prof().nick || "Guest", av: prof().avatar }), 1500); Vs.join(code); return; }
+  }
   if (h === "worlds") { setTheme("HOME", ev); show("worldsPage"); renderWorlds(); return; }
   if (h === "mix") { setTheme("mix", ev); show("mixPage"); renderMix(); return; }
-  if (h === "profile") { setTheme("HOME", ev); show("profilePage"); renderProfile(); return; }
+  if (h === "profile") { setTheme("HOME", ev); show("profilePage"); renderProfile(); afterProfile(); return; }
   if (h === "collection") { setTheme("HOME", ev); show("collPage"); renderCollection(); return; }
   if (h === "settings") { setTheme("HOME", ev); show("setPage"); renderSettings(); return; }
   if (h === "wiki") { setTheme("HOME", ev); show("wikiPage"); renderWiki(); return; }
+  if (h === "calendar") { setTheme("kpop", ev); show("calPage"); Cal.render(); return; }
   setTheme("HOME", ev); show("home"); renderHome();
 }
 
@@ -523,7 +488,7 @@ function recordLine(w, id) { const b = prof().best[w + ":" + id]; return b ? `Yo
 function renderHub() {
   const w = S.world; let k = 0;
   const faces = (g) => shuffle(g.pool().filter(imgOf)).slice(0, 3).map((x) => `<img class="gface-img ${x.logo || x.flag ? "contain" : ""} ${isCut(x) ? "cutpic" : ""}" src="${imgOf(x)}" alt="">`).join("");
-  $("#room").innerHTML = `<h2 class="sec">What do you want to play?</h2><p class="secsub">${GAMES[w].length} games in ${esc(WORLDS[w].name)}. Every one works solo, on one device with a friend, or on two devices.</p><div class="hub">${GAMES[w].map((g) => `<button type="button" class="gcard" data-game="${g.id}" style="--d:${k++ * 60}ms"><div class="gfaces">${faces(g)}</div><div class="gname">${esc(g.name)}</div><div class="gmodes">${g.kind === "play" ? "vs computer · 2 players" : g.kind === "hol" ? "Solo streak · 2 players" : g.kind === "roulette" ? "Solo 60 seconds · 2 players" : "Solo streak · 2 players · online"}</div><div class="gtag">${esc(g.tag)}</div><div class="grec num">${esc(recordLine(w, g.id))}</div></button>`).join("")}</div>`;
+  $("#room").innerHTML = `<h2 class="sec">What do you want to play?</h2><p class="secsub">${GAMES[w].length} games in ${esc(WORLDS[w].name)}. Every one works solo, on one device with a friend, or on two devices.</p>${w === "kpop" ? calDoorHTML() : ""}${w === "chess" ? Train.strip() : ""}<div class="hub">${GAMES[w].map((g) => `<button type="button" class="gcard" data-game="${g.id}" style="--d:${k++ * 60}ms"><div class="gfaces">${faces(g)}</div><div class="gname">${esc(g.name)}</div><div class="gmodes">${g.kind === "play" ? "vs computer · 2 players" : g.kind === "hol" ? "Solo streak · 2 players" : g.kind === "roulette" ? "Solo 60 seconds · 2 players" : "Solo streak · 2 players · online"}</div><div class="gtag">${esc(g.tag)}</div><div class="grec num">${esc(recordLine(w, g.id))}</div></button>`).join("")}</div>`;
   homeTilt();
 }
 
@@ -545,7 +510,7 @@ const diffBar = () => S.world === "kpop" ? "" : `<div class="label" style="margi
 const modeIntro = (title, blurb, opts) => `<div class="card">${gamesBar(title)}<p class="sub">${blurb}</p>${diffBar()}<div class="label" style="margin-top:16px">Players and devices</div><div class="modes">${opts.map((o) => `<button class="mode" data-mode="${o.id}" type="button"><b>${o.t}</b><span>${o.d}</span></button>`).join("")}</div><div id="roomBox"></div></div>`;
 const NAMES = () => { try { const n = JSON.parse(localStorage.getItem("gp_names") || "null"); return n && n.length === 2 ? n : ["Player 1", "Player 2"]; } catch (e) { return ["Player 1", "Player 2"]; } };
 function openGame(id) {
-  S.game = id; if (S.world === "kpop") S.diff = "medium"; const g = gameOf(S.world, id); stopQuiz(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
+  S.game = id; if (S.world === "kpop") S.diff = "medium"; const g = gameOf(S.world, id); stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
   const how = { play: "The difficulty sets how strong the computer plays.", photo: "The picture is there from the start; hints arrive at one third and two thirds of the time.", clue: "Clues start hard and get easier.", blur: "The picture starts blurred and sharpens every few seconds.", scramble: "The letters of every word are shuffled. Hints arrive slowly.", hol: "Two picks, one question. Tap the right side.", all: "Type names in any order. Initials cost 30 points, a wrong name 20.", ttt: "Tap a square and name someone who fits its row and column. A wrong or repeated name loses your turn.", roulette: "Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.", audio: "A real song plays in short slices: 3 seconds, then 5 more, then the rest." }[g.kind];
   $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how} ${g.kind === "hol" ? "Solo: keep the streak going. Two players: take turns, five each." : "Buzz in whenever you think you know it. The sooner you are right, the more you score (up to 1,000); a wrong guess costs 150."}`, [
     { id: "solo", t: g.kind === "ttt" || g.kind === "play" ? "Solo, against the computer" : g.kind === "roulette" || g.kind === "all" ? "Solo, against the clock" : "Solo streak", d: g.kind === "ttt" ? "The computer gets smarter with the difficulty." : g.kind === "all" ? "Name everyone before the clock runs out." : g.kind === "roulette" ? "Name as many as you can before time runs out." : "Keep going for as long as you can. The run ends the first time you miss." },
@@ -815,7 +780,7 @@ function renderCollection() {
 }
 
 /* ================= profile ================= */
-function paintProfileBtn() { const p = prof(), b = $("#profileBtn"); if (b) b.innerHTML = `${avatarHTML(p.avatar, "sm", p.nick || "You")}<span>${esc(levelOf(p.xp).name)}${typeof Cloud !== "undefined" && Cloud.user ? " ·☁" : ""}</span>`; }
+function paintProfileBtn() { const p = prof(), b = $("#profileBtn"), si = $("#signInBtn"); if (si) si.hidden = typeof Cloud === "undefined" || !Cloud || !Cloud.on() || !!Cloud.user; if (b) b.innerHTML = `${avatarHTML(p.avatar, "sm", p.nick || "You")}<span>${esc(levelOf(p.xp).name)}${typeof Cloud !== "undefined" && Cloud.user ? " ·☁" : ""}</span>`; }
 /* free from the start: Hearts2Hearts (Ian first) and the most famous face of every category; everything else unlocks through the Dex */
 const STARTER = (k) => { const [w, id] = k.split(":"), x = items(w).find((y) => y.id === id); return !!x && ((w === "kpop" && (x.groups || []).includes("Hearts2Hearts")) || byFameAll(items(w, imgOf))[0] === x); };
 function renderProfile() {
@@ -823,15 +788,19 @@ function renderProfile() {
   const ian = items("kpop", (x) => x.kind === "idol" && x.n === "Ian" && (x.groups || []).includes("Hearts2Hearts") && x.img), h2h = items("kpop", (x) => x.kind === "idol" && (x.groups || []).includes("Hearts2Hearts") && x.img && x.n !== "Ian");
   const avs = [...ian, ...h2h].map((x) => ({ w: "kpop", x })).concat(WORLD_IDS.flatMap((w) => byFameAll(items(w, imgOf)).slice(0, 14).map((x) => ({ w, x })))).filter((v, i, A) => A.findIndex((y) => y.x === v.x) === i);
   $("#profRoom").innerHTML = accountCardHTML() + friendsCardHTML() + `<div class="card pfcard" style="${bannerCSS(p.banner)}"><div class="pfhead" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">${avatarHTML(p.avatar, "xl", p.nick || "You")}<div><div class="label">Level ${lv.i + 1}</div><h2 style="font-size:34px;font-family:var(--display)">${esc(p.nick || "You")}</h2>${p.title && achOf(p.title) ? `<div class="pftitle">${esc(achOf(p.title)[1])}</div>` : ""}<div class="fine">${esc(lv.name)} · ${p.xp} XP${lv.next ? ` · ${lv.next - p.xp} to ${LEVELS[lv.i + 1][0]}` : ""}</div><div class="meter" style="margin-top:8px;max-width:320px"><i style="width:${pct}%"></i></div></div>${showcaseHTML(p)}<label class="fine" style="margin-left:auto">Nickname <input id="nick" value="${esc(p.nick)}" maxlength="16" style="width:150px"></label></div></div>
+  ${myLinkHTML()}
+  ${shareCardHTML()}
+  ${Season.card()}
   ${BadgeUI.html()}
   ${flairHTML(p)}
   <div class="card"><div class="label">Rank in every world</div><div class="wrank" style="margin-top:8px">${WORLD_IDS.map((w) => { const x = (p.worlds[w] || {}).xp || 0; return `<div style="--wc:${WVARS[w][4]}"><span class="fine">${esc(WORLDS[w].name)}</span><b>${rkIcon(wRank(x))} ${wRank(x)}</b><span class="fine num">${x} XP · ${(p.worlds[w] || {}).plays || 0} games</span></div>`; }).join("")}</div><div class="fine" style="margin-top:8px">Cross-category matches: ${p.mix.played} played, ${p.mix.won} won.</div></div>
   <div class="card"><div class="label">Profile picture</div><p class="fine">Anyone in your Dex can be your picture. Locked ones unlock when you get them right three times.</p><div class="avpick" style="margin-top:8px">${avs.map(({ w, x }) => { const k = w + ":" + x.id, ok = dexHas(k) || STARTER(k); return `<button type="button" class="${p.avatar === k ? "on" : ""} ${ok ? "" : "locked"}" ${ok ? `data-av="${k}"` : `title="Get ${esc(x.n)} right 3 times"`}><img src="${imgOf(x)}" alt="" class="${isCut(x) ? "cutpic" : ""}">${ok ? esc(x.n) : "Locked"}</button>`; }).join("")}</div></div>
   <div class="card"><div class="label">Achievements ${Object.keys(p.ach).length} of ${ACH.length}</div><div class="achgrid" style="margin-top:8px">${ACH.map(([id, n, d, t, ic]) => `<div class="achv ${p.ach[id] ? "on" : ""}" style="--tc:${TIERS[t][1]}"><svg class=ic><use href=#i-${ic}></use></svg><b>${esc(n)}</b><span class="fine">${esc(d)}</span><span class="fine" style="color:${TIERS[t][1]}">${TIERS[t][0]}</span></div>`).join("")}</div></div>`;
 }
+function afterProfile() { try { Season.board(); } catch (e) { /* not ready */ } }
 function renderSettings() {
   const g = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
-  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div><div class="card"><div class="label">Your sidekick in each category</div><p class="fine">The sidekick cheers you on, reacts to your answers and follows you into that category.</p>${WORLD_IDS.map(kickRow).join("")}</div><div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Photo credits</div><p class="fine">Every picture comes with its author and licence on the answer card. K-pop, geography, history and food pictures are from Wikimedia Commons (free licences or public domain), facts from Wikidata (CC0). Football data and crests come from ballknowledge (Transfermarkt CC0 data; crests and player photos shown only to identify them).</p></div>`;
+  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div><div class="card"><div class="label">Your sidekick in each category</div><p class="fine">The sidekick cheers you on, reacts to your answers and follows you into that category.</p>${WORLD_IDS.map(kickRow).join("")}</div>${outfitCardHTML()}${lookCardHTML()}${tourCardHTML()}<div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Photo credits</div><p class="fine">Every picture comes with its author and licence on the answer card. K-pop, geography, history and food pictures are from Wikimedia Commons (free licences or public domain), facts from Wikidata (CC0). Football data and crests come from ballknowledge (Transfermarkt CC0 data; crests and player photos shown only to identify them).</p></div>`;
 }
 
 /* ================= wiki: every group, idol, song, country, player... with its facts and links; any name with data-wiki opens it ================= */
@@ -894,11 +863,11 @@ const Net = {
     else if (m.k === "state") { if (Vs.on && !Vs.matched) Vs.close(); this.hostName = m.host; Q.s = Object.assign(m.s, { used: new Set() }); if (S.world !== m.s.w || S.game !== m.s.game) { S.world = m.s.w; S.game = m.s.game; renderWorld(); } renderQuiz(); }
   },
   sync() { if (this.role !== "host" || !Q.s) return; const s = { ...Q.s }; delete s.used; this.send({ k: "state", s, host: prof().nick || "Host" }); },
-  close() { this.mq.forEach((c) => { try { c.close(); } catch (e) { /* closed */ } }); this.mq = []; this.role = null; },
+  close() { this.mq.forEach((c) => { try { c.close(); } catch (e) { /* closed */ } }); this.mq = []; this.role = null; this.code = null; this.guestName = ""; this.hostName = ""; this.ranked = null; this.seen.clear(); },
   paint() {},
 };
 function openOnline() {
-  $("#roomBox").innerHTML = matchmakingHTML() + `<div class="card" style="margin-top:12px"><div class="label">Play a friend: room code</div><div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="mkRoom" type="button">Create a room</button><span class="fine">or</span><input id="roomCode" maxlength="4" placeholder="CODE" style="width:90px;text-transform:uppercase"><button class="btn ghost" id="joinRoom" type="button">Join</button></div><div id="roomMsg" class="fine" style="margin-top:8px"></div></div>`;
+  $("#roomBox").innerHTML = matchmakingHTML() + `<div class="card" style="margin-top:12px"><div class="label">Play a friend: room code</div><div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="mkRoom" type="button">Create a room</button><span class="fine">or</span><input id="roomCode" maxlength="4" placeholder="CODE" style="width:90px;text-transform:uppercase"><button class="btn ghost" id="joinRoom" type="button">Join</button></div><div id="roomMsg" class="fine" style="margin-top:8px"></div>${watchRowHTML()}</div>`;
 }
 const codeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 function makeRoom() { Net.guestName = ""; const code = Array.from({ length: 4 }, () => rnd([...codeChars])).join(""); Net.role = "host"; Net.open(code); Vs.wait(code, S.game); }
@@ -909,7 +878,6 @@ const Account = { signedIn: false }, Ranked = { elo: 1000 }, myBadges = () => Ob
 const rankOf = (elo) => { const r = WRANKS.find(([m]) => elo - 1000 >= m) || WRANKS[WRANKS.length - 1]; return { name: r[1], icon: rkIcon(r[1]) }; };
 Net.linked = () => Net.mq.some((c) => c && c.open);
 /* ================= events ================= */
-["pointerdown", "keydown", "touchend"].forEach((ev) => document.addEventListener(ev, () => Babble.ready(), { once: false, passive: true }));
 document.addEventListener("click", (e) => {
   const wl = e.target.closest("[data-wiki]"); if (wl) { e.preventDefault(); Snd.tick(); openWiki(wl.dataset.wiki); return; }
   if (e.target.id === "wikiPop" || e.target.closest("[data-wclose]")) { closeWiki(); return; }

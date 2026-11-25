@@ -40,8 +40,8 @@ if "kpop" in packs and os.path.exists(au):
             x["pv"], x["am"] = A[x["id"]]["pv"], A[x["id"]]["url"]
 html = rd("site/template.html")
 for k, v in {"/*FONTS*/": rd("site/fonts.html"), "/*BASE_CSS*/": rd("site/base.css"), "/*EXTRA_CSS*/": rd("site/extra.css") + "\n" + rd("site/chess.css"), "/*SPRITE*/": rd("site/sprite.html"),
-             "/*PACKS*/{}": json.dumps(packs, ensure_ascii=False, separators=(",", ":")), "/*CORE*/": core,
-             "/*MASCOTS*/": rd("site/mascot_lines.js") + "\n" + rd("site/coach_lines.js") + "\n" + rd("site/chess_coaches.js") + "\n" + rd("site/mascot_art.js") + "\n" + rd("site/mascots_worlds.js"), "/*APP*/": rd("site/app.js") + "\n" + rd("site/social.js") + "\n" + rd("site/chessplay.js")}.items():
+             "/*PACKS*/{}": json.dumps(packs, ensure_ascii=False, separators=(",", ":")) + ";window.PUZZLES=" + rd("site/puzzles.json"), "/*CORE*/": core,
+             "/*MASCOTS*/": rd("site/mascot_lines.js") + "\n" + rd("site/coach_lines.js") + "\n" + rd("site/chess_coaches.js") + "\n" + rd("site/mascot_art.js") + "\n" + rd("site/mascots_worlds.js") + "\n" + rd("site/more_lines.js") + "\n" + rd("site/voice.js"), "/*APP*/": rd("site/app.js") + "\n" + rd("site/social.js") + "\n" + rd("site/chessplay.js") + "\n" + rd("site/extras.js") + "\n" + rd("site/gamefx.js") + "\n" + rd("site/missions.js") + "\n" + rd("site/fits_tour.js") + "\n" + rd("site/chess_train.js") + "\n" + rd("site/online_extras.js")}.items():
     html = html.replace(k, v, 1)
 out = os.path.join(ROOT, "docs")
 os.makedirs(out, exist_ok=True)
