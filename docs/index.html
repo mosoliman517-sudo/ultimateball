@@ -1321,6 +1321,25 @@ body.ingame #tourChip,body:not(.athome) #tourChip{display:none}
 .blurpic.rev .tiles i{background:var(--surface2);box-shadow:inset 0 0 0 1px var(--line);transition:opacity .5s,transform .5s}
 .blurpic.rev .tiles i.gone{opacity:0;transform:scale(.4)}
 .facerow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0}.facerow img{width:min(120px,22vw);aspect-ratio:3/4;object-fit:cover;border-radius:12px}
+/* Odd one out, party room, photocard binder, right-to-left */
+.oddq{font-family:var(--display);font-size:clamp(20px,3.4vw,30px);text-align:center;margin:4px 0 8px}
+.gcard.modecard{min-height:0;border-style:dashed}
+.pcode{font:800 clamp(48px,14vw,88px) var(--display);letter-spacing:.18em;margin:4px 0 12px}
+.pwin{font-family:var(--display);font-size:clamp(30px,7vw,52px);margin:6px 0 12px;overflow-wrap:anywhere}
+.pboard{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:6px}
+.pboard li{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;overflow-wrap:anywhere}
+.pboard li.me{border-width:2px;border-color:var(--ink)} .pboard li.gone{opacity:.45}
+#pName{margin-top:6px;max-width:260px;display:block}
+.bpage{border:1px solid var(--line);border-radius:16px;padding:10px 14px;margin-bottom:10px}
+.bpage summary{cursor:pointer;display:flex;justify-content:space-between;gap:12px;min-height:32px;align-items:center}
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin-top:10px}
+.pcard{position:relative;aspect-ratio:55/85;border-radius:10px;overflow:hidden;background:#17121f;padding:4px;cursor:pointer}
+.pcard img{width:100%;height:100%;object-fit:cover;border-radius:7px;display:block}
+.pcard span{position:absolute;left:4px;right:4px;bottom:4px;padding:14px 4px 4px;font-size:12px;font-weight:700;text-align:center;color:#fff;background:linear-gradient(transparent,#000c);border-radius:0 0 7px 7px}
+.pcard.locked{cursor:default;opacity:.55} .pcard.locked img{filter:brightness(0) opacity(.5)} .pcard.locked span{top:38%;bottom:auto;background:none;font-size:30px}
+.pcard.own{background:#e9e4f2} .pcard.holo{background:linear-gradient(135deg,#7be0ff,#ff8ad4,#ffe27a,#8dffb5)} .pcard.gold{background:linear-gradient(135deg,#ffe9a0,#b8860b,#ffd75e)}
+[dir="rtl"] .num{direction:ltr;unicode-bidi:isolate} [dir="rtl"] .gcard,[dir="rtl"] .gpick,[dir="rtl"] .world,[dir="rtl"] .mode,[dir="rtl"] .wcard{text-align:right}
+.bpage,.pcards,.pcard{min-width:0;max-width:100%} .pcards{grid-template-columns:repeat(auto-fill,minmax(min(96px,28vw),1fr))} .pcard img{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}
 
 /* chess pieces and board, copied from ballknowledge's chess page (piece set: cburnett, CC BY-SA 3.0, via Lichess) */
 .pc-bb{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJjb2xvci1zY2hlbWU6bGlnaHQgb25seSIgd2lkdGg9IjQ1IiBoZWlnaHQ9IjQ1IiB2aWV3Qm94PSIwIDAgNDUgNDUiPjxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMS41Ij48ZyBmaWxsPSIjMDAwIiBzdHJva2UtbGluZWNhcD0iYnV0dCI+PHBhdGggZD0iTTkgMzZjMy40LTEgMTAuMS40IDEzLjUtMiAzLjQgMi40IDEwLjEgMSAxMy41IDIgMCAwIDEuNi41IDMgMi0uNyAxLTEuNiAxLTMgLjUtMy40LTEtMTAuMS41LTEzLjUtMS0zLjQgMS41LTEwLjEgMC0xMy41IDEtMS40LjUtMi4zLjUtMy0uNSAxLjQtMiAzLTIgMy0yeiIvPjxwYXRoIGQ9Ik0xNSAzMmMyLjUgMi41IDEyLjUgMi41IDE1IDAgLjUtMS41IDAtMiAwLTIgMC0yLjUtMi41LTQtMi41LTQgNS41LTEuNSA2LTExLjUtNS0xNS41LTExIDQtMTAuNSAxNC01IDE1LjUgMCAwLTIuNSAxLjUtMi41IDQgMCAwLS41LjUgMCAyeiIvPjxwYXRoIGQ9Ik0yNSA4YTIuNSAyLjUgMCAxIDEtNSAwIDIuNSAyLjUgMCAxIDEgNSAweiIvPjwvZz48cGF0aCBzdHJva2U9IiNlY2VjZWMiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIGQ9Ik0xNy41IDI2aDEwTTE1IDMwaDE1bS03LjUtMTQuNXY1TTIwIDE4aDUiLz48L2c+PC9zdmc+)}
@@ -2638,6 +2657,207 @@ const BK_LINES = {"boot":{"welcome":["Evening. I'm Old Boot. I've played in ever
 Object.entries(BK_LINES).forEach(([k, kinds]) => { if (!MASCOTS[k]) return; const L = (MASCOT_LINES[k] = { ...(MASCOT_LINES[k] || {}) });
   Object.entries(kinds).forEach(([kind, lines]) => { L[kind] = [...new Set([...(L[kind] || []), ...lines])]; }); MASCOTS[k].lines = L; });
 
+/* Third batch: many more everyday lines for every sidekick. Every line must be true whenever its moment fires, in any category:
+   no claims about chess moves, goals, clocks or times of day that may not have happened, and no counted streaks.
+   Row order: hit, bighit, miss, streak, best, over, welcome, idle. */
+const SIDE_KINDS3 = ["hit", "bighit", "miss", "streak", "best", "over", "welcome", "idle"];
+const SIDE_LINES3 = {
+  bongi: [
+    ["Correct! I'm doing a little spin.", "Yes! That brightened my whole evening.", "Right answer! Hearts everywhere.", "You got it! Wave for yourself.", "That's right. Pure dedication.", "Correct! I'd give you a fan sign.", "Yes! Straight to the highlight reel.", "Spot on. My batteries salute you."],
+    ["Lightning fast! Are you a mind reader?", "Wow, no hesitation at all!", "That was instant stage presence.", "So quick my light skipped a beat."],
+    ["Not this one, sweetie.", "Wrong, but the show goes on.", "Hmm, that's a different act.", "Oh no. Big hug.", "Not quite. Keep your light on.", "Missed it. Even I blink sometimes.", "That answer didn't make the setlist.", "Try again next round. I'm here."],
+    ["Look at that run!", "The momentum is unreal.", "You're sparkling right now.", "Don't stop, the crowd is chanting."],
+    ["That's your best yet!", "A brand new record! Fireworks!", "Peak performance. I saw it."],
+    ["That's the show. Thank you for coming!", "Curtain call. Take a bow.", "All done. You were lovely.", "We'll be back with a new stage."],
+    ["Hi! I saved you a spot.", "You made it! Let's glow.", "Ready when you are, superstar."],
+    ["I wonder what colour I am today.", "Psst. Pick a game.", "Waiting is just a long intro.", "I'm very patient for a stick."],
+  ],
+  mic: [
+    ["Correct! I'm clapping into myself.", "Yes! Loud and proud.", "That's right, that's right!", "You're good at this!", "Correct! Can I be on your team?", "Bingo! I mean, yes!", "Right! That was smooth.", "Yes! Give yourself a cheer."],
+    ["Whoa! Faster than my high note.", "You didn't even breathe!", "Instant! Show off. I love it.", "That was ridiculous. Again!"],
+    ["Aww, not that one.", "Oops, wrong note.", "Nope! Smile through it.", "I thought so too. We're both wrong.", "That's okay, next verse.", "Missed. Dramatic sigh.", "Not it. I still like you.", "Wrong, but very brave."],
+    ["You keep going!", "I'm losing my voice cheering.", "So hot right now. The streak, I mean.", "Nobody interrupt this."],
+    ["New record! I'm so proud!", "You beat yourself! In a nice way.", "Best one ever. Trophy time."],
+    ["And scene! Great job.", "That's all, folks!", "Done! Snack break.", "We should do that again."],
+    ["Yay, you're here!", "Hello! I missed you. A little. A lot.", "Let's make some noise!"],
+    ["Is this the break?", "I'm humming. Don't judge.", "Pick something, pick something.", "My cable is tangled again."],
+  ],
+  pocha: [
+    ["Correct. Beautifully done.", "Yes. That goes in the front page.", "Right. A sharp answer.", "Exactly. I like your taste.", "Correct. Very collectible.", "Yes. Crisp and clean.", "Right. You've done your homework.", "That's it. Lovely."],
+    ["Immediate. How rare.", "Barely a glance. Superb.", "A flash pull.", "Quick as opening a new pack."],
+    ["Not that one.", "A duplicate of a wrong answer.", "No. Put it back.", "Off by one page.", "That's not in my binder.", "A miss. It happens to the best sets.", "Wrong. The sleeve is disappointed.", "Not quite right."],
+    ["A beautiful run.", "You're completing the set.", "Each one rarer than the last.", "Don't crease this streak."],
+    ["A new personal best. Frame it.", "Your highest grade yet.", "Record condition."],
+    ["Session complete.", "Back into the case.", "A fine collection today.", "That's the last page for now."],
+    ["There you are.", "Welcome to the binder.", "Shall we collect something?"],
+    ["Gently, please.", "I'm admiring my own foil.", "Still waiting. Still rare.", "Which game shall it be?"],
+  ],
+  neko: [
+    ["Correct! Gold star sticker.", "Yes! Your brain is glowing.", "Right! That's main plot knowledge.", "Nailed it, nya.", "Correct! Friendship power.", "Yes! Straight from the manga.", "Right! You didn't even need a flashback.", "That's it! Sparkle eyes."],
+    ["Instant transmission!", "That was faster than a speedster arc.", "No loading time at all!", "Ultra instinct!"],
+    ["Nope, wrong timeline.", "Aw, a tiny rain cloud.", "That's not it, partner.", "The answer escaped!", "Wrong! Cue the comedy fall.", "Not this episode.", "Missed. Train harder, hero.", "So close, yet so filler."],
+    ["The combo continues!", "Your aura is visible!", "Unstoppable arc!", "The narrator is impressed."],
+    ["New record! Opening theme remix!", "You surpassed your limits!", "A new final form!"],
+    ["Episode complete!", "Roll the ending song.", "That was a good watch.", "Next time on this quiz!"],
+    ["Yahoo! You're back!", "The protagonist has arrived.", "Let's start the adventure."],
+    ["Waiting for the next arc.", "Should I rewatch something?", "Tail flick. Tail flick.", "Choose your quest."],
+  ],
+  boot: [
+    ["That's it, nicely taken.", "Correct. Proper knowledge.", "Yes, you've got an eye for it.", "Right on the money.", "Good lad. Good answer.", "Spot on. Old school.", "Correct, and with a bit of style.", "That'll do very nicely."],
+    ["Quick as you like!", "Straight off the first touch.", "Didn't even look. Class.", "Faster than I've ever moved."],
+    ["Not that one, pal.", "Wide. Have another.", "Ah, scuffed it.", "Wrong, but keep your chin up.", "Missed. We've all done it.", "No joy there.", "That's not the one.", "Hard luck."],
+    ["You're on a proper run.", "Can't miss at the minute, can you?", "Form of your life.", "Don't change a thing."],
+    ["Best you've done. Savour it.", "A new high. Marvellous.", "Never seen you better."],
+    ["That's your lot. Well played.", "Boots off. Good session.", "Done and dusted.", "Same again soon."],
+    ["Hello again, old friend.", "Come on in, pitch is ready.", "Good to see you."],
+    ["Could do with a polish.", "I'm resting my studs.", "Fancy another?", "Quiet in here."],
+  ],
+  rita: [
+    ["Correct. Allowed.", "Yes. Perfectly legal answer.", "Right. No review needed.", "That is correct.", "Accepted without complaint.", "Good. Clean.", "Correct. Carry on.", "Yes. Textbook."],
+    ["Swift and fair.", "Before I could raise my arm.", "Remarkably quick.", "No delay whatsoever."],
+    ["Incorrect.", "That's a no from me.", "Not allowed, I'm afraid.", "Wrong. No arguing.", "I've seen the replay. Still no.", "That doesn't stand.", "A mistake. Compose yourself.", "No. Next."],
+    ["A fine spell of play.", "Consistently correct.", "I have nothing to penalise.", "Impressive discipline."],
+    ["A new best. Officially recorded.", "Your finest performance.", "That goes in my notebook, the good page."],
+    ["Match concluded.", "That's time. Well conducted.", "Session closed.", "You may leave the field."],
+    ["Good to see you. Behave.", "Welcome. Rules apply.", "Present and correct, excellent."],
+    ["I'm checking my cards.", "Is someone going to play?", "Silence. Lovely.", "I could book this waiting."],
+  ],
+  bench: [
+    ["Yes! I'd have said that too.", "Correct! Starting eleven answer.", "You got it! I'm on my feet.", "Right! Coach, take notes.", "That's the one!", "Correct, and I'm clapping.", "Nice! Team player.", "Yes! First choice stuff."],
+    ["So fast! I missed it tying my laces.", "Instant! Super sub energy.", "Before I could stand up!", "Quickest thing I've seen all season."],
+    ["Aw. Happens.", "Not that one, mate.", "I'd have missed it too. From here.", "Wrong, but you're still starting.", "Shake it off. I shake off a lot.", "No good. Next one.", "Close, in a way.", "That's okay. Nobody's subbing you."],
+    ["You're never coming off!", "Man of the match material.", "Keep rolling, I'm enjoying this.", "I'm taking tips."],
+    ["Your best ever! I was here for it.", "Personal best! Group hug.", "Never doubted you."],
+    ["Full time from me.", "Great shift.", "Hit the showers.", "I'll keep your seat."],
+    ["Hey, you're back!", "Saved you the good spot.", "Let's get you on."],
+    ["Warming up my thumbs.", "Still waiting. Used to it.", "Pick one, I'll watch.", "Blanket's cosy."],
+  ],
+  rim: [
+    ["Correct. Right through the middle.", "Yes! Clean.", "That's a make.", "Good shot.", "Right. Smooth release.", "Correct, didn't even touch me.", "Yes, count it.", "Nice and soft."],
+    ["Pulled up and drained it!", "Quickest release ever.", "No dribble needed.", "Straight fire."],
+    ["Off the iron.", "Brick. We move.", "Not that one.", "Bounced right out.", "Short on that one.", "Wrong, rebound it.", "That one clanked.", "Air ball, almost."],
+    ["You're heating up.", "Can't guard you.", "Everything's falling.", "Keep shooting."],
+    ["Career high!", "Best night yet.", "Hang that in the rafters."],
+    ["Game over. Good run.", "Hit the lockers.", "That's the buzzer.", "Come shoot again."],
+    ["Welcome to the court.", "Look who's back.", "Net's fresh. Let's go."],
+    ["Just hanging around.", "Somebody pass the ball.", "My net's itchy.", "Quiet in the gym."],
+  ],
+  clock: [
+    ["Correct! Phew.", "Yes! Good timing.", "Right! I can relax.", "That's it, that's it!", "Correct, and efficient.", "Yes! No time wasted.", "Right answer. Breathing again.", "Good! Very good."],
+    ["That was barely a tick!", "So fast I'm confused.", "You saved so much time.", "Instant. My favourite."],
+    ["Oh no. Oh no.", "Wrong! Don't panic. I will.", "Not that. Reset, reset.", "Missed. It's fine. Is it fine?", "No. Deep breath.", "That one got away.", "Incorrect. Moving on quickly.", "Not quite."],
+    ["Keep the rhythm!", "Don't stop now!", "Tick, correct, tick, correct.", "You're so consistent it's soothing."],
+    ["A record! Time stands still.", "Best ever! Mark the minute.", "New high, and on schedule."],
+    ["All done. Right on time.", "That's the end. Already?", "Finished. I can rest a second.", "Wrap up complete."],
+    ["You're here! Not late at all.", "Welcome! No rush. Small rush.", "Ready? I'm ready. Mostly."],
+    ["The waiting is the worst part.", "I keep counting anyway.", "Any second now.", "Choose quickly, or not, it's fine."],
+  ],
+  sneak: [
+    ["Yes sir!", "That's fire!", "Correct, no cap.", "You ate that.", "Right! Squeaky clean.", "Big answer!", "Yup yup!", "Smooth operator."],
+    ["Zoom! Gone!", "That was filthy quick.", "Speed demon!", "Didn't even squeak first."],
+    ["Nah, not that one.", "Slipped!", "Whoops, loose lace.", "All good, bounce back.", "Not it, fam.", "Missed that step.", "Wrong, but stylish.", "Run it back."],
+    ["You're cooking!", "Can't be stopped!", "Streak is wild!", "Somebody call the fire team."],
+    ["New record, let's go!", "That's your best, legend!", "Highest bounce yet!"],
+    ["We're out! Good one.", "Kicks off. Rest up.", "That was a vibe.", "Catch you next run."],
+    ["Yooo, you made it!", "Fresh kicks, fresh start.", "Let's lace up."],
+    ["Squeak. Just testing.", "Bored soles over here.", "Pick a game, any game.", "Doing a little shuffle."],
+  ],
+  pin: [
+    ["Correct. Exactly there.", "Yes, right on target.", "That's the spot.", "Well located.", "Correct. Good bearings.", "Right where I'd have put it.", "Yes. Excellent navigation.", "Found it."],
+    ["Straight there, no detours.", "You didn't even unfold the map.", "Faster than a signal.", "Direct flight."],
+    ["Not there.", "A little off course.", "Wrong turning.", "That's somewhere else.", "Missed the mark.", "No. Let's reorient.", "Not on this map.", "Detour required."],
+    ["Making great distance.", "No wrong turns lately.", "A very straight road.", "Onward."],
+    ["Your furthest point yet.", "New record on the map.", "A personal summit."],
+    ["Trip complete.", "We stop here.", "Pins down. Rest.", "Until the next journey."],
+    ["You've arrived.", "Good to have a travelling companion.", "Where to?"],
+    ["I'm holding this spot.", "Somewhere nice would be good.", "Waiting at the crossroads.", "Pick a direction."],
+  ],
+  tock: [
+    ["Correct, as it was written.", "Yes, indeed.", "Right. A sound memory.", "That is so.", "Correct. Well recalled.", "Yes, the record confirms it.", "Truly said.", "Precisely."],
+    ["Swift as a messenger.", "Quicker than I can turn.", "An immediate reply. Rare in any age.", "No pondering required."],
+    ["That is not so.", "An error, gently noted.", "No. Think back further.", "Alas, mistaken.", "Not that one.", "The memory slipped.", "Incorrect, young scholar.", "Another time, perhaps."],
+    ["A long and noble run.", "Steady as the ages.", "Your reign goes on.", "Few manage this."],
+    ["The finest hour yet.", "A new height in your annals.", "Remember this one."],
+    ["The chapter closes.", "So ends the session.", "Until the glass turns again.", "Rest now."],
+    ["Welcome, traveller in time.", "You return. Good.", "Shall we look backwards together?"],
+    ["Sand falls. I wait.", "Patience is my trade.", "The past is not going anywhere.", "Choose, when ready."],
+  ],
+  dumpling: [
+    ["Correct. Tasty.", "Yes, well cooked.", "Right. Full of flavour.", "That's a good one.", "Correct. Compliments.", "Yes. Nicely done.", "Right, just right.", "Mm. Correct."],
+    ["Served before I could order.", "Express kitchen.", "Hot and fast.", "Instant noodle speed."],
+    ["Not to my taste.", "Wrong ingredient.", "That one flopped.", "No, no, no.", "A bit soggy, that answer.", "Missed the pot.", "Incorrect. Wipe the counter.", "Try another recipe."],
+    ["A feast of correct answers.", "The pot is boiling over, nicely.", "Seconds, thirds, keep going.", "Chef mode."],
+    ["Your best dish yet.", "A new house record.", "Michelin moment."],
+    ["Kitchen closing.", "Thank you for dining.", "All plates cleared.", "Come back hungry."],
+    ["Welcome, have a seat.", "Good, a customer.", "Something smells like a quiz."],
+    ["I'm simmering.", "Anyone hungry?", "Waiting for an order.", "Do not poke the dumpling."],
+  ],
+  dogear: [
+    ["Correct. Duly noted.", "Yes, as printed.", "Right. A good entry.", "That's the one.", "Correct, well read.", "Yes, no correction needed.", "Right on the page.", "Accurate."],
+    ["Quicker than the index.", "You didn't even turn a page.", "Immediate recall.", "A speed reader."],
+    ["Not that entry.", "An erratum.", "Wrong page, I'm afraid.", "Not quite what's written.", "Incorrect. Mark and learn.", "That belongs elsewhere.", "No. Check again next time.", "A smudge."],
+    ["A fine chapter of answers.", "Page after page.", "Quite the series.", "Do continue."],
+    ["Your best edition yet.", "A record, bound in gold.", "Newly revised, upwards."],
+    ["The end of this volume.", "Bookmark placed.", "Reading time's up.", "Until the sequel."],
+    ["Welcome back to the shelf.", "Good, a reader.", "Open wherever you like."],
+    ["Dust gathers.", "I've reread myself twice.", "Take your pick.", "Quietly waiting."],
+  ],
+  pip: [
+    ["Yes! Forward we go.", "Correct! One square closer.", "Right! Brave answer.", "That's it, general!", "Correct! I felt that.", "Yes! Strong.", "Right! Tiny cheer.", "Good one!"],
+    ["Faster than a knight!", "You didn't even pause.", "Charge! Straight to it.", "Wow, instant."],
+    ["Oh. Not that one.", "Wrong, but we keep marching.", "A stumble. Up you get.", "Not it. I believe in you.", "Missed. Pawns miss too.", "That's alright.", "No. Next square.", "Close ranks and try again."],
+    ["We're advancing!", "Look at that run!", "I've never seen the front like this.", "Keep marching!"],
+    ["Your best ever! Promotion for you.", "New record! Hats off.", "That's heroic."],
+    ["Campaign over. Well fought.", "Back to the box.", "Good march today.", "Rest, soldier."],
+    ["You're back! Reporting for duty.", "Hello! I kept your place.", "Ready to march."],
+    ["Standing very still.", "Is it my turn?", "I can wait. I'm used to it.", "Choose our next battle."],
+  ],
+  vera: [
+    ["Correct. Naturally.", "Yes, well done.", "Right. I approve.", "Precisely so.", "Correct. How refined.", "Yes. You may continue.", "Quite right.", "Acceptable. More than acceptable."],
+    ["Swift. I like that.", "Immediate. Regal, even.", "You didn't keep me waiting.", "Splendidly fast."],
+    ["No, dear.", "Incorrect. Chin up.", "That will not do.", "A disappointment, briefly.", "Wrong. Compose yourself.", "Not that one.", "I've heard better.", "Try to be more careful."],
+    ["You're on a rather royal run.", "Consistent. Good.", "I'm nearly impressed.", "Do keep this up."],
+    ["Your finest. I shall remember it.", "A new best. Bow.", "Magnificent, for once. Always, perhaps."],
+    ["That concludes the audience.", "You are dismissed, with honours.", "A pleasant session.", "Until we meet again."],
+    ["Ah, there you are.", "You may sit.", "Entertain me."],
+    ["I am waiting.", "Do hurry along.", "My crown is heavy.", "Choose something worthy."],
+  ],
+  bea: [
+    ["Yes. Calmly done.", "Correct. Well seen.", "That's right.", "Good. Very good.", "Correct. A clear line.", "Yes, nicely judged.", "Right. Trust that.", "Exactly."],
+    ["You saw it at once.", "Quick and sure.", "No doubt at all.", "A clean, straight line."],
+    ["Not this time.", "That's alright. Look again.", "A small miss.", "Wrong, but you learn.", "Breathe. Next one.", "Not quite there.", "An angle you missed.", "Be gentle with yourself."],
+    ["A lovely rhythm.", "You're seeing clearly.", "Steady and strong.", "Keep your calm."],
+    ["Your best yet. Quietly wonderful.", "A new high. Well earned.", "That's real progress."],
+    ["A good session.", "Rest your mind now.", "Well done today.", "Until next time."],
+    ["Welcome. Take a breath.", "Nice to see you.", "Shall we begin slowly?"],
+    ["There's no hurry.", "I'm thinking in diagonals.", "Quiet is useful.", "Choose when you're ready."],
+  ],
+};
+/* the chess coaches' quiz pools were mapped from chess move grades ("You sacrificed your queen", "Checkmate", "Book move"), which
+   are false after a quiz answer. In quizzes they now say only these lines; their move-grade lines stay for chess itself. */
+["pip", "vera", "bea"].forEach((k) => {
+  const old = MASCOT_LINES[k] || {}, L = { ...old };
+  const own = Object.fromEntries(SIDE_KINDS3.map((kind, i) => [kind, SIDE_LINES3[k][i]]));
+  Object.assign(L, own, {
+    welcome: own.welcome, rankup: (MORE_LINES[k] || {}).rankup || own.best, achieve: own.best,
+    idle: [...own.idle, ...(old.idle || []).filter((t) => /^Fun fact:/.test(t))],
+    // for the chess screens only
+    ch_win: ((COACH_LINES[k] || {}).win || []), ch_loss: ((COACH_LINES[k] || {}).loss || []), ch_draw: ((COACH_LINES[k] || {}).draw || []),
+    rv_best: (COACH_LINES[k] || {}).best || [], rv_good: (COACH_LINES[k] || {}).good || [], rv_inaccuracy: (COACH_LINES[k] || {}).inaccuracy || [], rv_mistake: (COACH_LINES[k] || {}).mistake || [], rv_blunder: (COACH_LINES[k] || {}).blunder || [],
+  });
+  MASCOT_LINES[k] = L; MASCOTS[k].lines = L;
+});
+Object.entries(SIDE_LINES3).forEach(([k, rows]) => {
+  if (["pip", "vera", "bea"].includes(k)) return;
+  const L = (MASCOT_LINES[k] = { ...(MASCOT_LINES[k] || {}) });
+  rows.forEach((lines, i) => { const kind = SIDE_KINDS3[i]; L[kind] = [...new Set([...(L[kind] || []), ...lines])]; });
+  if (MASCOTS[k]) MASCOTS[k].lines = L;
+});
+
+/* made by pipelines/group_lines.py: praise for a particular group (grp_) or idol (idl_), said only after that answer */
+{ const G = {"bongi":{"grp_bts":["BTS! My light just switched to full.","BTS, correct! I'm blinking in rhythm."],"grp_blackpink":["That's Blackpink! Wave it high.","You know your Blackpink. Sparkles for you."],"grp_twice":["Yes, Twice! The whole stand is glowing.","Twice! I'd stay lit all night for that."],"grp_straykids":["Stray Kids, correct! I'm blinking in rhythm.","Right, it's Stray Kids! Happy little glow."],"grp_itzy":["You know your Itzy. Sparkles for you.","Itzy! My light just switched to full."],"grp_seventeen":["Seventeen! I'd stay lit all night for that.","That's Seventeen! Wave it high."],"grp_enhypen":["Right, it's Enhypen! Happy little glow.","Yes, Enhypen! The whole stand is glowing."],"grp_lesserafim":["Le Sserafim! My light just switched to full.","Le Sserafim, correct! I'm blinking in rhythm."],"grp_newjeans":["That's NewJeans! Wave it high.","You know your NewJeans. Sparkles for you."],"grp_idle":["Yes, I-dle! The whole stand is glowing.","I-dle! I'd stay lit all night for that."],"grp_ateez":["Ateez, correct! I'm blinking in rhythm.","Right, it's Ateez! Happy little glow."],"grp_babymonster":["You know your Babymonster. Sparkles for you.","Babymonster! My light just switched to full."],"grp_ive":["Ive! I'd stay lit all night for that.","That's Ive! Wave it high."],"grp_nmixx":["Right, it's Nmixx! Happy little glow.","Yes, Nmixx! The whole stand is glowing."],"grp_izone":["Iz*One! My light just switched to full.","Iz*One, correct! I'm blinking in rhythm."],"grp_kep1er":["That's Kep1er! Wave it high.","You know your Kep1er. Sparkles for you."],"grp_everglow":["Yes, Everglow! The whole stand is glowing.","Everglow! I'd stay lit all night for that."],"grp_stayc":["STAYC, correct! I'm blinking in rhythm.","Right, it's STAYC! Happy little glow."],"grp_illit":["You know your Illit. Sparkles for you.","Illit! My light just switched to full."],"grp_treasure":["Treasure! I'd stay lit all night for that.","That's Treasure! Wave it high."],"grp_fiftyfifty":["Right, it's Fifty Fifty! Happy little glow.","Yes, Fifty Fifty! The whole stand is glowing."],"grp_fromis9":["Fromis 9! My light just switched to full.","Fromis 9, correct! I'm blinking in rhythm."],"grp_hearts2hearts":["That's Hearts2Hearts! Wave it high.","You know your Hearts2Hearts. Sparkles for you."],"grp_zerobaseone":["Yes, Zerobaseone! The whole stand is glowing.","Zerobaseone! I'd stay lit all night for that."],"grp_cortis":["Cortis, correct! I'm blinking in rhythm.","Right, it's Cortis! Happy little glow."],"grp_kissoflife":["You know your Kiss of Life. Sparkles for you.","Kiss of Life! My light just switched to full."],"grp_p1harmony":["P1Harmony! I'd stay lit all night for that.","That's P1Harmony! Wave it high."],"grp_kiiikiii":["Right, it's KiiiKiii! Happy little glow.","Yes, KiiiKiii! The whole stand is glowing."],"grp_cravity":["Cravity! My light just switched to full.","Cravity, correct! I'm blinking in rhythm."],"grp_tws":["That's TWS! Wave it high.","You know your TWS. Sparkles for you."],"grp_riize":["Yes, Riize! The whole stand is glowing.","Riize! I'd stay lit all night for that."],"grp_unis":["Unis, correct! I'm blinking in rhythm.","Right, it's Unis! Happy little glow."],"grp_nctwish":["You know your NCT Wish. Sparkles for you.","NCT Wish! My light just switched to full."],"grp_alldayproject":["AllDay Project! I'd stay lit all night for that.","That's AllDay Project! Wave it high."],"grp_kickflip":["Right, it's KickFlip! Happy little glow.","Yes, KickFlip! The whole stand is glowing."],"grp_nowz":["Nowz! My light just switched to full.","Nowz, correct! I'm blinking in rhythm."],"grp_badvillain":["That's Badvillain! Wave it high.","You know your Badvillain. Sparkles for you."],"grp_theboyz":["Yes, The Boyz! The whole stand is glowing.","The Boyz! I'd stay lit all night for that."],"grp_meovv":["MEOVV, correct! I'm blinking in rhythm.","Right, it's MEOVV! Happy little glow."],"grp_aespa":["You know your aespa. Sparkles for you.","aespa! My light just switched to full."],"grp_txt":["TXT! I'd stay lit all night for that.","That's TXT! Wave it high."],"grp_boynextdoor":["Right, it's Boynextdoor! Happy little glow.","Yes, Boynextdoor! The whole stand is glowing."],"grp_katseye":["KATSEYE! My light just switched to full.","KATSEYE, correct! I'm blinking in rhythm."],"grp_xg":["That's XG! Wave it high.","You know your XG. Sparkles for you."],"idl_lisa":["Lisa! Glowing for that one."],"idl_jungkook":["That's Jung Kook! Full brightness."],"idl_v":["Yes, V! I'm waving."],"idl_jimin":["You spotted Jimin! Sparkle time."],"idl_rm":["RM! Glowing for that one."],"idl_jhope":["That's J-Hope! Full brightness."],"idl_tzuyu":["Yes, Tzuyu! I'm waving."],"idl_jihyo":["You spotted Jihyo! Sparkle time."],"idl_dahyun":["Dahyun! Glowing for that one."],"idl_wonyoung":["That's Wonyoung! Full brightness."],"idl_chaeyoung":["Yes, Chaeyoung! I'm waving."],"idl_mina":["You spotted Mina! Sparkle time."],"idl_soyeon":["Soyeon! Glowing for that one."],"idl_sakura":["That's Sakura! Full brightness."],"idl_joyuri":["Yes, Jo Yu Ri! I'm waving."],"idl_bangchan":["You spotted Bang Chan! Sparkle time."],"idl_felix":["Felix! Glowing for that one."],"idl_yeji":["That's Yeji! Full brightness."],"idl_yuqi":["Yes, Yuqi! I'm waving."],"idl_ryujin":["You spotted Ryujin! Sparkle time."],"idl_choiyena":["Choi Ye Na! Glowing for that one."],"idl_yujin":["That's Yujin! Full brightness."],"idl_leechaeyeon":["Yes, Lee Chae Yeon! I'm waving."],"idl_minnie":["You spotted Minnie! Sparkle time."],"idl_leeknow":["Lee Know! Glowing for that one."],"idl_kwoneunbi":["That's Kwon Eun Bi! Full brightness."],"idl_kimchaewon":["Yes, Kim Chae Won! I'm waving."],"idl_hyunjin":["You spotted Hyunjin! Sparkle time."],"idl_changbin":["Changbin! Glowing for that one."],"idl_kimminju":["That's Kim Min Ju! Full brightness."],"idl_mingyu":["Yes, Mingyu! I'm waving."],"idl_shuhua":["You spotted Shuhua! Sparkle time."],"idl_seungmin":["Seungmin! Glowing for that one."],"idl_chaeryeong":["That's Chaeryeong! Full brightness."],"idl_lia":["Yes, Lia! I'm waving."],"idl_seungkwan":["You spotted Seungkwan! Sparkle time."],"idl_in":["I.N! Glowing for that one."],"idl_sunghoon":["That's Sunghoon! Full brightness."],"idl_sieun":["Yes, Sieun! I'm waving."],"idl_yuna":["You spotted Yuna! Sparkle time."],"idl_yunjin":["Yunjin! Glowing for that one."],"idl_han":["That's Han! Full brightness."],"idl_natty":["Yes, Natty! I'm waving."],"idl_vernon":["You spotted Vernon! Sparkle time."],"idl_kazuha":["Kazuha! Glowing for that one."],"idl_kanghyewon":["That's Kang Hye Won! Full brightness."],"idl_niki":["Yes, NI-KI! I'm waving."],"idl_sihyeon":["You spotted Sihyeon! Sparkle time."],"idl_choihyunsuk":["Choi Hyun Suk! Glowing for that one."],"idl_hongjoong":["That's Hongjoong! Full brightness."],"idl_lily":["Yes, Lily! I'm waving."],"idl_gaeul":["You spotted Gaeul! Sparkle time."],"idl_eunchae":["Eunchae! Glowing for that one."],"idl_jiwoong":["That's Jiwoong! Full brightness."],"idl_hanbin":["Yes, Hanbin! I'm waving."],"idl_leeseo":["You spotted Leeseo! Sparkle time."],"idl_haerin":["Haerin! Glowing for that one."],"idl_minji":["That's Minji! Full brightness."],"idl_liz":["Yes, Liz! I'm waving."],"idl_hanni":["You spotted Hanni! Sparkle time."],"idl_hyein":["Hyein! Glowing for that one."],"idl_san":["That's San! Full brightness."],"idl_rei":["Yes, Rei! I'm waving."],"idl_belle":["You spotted Belle! Sparkle time."],"idl_dino":["Dino! Glowing for that one."],"idl_yunho":["That's Yunho! Full brightness."],"idl_yeosang":["Yes, Yeosang! I'm waving."],"idl_jongho":["You spotted Jongho! Sparkle time."],"idl_woochan":["Woochan! Glowing for that one."],"idl_carmen":["That's Carmen! Full brightness."],"idl_sungchan":["Yes, Sungchan! I'm waving."],"idl_shotaro":["You spotted Shotaro! Sparkle time."],"idl_mingi":["Mingi! Glowing for that one."],"idl_seonghwa":["That's Seonghwa! Full brightness."],"idl_xiaoting":["Yes, Xiaoting! I'm waving."],"idl_ahyeon":["You spotted Ahyeon! Sparkle time."],"idl_wonhee":["Wonhee! Glowing for that one."],"idl_chaehyun":["That's Chaehyun! Full brightness."],"idl_hikaru":["Yes, Hikaru! I'm waving."],"idl_dayeon":["You spotted Dayeon! Sparkle time."],"idl_sullyoon":["Sullyoon! Glowing for that one."],"idl_haewon":["That's Haewon! Full brightness."],"idl_hyeongjun":["Yes, Hyeongjun! I'm waving."],"idl_nagyung":["You spotted Nagyung! Sparkle time."],"idl_jiwon":["Jiwon! Glowing for that one."],"idl_hayoung":["That's Hayoung! Full brightness."],"idl_jungwon":["Yes, Jungwon! I'm waving."],"idl_jake":["You spotted Jake! Sparkle time."],"idl_sunoo":["Sunoo! Glowing for that one."],"idl_sumin":["That's Sumin! Full brightness."],"idl_wooyoung":["Yes, Wooyoung! I'm waving."],"idl_junkyu":["You spotted Junkyu! Sparkle time."],"idl_jihoon":["Jihoon! Glowing for that one."],"idl_kyujin":["That's Kyujin! Full brightness."],"idl_taerae":["Yes, Taerae! I'm waving."],"idl_anton":["You spotted Anton! Sparkle time."],"idl_eunseok":["Eunseok! Glowing for that one."],"idl_minju":["That's Minju! Full brightness."],"idl_minhee":["Yes, Minhee! I'm waving."],"idl_j":["You spotted J! Sparkle time."],"idl_sojunghwan":["So Jung Hwan! Glowing for that one."],"idl_yoshi":["That's Yoshi! Full brightness."],"idl_hueningbahiyyih":["Yes, Huening Bahiyyih! I'm waving."],"idl_bae":["You spotted Bae! Sparkle time."],"idl_julie":["Julie! Glowing for that one."],"idl_haneul":["That's Haneul! Full brightness."],"idl_wonbin":["Yes, Wonbin! I'm waving."],"idl_asa":["You spotted Asa! Sparkle time."],"idl_yunah":["Yunah! Glowing for that one."],"idl_moka":["That's Moka! Full brightness."],"idl_iroha":["Yes, Iroha! I'm waving."],"idl_bailey":["You spotted Bailey! Sparkle time."],"idl_tarzzan":["Tarzzan! Glowing for that one."],"idl_jiheon":["That's Jiheon! Full brightness."],"idl_jongseob":["Yes, Jongseob! I'm waving."],"idl_taeyoung":["You spotted Taeyoung! Sparkle time."],"idl_jay":["Jay! Glowing for that one."],"idl_doyoung":["That's Doyoung! Full brightness."],"idl_matthew":["Yes, Matthew! I'm waving."],"idl_yushi":["You spotted Yushi! Sparkle time."],"idl_rora":["Rora! Glowing for that one."],"idl_youngseo":["That's Youngseo! Full brightness."],"idl_woobin":["Yes, Woobin! I'm waving."],"idl_jungmo":["You spotted Jungmo! Sparkle time."],"idl_wonjin":["Wonjin! Glowing for that one."],"idl_keeho":["That's Keeho! Full brightness."],"idl_jiung":["Yes, Jiung! I'm waving."],"idl_parkjeongwoo":["You spotted Park Jeong Woo! Sparkle time."],"idl_asahi":["Asahi! Glowing for that one."],"idl_haruto":["That's Haruto! Full brightness."],"idl_yoonjaehyuk":["Yes, Yoon Jae Hyuk! I'm waving."],"idl_jiwoo":["You spotted Jiwoo! Sparkle time."],"idl_gunwook":["Gunwook! Glowing for that one."],"idl_sion":["That's Sion! Full brightness."],"idl_sakuya":["Yes, Sakuya! I'm waving."],"idl_chiquita":["You spotted Chiquita! Sparkle time."],"idl_dohoon":["Dohoon! Glowing for that one."],"idl_ian":["That's Ian! Full brightness."],"idl_martin":["Yes, Martin! I'm waving."],"idl_seongmin":["You spotted Seongmin! Sparkle time."],"idl_isa":["Isa! Glowing for that one."],"idl_yoon":["That's Yoon! Full brightness."],"idl_seeun":["Yes, Seeun! I'm waving."],"idl_riku":["You spotted Riku! Sparkle time."],"idl_sohee":["Sohee! Glowing for that one."],"idl_ruka":["That's Ruka! Full brightness."],"idl_pharita":["Yes, Pharita! I'm waving."],"idl_hanjin":["You spotted Hanjin! Sparkle time."],"idl_yuha":["Yuha! Glowing for that one."],"idl_jiyu":["That's Jiyu! Full brightness."],"idl_leesol":["Yes, Leesol! I'm waving."],"idl_james":["You spotted James! Sparkle time."],"idl_annie":["Annie! Glowing for that one."],"idl_serim":["That's Serim! Full brightness."],"idl_theo":["Yes, Theo! I'm waving."],"idl_intak":["You spotted Intak! Sparkle time."],"idl_keena":["Keena! Glowing for that one."],"idl_ryo":["That's Ryo! Full brightness."],"idl_rami":["Yes, Rami! I'm waving."],"idl_chanellemoon":["You spotted Chanelle Moon! Sparkle time."],"idl_yewon":["Yewon! Glowing for that one."],"idl_hana":["That's Hana! Full brightness."],"idl_athena":["Yes, Athena! I'm waving."],"idl_shinyu":["You spotted Shinyu! Sparkle time."],"idl_youngjae":["Youngjae! Glowing for that one."],"idl_kyungmin":["That's Kyungmin! Full brightness."],"idl_stella":["Yes, Stella! I'm waving."],"idl_juun":["You spotted Juun! Sparkle time."],"idl_ana":["A-na! Glowing for that one."],"idl_yeon":["That's Ye-on! Full brightness."],"idl_sui":["Yes, Sui! I'm waving."],"idl_haum":["You spotted Haum! Sparkle time."],"idl_kya":["Kya! Glowing for that one."],"idl_keonho":["That's Keonho! Full brightness."],"idl_juhoon":["Yes, Juhoon! I'm waving."],"idl_seonghyeon":["You spotted Seonghyeon! Sparkle time."],"idl_allen":["Allen! Glowing for that one."],"idl_yunha":["That's Yunha! Full brightness."],"idl_hyunjae":["Yes, Hyunjae! I'm waving."],"idl_sunwoo":["You spotted Sunwoo! Sparkle time."],"idl_eric":["Eric! Glowing for that one."],"idl_kevin":["That's Kevin! Full brightness."],"idl_younghoon":["Yes, Younghoon! I'm waving."],"idl_jacob":["You spotted Jacob! Sparkle time."],"idl_juyeon":["Juyeon! Glowing for that one."],"idl_q":["That's Q! Full brightness."],"idl_anna":["Yes, Anna! I'm waving."],"idl_ella":["You spotted Ella! Sparkle time."],"idl_sooin":["Sooin! Glowing for that one."],"idl_gawon":["That's Gawon! Full brightness."],"idl_narin":["Yes, Narin! I'm waving."],"idl_ningning":["You spotted Ningning! Sparkle time."],"idl_taehyun":["Taehyun! Glowing for that one."],"idl_hueningkai":["That's Hueningkai! Full brightness."],"idl_beomgyu":["Yes, Beomgyu! I'm waving."],"idl_soobin":["You spotted Soobin! Sparkle time."],"idl_yeonjun":["Yeonjun! Glowing for that one."],"idl_giselle":["That's Giselle! Full brightness."],"idl_woonhak":["Yes, Woonhak! I'm waving."],"idl_jaehyun":["You spotted Jaehyun! Sparkle time."],"idl_sungho":["Sungho! Glowing for that one."],"idl_taesan":["That's Taesan! Full brightness."],"idl_riwoo":["Yes, Riwoo! I'm waving."],"idl_leehan":["You spotted Leehan! Sparkle time."],"idl_manon":["Manon! Glowing for that one."],"idl_sophia":["That's Sophia! Full brightness."],"idl_daniela":["Yes, Daniela! I'm waving."],"idl_lara":["You spotted Lara! Sparkle time."],"idl_megan":["Megan! Glowing for that one."],"idl_yoonchae":["That's Yoonchae! Full brightness."],"idl_karina":["Yes, Karina! I'm waving."],"idl_winter":["You spotted Winter! Sparkle time."],"idl_jurin":["Jurin! Glowing for that one."],"idl_chisa":["That's Chisa! Full brightness."],"idl_hinata":["Yes, Hinata! I'm waving."],"idl_harvey":["You spotted Harvey! Sparkle time."],"idl_juria":["Juria! Glowing for that one."],"idl_maya":["That's Maya! Full brightness."],"idl_cocona":["Yes, Cocona! I'm waving."],"idl_jin":["You spotted Jin! Sparkle time."],"idl_suga":["Suga! Glowing for that one."],"idl_jisoo":["That's Jisoo! Full brightness."],"idl_jennie":["Yes, Jennie! I'm waving."],"idl_rose":["You spotted Rosé! Sparkle time."],"idl_nayeon":["Nayeon! Glowing for that one."],"idl_jeongyeon":["That's Jeongyeon! Full brightness."],"idl_momo":["Yes, Momo! I'm waving."],"idl_sana":["You spotted Sana! Sparkle time."],"idl_scoups":["S.Coups! Glowing for that one."],"idl_jeonghan":["That's Jeonghan! Full brightness."],"idl_joshua":["Yes, Joshua! I'm waving."],"idl_jun":["You spotted Jun! Sparkle time."],"idl_the8":["The8! Glowing for that one."],"idl_hoshi":["That's Hoshi! Full brightness."],"idl_wonwoo":["Yes, Wonwoo! I'm waving."],"idl_woozi":["You spotted Woozi! Sparkle time."],"idl_dk":["DK! Glowing for that one."],"idl_miyeon":["That's Miyeon! Full brightness."],"idl_yabukinako":["Yes, Yabuki Nako! I'm waving."],"idl_hondahitomi":["You spotted Honda Hitomi! Sparkle time."],"idl_soul":["Soul! Glowing for that one."],"idl_hyeonju":["That's Hyeonju! Full brightness."],"idl_nana":["Yes, Nana! I'm waving."],"idl_gehlee":["You spotted Gehlee! Sparkle time."],"idl_jaehee":["Jaehee! Glowing for that one."],"idl_kyehoon":["That's Kyehoon! Full brightness."],"idl_donghwa":["Yes, Donghwa! I'm waving."],"idl_juwang":["You spotted Juwang! Sparkle time."],"idl_minje":["Minje! Glowing for that one."],"idl_keiju":["That's Keiju! Full brightness."],"idl_donghyeon":["Yes, Donghyeon! I'm waving."],"idl_hyeonbin":["You spotted Hyeonbin! Sparkle time."],"idl_yeonwoo":["Yeonwoo! Glowing for that one."],"idl_jinhyuk":["That's Jinhyuk! Full brightness."],"idl_siyun":["Yes, Siyun! I'm waving."],"idl_emma":["You spotted Emma! Sparkle time."],"idl_chloeyoung":["Chloe Young! Glowing for that one."],"idl_hue":["That's HU'E! Full brightness."],"idl_ina":["Yes, INA! I'm waving."],"idl_yunseo":["You spotted YunSeo! Sparkle time."],"idl_vin":["Vin! Glowing for that one."],"idl_kelly":["That's Kelly! Full brightness."],"idl_sangyeon":["Yes, Sangyeon! I'm waving."],"idl_kotoko":["You spotted Kotoko! Sparkle time."],"idl_elisia":["Elisia! Glowing for that one."],"idl_yoona":["That's Yoona! Full brightness."],"idl_seowon":["Yes, Seowon! I'm waving."],"idl_onda":["You spotted Onda! Sparkle time."],"idl_aisha":["Aisha! Glowing for that one."],"idl_amaru":["That's Amaru! Full brightness."]},"mic":{"grp_bts":["BTS! Make some noise!","BTS, correct! Encore, encore!"],"grp_blackpink":["That's Blackpink! I'd do the fanchant.","You really know Blackpink. Loud applause!"],"grp_twice":["Yes, Twice! Turn me up.","Twice! I felt that one in the speakers."],"grp_straykids":["Stray Kids, correct! Encore, encore!","Right, it's Stray Kids! Sing it with me."],"grp_itzy":["You really know Itzy. Loud applause!","Itzy! Make some noise!"],"grp_seventeen":["Seventeen! I felt that one in the speakers.","That's Seventeen! I'd do the fanchant."],"grp_enhypen":["Right, it's Enhypen! Sing it with me.","Yes, Enhypen! Turn me up."],"grp_lesserafim":["Le Sserafim! Make some noise!","Le Sserafim, correct! Encore, encore!"],"grp_newjeans":["That's NewJeans! I'd do the fanchant.","You really know NewJeans. Loud applause!"],"grp_idle":["Yes, I-dle! Turn me up.","I-dle! I felt that one in the speakers."],"grp_ateez":["Ateez, correct! Encore, encore!","Right, it's Ateez! Sing it with me."],"grp_babymonster":["You really know Babymonster. Loud applause!","Babymonster! Make some noise!"],"grp_ive":["Ive! I felt that one in the speakers.","That's Ive! I'd do the fanchant."],"grp_nmixx":["Right, it's Nmixx! Sing it with me.","Yes, Nmixx! Turn me up."],"grp_izone":["Iz*One! Make some noise!","Iz*One, correct! Encore, encore!"],"grp_kep1er":["That's Kep1er! I'd do the fanchant.","You really know Kep1er. Loud applause!"],"grp_everglow":["Yes, Everglow! Turn me up.","Everglow! I felt that one in the speakers."],"grp_stayc":["STAYC, correct! Encore, encore!","Right, it's STAYC! Sing it with me."],"grp_illit":["You really know Illit. Loud applause!","Illit! Make some noise!"],"grp_treasure":["Treasure! I felt that one in the speakers.","That's Treasure! I'd do the fanchant."],"grp_fiftyfifty":["Right, it's Fifty Fifty! Sing it with me.","Yes, Fifty Fifty! Turn me up."],"grp_fromis9":["Fromis 9! Make some noise!","Fromis 9, correct! Encore, encore!"],"grp_hearts2hearts":["That's Hearts2Hearts! I'd do the fanchant.","You really know Hearts2Hearts. Loud applause!"],"grp_zerobaseone":["Yes, Zerobaseone! Turn me up.","Zerobaseone! I felt that one in the speakers."],"grp_cortis":["Cortis, correct! Encore, encore!","Right, it's Cortis! Sing it with me."],"grp_kissoflife":["You really know Kiss of Life. Loud applause!","Kiss of Life! Make some noise!"],"grp_p1harmony":["P1Harmony! I felt that one in the speakers.","That's P1Harmony! I'd do the fanchant."],"grp_kiiikiii":["Right, it's KiiiKiii! Sing it with me.","Yes, KiiiKiii! Turn me up."],"grp_cravity":["Cravity! Make some noise!","Cravity, correct! Encore, encore!"],"grp_tws":["That's TWS! I'd do the fanchant.","You really know TWS. Loud applause!"],"grp_riize":["Yes, Riize! Turn me up.","Riize! I felt that one in the speakers."],"grp_unis":["Unis, correct! Encore, encore!","Right, it's Unis! Sing it with me."],"grp_nctwish":["You really know NCT Wish. Loud applause!","NCT Wish! Make some noise!"],"grp_alldayproject":["AllDay Project! I felt that one in the speakers.","That's AllDay Project! I'd do the fanchant."],"grp_kickflip":["Right, it's KickFlip! Sing it with me.","Yes, KickFlip! Turn me up."],"grp_nowz":["Nowz! Make some noise!","Nowz, correct! Encore, encore!"],"grp_badvillain":["That's Badvillain! I'd do the fanchant.","You really know Badvillain. Loud applause!"],"grp_theboyz":["Yes, The Boyz! Turn me up.","The Boyz! I felt that one in the speakers."],"grp_meovv":["MEOVV, correct! Encore, encore!","Right, it's MEOVV! Sing it with me."],"grp_aespa":["You really know aespa. Loud applause!","aespa! Make some noise!"],"grp_txt":["TXT! I felt that one in the speakers.","That's TXT! I'd do the fanchant."],"grp_boynextdoor":["Right, it's Boynextdoor! Sing it with me.","Yes, Boynextdoor! Turn me up."],"grp_katseye":["KATSEYE! Make some noise!","KATSEYE, correct! Encore, encore!"],"grp_xg":["That's XG! I'd do the fanchant.","You really know XG. Loud applause!"],"idl_lisa":["Lisa! Say it louder!"],"idl_jungkook":["That's Jung Kook! Cheers all round."],"idl_v":["Yes, V! What a call."],"idl_jimin":["You got Jimin! Loud and clear."],"idl_rm":["RM! Say it louder!"],"idl_jhope":["That's J-Hope! Cheers all round."],"idl_tzuyu":["Yes, Tzuyu! What a call."],"idl_jihyo":["You got Jihyo! Loud and clear."],"idl_dahyun":["Dahyun! Say it louder!"],"idl_wonyoung":["That's Wonyoung! Cheers all round."],"idl_chaeyoung":["Yes, Chaeyoung! What a call."],"idl_mina":["You got Mina! Loud and clear."],"idl_soyeon":["Soyeon! Say it louder!"],"idl_sakura":["That's Sakura! Cheers all round."],"idl_joyuri":["Yes, Jo Yu Ri! What a call."],"idl_bangchan":["You got Bang Chan! Loud and clear."],"idl_felix":["Felix! Say it louder!"],"idl_yeji":["That's Yeji! Cheers all round."],"idl_yuqi":["Yes, Yuqi! What a call."],"idl_ryujin":["You got Ryujin! Loud and clear."],"idl_choiyena":["Choi Ye Na! Say it louder!"],"idl_yujin":["That's Yujin! Cheers all round."],"idl_leechaeyeon":["Yes, Lee Chae Yeon! What a call."],"idl_minnie":["You got Minnie! Loud and clear."],"idl_leeknow":["Lee Know! Say it louder!"],"idl_kwoneunbi":["That's Kwon Eun Bi! Cheers all round."],"idl_kimchaewon":["Yes, Kim Chae Won! What a call."],"idl_hyunjin":["You got Hyunjin! Loud and clear."],"idl_changbin":["Changbin! Say it louder!"],"idl_kimminju":["That's Kim Min Ju! Cheers all round."],"idl_mingyu":["Yes, Mingyu! What a call."],"idl_shuhua":["You got Shuhua! Loud and clear."],"idl_seungmin":["Seungmin! Say it louder!"],"idl_chaeryeong":["That's Chaeryeong! Cheers all round."],"idl_lia":["Yes, Lia! What a call."],"idl_seungkwan":["You got Seungkwan! Loud and clear."],"idl_in":["I.N! Say it louder!"],"idl_sunghoon":["That's Sunghoon! Cheers all round."],"idl_sieun":["Yes, Sieun! What a call."],"idl_yuna":["You got Yuna! Loud and clear."],"idl_yunjin":["Yunjin! Say it louder!"],"idl_han":["That's Han! Cheers all round."],"idl_natty":["Yes, Natty! What a call."],"idl_vernon":["You got Vernon! Loud and clear."],"idl_kazuha":["Kazuha! Say it louder!"],"idl_kanghyewon":["That's Kang Hye Won! Cheers all round."],"idl_niki":["Yes, NI-KI! What a call."],"idl_sihyeon":["You got Sihyeon! Loud and clear."],"idl_choihyunsuk":["Choi Hyun Suk! Say it louder!"],"idl_hongjoong":["That's Hongjoong! Cheers all round."],"idl_lily":["Yes, Lily! What a call."],"idl_gaeul":["You got Gaeul! Loud and clear."],"idl_eunchae":["Eunchae! Say it louder!"],"idl_jiwoong":["That's Jiwoong! Cheers all round."],"idl_hanbin":["Yes, Hanbin! What a call."],"idl_leeseo":["You got Leeseo! Loud and clear."],"idl_haerin":["Haerin! Say it louder!"],"idl_minji":["That's Minji! Cheers all round."],"idl_liz":["Yes, Liz! What a call."],"idl_hanni":["You got Hanni! Loud and clear."],"idl_hyein":["Hyein! Say it louder!"],"idl_san":["That's San! Cheers all round."],"idl_rei":["Yes, Rei! What a call."],"idl_belle":["You got Belle! Loud and clear."],"idl_dino":["Dino! Say it louder!"],"idl_yunho":["That's Yunho! Cheers all round."],"idl_yeosang":["Yes, Yeosang! What a call."],"idl_jongho":["You got Jongho! Loud and clear."],"idl_woochan":["Woochan! Say it louder!"],"idl_carmen":["That's Carmen! Cheers all round."],"idl_sungchan":["Yes, Sungchan! What a call."],"idl_shotaro":["You got Shotaro! Loud and clear."],"idl_mingi":["Mingi! Say it louder!"],"idl_seonghwa":["That's Seonghwa! Cheers all round."],"idl_xiaoting":["Yes, Xiaoting! What a call."],"idl_ahyeon":["You got Ahyeon! Loud and clear."],"idl_wonhee":["Wonhee! Say it louder!"],"idl_chaehyun":["That's Chaehyun! Cheers all round."],"idl_hikaru":["Yes, Hikaru! What a call."],"idl_dayeon":["You got Dayeon! Loud and clear."],"idl_sullyoon":["Sullyoon! Say it louder!"],"idl_haewon":["That's Haewon! Cheers all round."],"idl_hyeongjun":["Yes, Hyeongjun! What a call."],"idl_nagyung":["You got Nagyung! Loud and clear."],"idl_jiwon":["Jiwon! Say it louder!"],"idl_hayoung":["That's Hayoung! Cheers all round."],"idl_jungwon":["Yes, Jungwon! What a call."],"idl_jake":["You got Jake! Loud and clear."],"idl_sunoo":["Sunoo! Say it louder!"],"idl_sumin":["That's Sumin! Cheers all round."],"idl_wooyoung":["Yes, Wooyoung! What a call."],"idl_junkyu":["You got Junkyu! Loud and clear."],"idl_jihoon":["Jihoon! Say it louder!"],"idl_kyujin":["That's Kyujin! Cheers all round."],"idl_taerae":["Yes, Taerae! What a call."],"idl_anton":["You got Anton! Loud and clear."],"idl_eunseok":["Eunseok! Say it louder!"],"idl_minju":["That's Minju! Cheers all round."],"idl_minhee":["Yes, Minhee! What a call."],"idl_j":["You got J! Loud and clear."],"idl_sojunghwan":["So Jung Hwan! Say it louder!"],"idl_yoshi":["That's Yoshi! Cheers all round."],"idl_hueningbahiyyih":["Yes, Huening Bahiyyih! What a call."],"idl_bae":["You got Bae! Loud and clear."],"idl_julie":["Julie! Say it louder!"],"idl_haneul":["That's Haneul! Cheers all round."],"idl_wonbin":["Yes, Wonbin! What a call."],"idl_asa":["You got Asa! Loud and clear."],"idl_yunah":["Yunah! Say it louder!"],"idl_moka":["That's Moka! Cheers all round."],"idl_iroha":["Yes, Iroha! What a call."],"idl_bailey":["You got Bailey! Loud and clear."],"idl_tarzzan":["Tarzzan! Say it louder!"],"idl_jiheon":["That's Jiheon! Cheers all round."],"idl_jongseob":["Yes, Jongseob! What a call."],"idl_taeyoung":["You got Taeyoung! Loud and clear."],"idl_jay":["Jay! Say it louder!"],"idl_doyoung":["That's Doyoung! Cheers all round."],"idl_matthew":["Yes, Matthew! What a call."],"idl_yushi":["You got Yushi! Loud and clear."],"idl_rora":["Rora! Say it louder!"],"idl_youngseo":["That's Youngseo! Cheers all round."],"idl_woobin":["Yes, Woobin! What a call."],"idl_jungmo":["You got Jungmo! Loud and clear."],"idl_wonjin":["Wonjin! Say it louder!"],"idl_keeho":["That's Keeho! Cheers all round."],"idl_jiung":["Yes, Jiung! What a call."],"idl_parkjeongwoo":["You got Park Jeong Woo! Loud and clear."],"idl_asahi":["Asahi! Say it louder!"],"idl_haruto":["That's Haruto! Cheers all round."],"idl_yoonjaehyuk":["Yes, Yoon Jae Hyuk! What a call."],"idl_jiwoo":["You got Jiwoo! Loud and clear."],"idl_gunwook":["Gunwook! Say it louder!"],"idl_sion":["That's Sion! Cheers all round."],"idl_sakuya":["Yes, Sakuya! What a call."],"idl_chiquita":["You got Chiquita! Loud and clear."],"idl_dohoon":["Dohoon! Say it louder!"],"idl_ian":["That's Ian! Cheers all round."],"idl_martin":["Yes, Martin! What a call."],"idl_seongmin":["You got Seongmin! Loud and clear."],"idl_isa":["Isa! Say it louder!"],"idl_yoon":["That's Yoon! Cheers all round."],"idl_seeun":["Yes, Seeun! What a call."],"idl_riku":["You got Riku! Loud and clear."],"idl_sohee":["Sohee! Say it louder!"],"idl_ruka":["That's Ruka! Cheers all round."],"idl_pharita":["Yes, Pharita! What a call."],"idl_hanjin":["You got Hanjin! Loud and clear."],"idl_yuha":["Yuha! Say it louder!"],"idl_jiyu":["That's Jiyu! Cheers all round."],"idl_leesol":["Yes, Leesol! What a call."],"idl_james":["You got James! Loud and clear."],"idl_annie":["Annie! Say it louder!"],"idl_serim":["That's Serim! Cheers all round."],"idl_theo":["Yes, Theo! What a call."],"idl_intak":["You got Intak! Loud and clear."],"idl_keena":["Keena! Say it louder!"],"idl_ryo":["That's Ryo! Cheers all round."],"idl_rami":["Yes, Rami! What a call."],"idl_chanellemoon":["You got Chanelle Moon! Loud and clear."],"idl_yewon":["Yewon! Say it louder!"],"idl_hana":["That's Hana! Cheers all round."],"idl_athena":["Yes, Athena! What a call."],"idl_shinyu":["You got Shinyu! Loud and clear."],"idl_youngjae":["Youngjae! Say it louder!"],"idl_kyungmin":["That's Kyungmin! Cheers all round."],"idl_stella":["Yes, Stella! What a call."],"idl_juun":["You got Juun! Loud and clear."],"idl_ana":["A-na! Say it louder!"],"idl_yeon":["That's Ye-on! Cheers all round."],"idl_sui":["Yes, Sui! What a call."],"idl_haum":["You got Haum! Loud and clear."],"idl_kya":["Kya! Say it louder!"],"idl_keonho":["That's Keonho! Cheers all round."],"idl_juhoon":["Yes, Juhoon! What a call."],"idl_seonghyeon":["You got Seonghyeon! Loud and clear."],"idl_allen":["Allen! Say it louder!"],"idl_yunha":["That's Yunha! Cheers all round."],"idl_hyunjae":["Yes, Hyunjae! What a call."],"idl_sunwoo":["You got Sunwoo! Loud and clear."],"idl_eric":["Eric! Say it louder!"],"idl_kevin":["That's Kevin! Cheers all round."],"idl_younghoon":["Yes, Younghoon! What a call."],"idl_jacob":["You got Jacob! Loud and clear."],"idl_juyeon":["Juyeon! Say it louder!"],"idl_q":["That's Q! Cheers all round."],"idl_anna":["Yes, Anna! What a call."],"idl_ella":["You got Ella! Loud and clear."],"idl_sooin":["Sooin! Say it louder!"],"idl_gawon":["That's Gawon! Cheers all round."],"idl_narin":["Yes, Narin! What a call."],"idl_ningning":["You got Ningning! Loud and clear."],"idl_taehyun":["Taehyun! Say it louder!"],"idl_hueningkai":["That's Hueningkai! Cheers all round."],"idl_beomgyu":["Yes, Beomgyu! What a call."],"idl_soobin":["You got Soobin! Loud and clear."],"idl_yeonjun":["Yeonjun! Say it louder!"],"idl_giselle":["That's Giselle! Cheers all round."],"idl_woonhak":["Yes, Woonhak! What a call."],"idl_jaehyun":["You got Jaehyun! Loud and clear."],"idl_sungho":["Sungho! Say it louder!"],"idl_taesan":["That's Taesan! Cheers all round."],"idl_riwoo":["Yes, Riwoo! What a call."],"idl_leehan":["You got Leehan! Loud and clear."],"idl_manon":["Manon! Say it louder!"],"idl_sophia":["That's Sophia! Cheers all round."],"idl_daniela":["Yes, Daniela! What a call."],"idl_lara":["You got Lara! Loud and clear."],"idl_megan":["Megan! Say it louder!"],"idl_yoonchae":["That's Yoonchae! Cheers all round."],"idl_karina":["Yes, Karina! What a call."],"idl_winter":["You got Winter! Loud and clear."],"idl_jurin":["Jurin! Say it louder!"],"idl_chisa":["That's Chisa! Cheers all round."],"idl_hinata":["Yes, Hinata! What a call."],"idl_harvey":["You got Harvey! Loud and clear."],"idl_juria":["Juria! Say it louder!"],"idl_maya":["That's Maya! Cheers all round."],"idl_cocona":["Yes, Cocona! What a call."],"idl_jin":["You got Jin! Loud and clear."],"idl_suga":["Suga! Say it louder!"],"idl_jisoo":["That's Jisoo! Cheers all round."],"idl_jennie":["Yes, Jennie! What a call."],"idl_rose":["You got Rosé! Loud and clear."],"idl_nayeon":["Nayeon! Say it louder!"],"idl_jeongyeon":["That's Jeongyeon! Cheers all round."],"idl_momo":["Yes, Momo! What a call."],"idl_sana":["You got Sana! Loud and clear."],"idl_scoups":["S.Coups! Say it louder!"],"idl_jeonghan":["That's Jeonghan! Cheers all round."],"idl_joshua":["Yes, Joshua! What a call."],"idl_jun":["You got Jun! Loud and clear."],"idl_the8":["The8! Say it louder!"],"idl_hoshi":["That's Hoshi! Cheers all round."],"idl_wonwoo":["Yes, Wonwoo! What a call."],"idl_woozi":["You got Woozi! Loud and clear."],"idl_dk":["DK! Say it louder!"],"idl_miyeon":["That's Miyeon! Cheers all round."],"idl_yabukinako":["Yes, Yabuki Nako! What a call."],"idl_hondahitomi":["You got Honda Hitomi! Loud and clear."],"idl_soul":["Soul! Say it louder!"],"idl_hyeonju":["That's Hyeonju! Cheers all round."],"idl_nana":["Yes, Nana! What a call."],"idl_gehlee":["You got Gehlee! Loud and clear."],"idl_jaehee":["Jaehee! Say it louder!"],"idl_kyehoon":["That's Kyehoon! Cheers all round."],"idl_donghwa":["Yes, Donghwa! What a call."],"idl_juwang":["You got Juwang! Loud and clear."],"idl_minje":["Minje! Say it louder!"],"idl_keiju":["That's Keiju! Cheers all round."],"idl_donghyeon":["Yes, Donghyeon! What a call."],"idl_hyeonbin":["You got Hyeonbin! Loud and clear."],"idl_yeonwoo":["Yeonwoo! Say it louder!"],"idl_jinhyuk":["That's Jinhyuk! Cheers all round."],"idl_siyun":["Yes, Siyun! What a call."],"idl_emma":["You got Emma! Loud and clear."],"idl_chloeyoung":["Chloe Young! Say it louder!"],"idl_hue":["That's HU'E! Cheers all round."],"idl_ina":["Yes, INA! What a call."],"idl_yunseo":["You got YunSeo! Loud and clear."],"idl_vin":["Vin! Say it louder!"],"idl_kelly":["That's Kelly! Cheers all round."],"idl_sangyeon":["Yes, Sangyeon! What a call."],"idl_kotoko":["You got Kotoko! Loud and clear."],"idl_elisia":["Elisia! Say it louder!"],"idl_yoona":["That's Yoona! Cheers all round."],"idl_seowon":["Yes, Seowon! What a call."],"idl_onda":["You got Onda! Loud and clear."],"idl_aisha":["Aisha! Say it louder!"],"idl_amaru":["That's Amaru! Cheers all round."]},"pocha":{"grp_bts":["BTS. A lovely set to know.","BTS, correct. Very collectible knowledge."],"grp_blackpink":["That is Blackpink. Filed and sleeved.","You know your Blackpink. Mint condition."],"grp_twice":["Yes, Twice. Front of the binder.","Twice. I keep a whole page for that."],"grp_straykids":["Stray Kids, correct. Very collectible knowledge.","Right, it's Stray Kids. Crisp answer."],"grp_itzy":["You know your Itzy. Mint condition.","Itzy. A lovely set to know."],"grp_seventeen":["Seventeen. I keep a whole page for that.","That is Seventeen. Filed and sleeved."],"grp_enhypen":["Right, it's Enhypen. Crisp answer.","Yes, Enhypen. Front of the binder."],"grp_lesserafim":["Le Sserafim. A lovely set to know.","Le Sserafim, correct. Very collectible knowledge."],"grp_newjeans":["That is NewJeans. Filed and sleeved.","You know your NewJeans. Mint condition."],"grp_idle":["Yes, I-dle. Front of the binder.","I-dle. I keep a whole page for that."],"grp_ateez":["Ateez, correct. Very collectible knowledge.","Right, it's Ateez. Crisp answer."],"grp_babymonster":["You know your Babymonster. Mint condition.","Babymonster. A lovely set to know."],"grp_ive":["Ive. I keep a whole page for that.","That is Ive. Filed and sleeved."],"grp_nmixx":["Right, it's Nmixx. Crisp answer.","Yes, Nmixx. Front of the binder."],"grp_izone":["Iz*One. A lovely set to know.","Iz*One, correct. Very collectible knowledge."],"grp_kep1er":["That is Kep1er. Filed and sleeved.","You know your Kep1er. Mint condition."],"grp_everglow":["Yes, Everglow. Front of the binder.","Everglow. I keep a whole page for that."],"grp_stayc":["STAYC, correct. Very collectible knowledge.","Right, it's STAYC. Crisp answer."],"grp_illit":["You know your Illit. Mint condition.","Illit. A lovely set to know."],"grp_treasure":["Treasure. I keep a whole page for that.","That is Treasure. Filed and sleeved."],"grp_fiftyfifty":["Right, it's Fifty Fifty. Crisp answer.","Yes, Fifty Fifty. Front of the binder."],"grp_fromis9":["Fromis 9. A lovely set to know.","Fromis 9, correct. Very collectible knowledge."],"grp_hearts2hearts":["That is Hearts2Hearts. Filed and sleeved.","You know your Hearts2Hearts. Mint condition."],"grp_zerobaseone":["Yes, Zerobaseone. Front of the binder.","Zerobaseone. I keep a whole page for that."],"grp_cortis":["Cortis, correct. Very collectible knowledge.","Right, it's Cortis. Crisp answer."],"grp_kissoflife":["You know your Kiss of Life. Mint condition.","Kiss of Life. A lovely set to know."],"grp_p1harmony":["P1Harmony. I keep a whole page for that.","That is P1Harmony. Filed and sleeved."],"grp_kiiikiii":["Right, it's KiiiKiii. Crisp answer.","Yes, KiiiKiii. Front of the binder."],"grp_cravity":["Cravity. A lovely set to know.","Cravity, correct. Very collectible knowledge."],"grp_tws":["That is TWS. Filed and sleeved.","You know your TWS. Mint condition."],"grp_riize":["Yes, Riize. Front of the binder.","Riize. I keep a whole page for that."],"grp_unis":["Unis, correct. Very collectible knowledge.","Right, it's Unis. Crisp answer."],"grp_nctwish":["You know your NCT Wish. Mint condition.","NCT Wish. A lovely set to know."],"grp_alldayproject":["AllDay Project. I keep a whole page for that.","That is AllDay Project. Filed and sleeved."],"grp_kickflip":["Right, it's KickFlip. Crisp answer.","Yes, KickFlip. Front of the binder."],"grp_nowz":["Nowz. A lovely set to know.","Nowz, correct. Very collectible knowledge."],"grp_badvillain":["That is Badvillain. Filed and sleeved.","You know your Badvillain. Mint condition."],"grp_theboyz":["Yes, The Boyz. Front of the binder.","The Boyz. I keep a whole page for that."],"grp_meovv":["MEOVV, correct. Very collectible knowledge.","Right, it's MEOVV. Crisp answer."],"grp_aespa":["You know your aespa. Mint condition.","aespa. A lovely set to know."],"grp_txt":["TXT. I keep a whole page for that.","That is TXT. Filed and sleeved."],"grp_boynextdoor":["Right, it's Boynextdoor. Crisp answer.","Yes, Boynextdoor. Front of the binder."],"grp_katseye":["KATSEYE. A lovely set to know.","KATSEYE, correct. Very collectible knowledge."],"grp_xg":["That is XG. Filed and sleeved.","You know your XG. Mint condition."],"idl_lisa":["Lisa. A fine card to pull."],"idl_jungkook":["That is Jung Kook. Into the sleeve."],"idl_v":["Yes, V. Nicely spotted."],"idl_jimin":["You named Jimin. Very neat."],"idl_rm":["RM. A fine card to pull."],"idl_jhope":["That is J-Hope. Into the sleeve."],"idl_tzuyu":["Yes, Tzuyu. Nicely spotted."],"idl_jihyo":["You named Jihyo. Very neat."],"idl_dahyun":["Dahyun. A fine card to pull."],"idl_wonyoung":["That is Wonyoung. Into the sleeve."],"idl_chaeyoung":["Yes, Chaeyoung. Nicely spotted."],"idl_mina":["You named Mina. Very neat."],"idl_soyeon":["Soyeon. A fine card to pull."],"idl_sakura":["That is Sakura. Into the sleeve."],"idl_joyuri":["Yes, Jo Yu Ri. Nicely spotted."],"idl_bangchan":["You named Bang Chan. Very neat."],"idl_felix":["Felix. A fine card to pull."],"idl_yeji":["That is Yeji. Into the sleeve."],"idl_yuqi":["Yes, Yuqi. Nicely spotted."],"idl_ryujin":["You named Ryujin. Very neat."],"idl_choiyena":["Choi Ye Na. A fine card to pull."],"idl_yujin":["That is Yujin. Into the sleeve."],"idl_leechaeyeon":["Yes, Lee Chae Yeon. Nicely spotted."],"idl_minnie":["You named Minnie. Very neat."],"idl_leeknow":["Lee Know. A fine card to pull."],"idl_kwoneunbi":["That is Kwon Eun Bi. Into the sleeve."],"idl_kimchaewon":["Yes, Kim Chae Won. Nicely spotted."],"idl_hyunjin":["You named Hyunjin. Very neat."],"idl_changbin":["Changbin. A fine card to pull."],"idl_kimminju":["That is Kim Min Ju. Into the sleeve."],"idl_mingyu":["Yes, Mingyu. Nicely spotted."],"idl_shuhua":["You named Shuhua. Very neat."],"idl_seungmin":["Seungmin. A fine card to pull."],"idl_chaeryeong":["That is Chaeryeong. Into the sleeve."],"idl_lia":["Yes, Lia. Nicely spotted."],"idl_seungkwan":["You named Seungkwan. Very neat."],"idl_in":["I.N. A fine card to pull."],"idl_sunghoon":["That is Sunghoon. Into the sleeve."],"idl_sieun":["Yes, Sieun. Nicely spotted."],"idl_yuna":["You named Yuna. Very neat."],"idl_yunjin":["Yunjin. A fine card to pull."],"idl_han":["That is Han. Into the sleeve."],"idl_natty":["Yes, Natty. Nicely spotted."],"idl_vernon":["You named Vernon. Very neat."],"idl_kazuha":["Kazuha. A fine card to pull."],"idl_kanghyewon":["That is Kang Hye Won. Into the sleeve."],"idl_niki":["Yes, NI-KI. Nicely spotted."],"idl_sihyeon":["You named Sihyeon. Very neat."],"idl_choihyunsuk":["Choi Hyun Suk. A fine card to pull."],"idl_hongjoong":["That is Hongjoong. Into the sleeve."],"idl_lily":["Yes, Lily. Nicely spotted."],"idl_gaeul":["You named Gaeul. Very neat."],"idl_eunchae":["Eunchae. A fine card to pull."],"idl_jiwoong":["That is Jiwoong. Into the sleeve."],"idl_hanbin":["Yes, Hanbin. Nicely spotted."],"idl_leeseo":["You named Leeseo. Very neat."],"idl_haerin":["Haerin. A fine card to pull."],"idl_minji":["That is Minji. Into the sleeve."],"idl_liz":["Yes, Liz. Nicely spotted."],"idl_hanni":["You named Hanni. Very neat."],"idl_hyein":["Hyein. A fine card to pull."],"idl_san":["That is San. Into the sleeve."],"idl_rei":["Yes, Rei. Nicely spotted."],"idl_belle":["You named Belle. Very neat."],"idl_dino":["Dino. A fine card to pull."],"idl_yunho":["That is Yunho. Into the sleeve."],"idl_yeosang":["Yes, Yeosang. Nicely spotted."],"idl_jongho":["You named Jongho. Very neat."],"idl_woochan":["Woochan. A fine card to pull."],"idl_carmen":["That is Carmen. Into the sleeve."],"idl_sungchan":["Yes, Sungchan. Nicely spotted."],"idl_shotaro":["You named Shotaro. Very neat."],"idl_mingi":["Mingi. A fine card to pull."],"idl_seonghwa":["That is Seonghwa. Into the sleeve."],"idl_xiaoting":["Yes, Xiaoting. Nicely spotted."],"idl_ahyeon":["You named Ahyeon. Very neat."],"idl_wonhee":["Wonhee. A fine card to pull."],"idl_chaehyun":["That is Chaehyun. Into the sleeve."],"idl_hikaru":["Yes, Hikaru. Nicely spotted."],"idl_dayeon":["You named Dayeon. Very neat."],"idl_sullyoon":["Sullyoon. A fine card to pull."],"idl_haewon":["That is Haewon. Into the sleeve."],"idl_hyeongjun":["Yes, Hyeongjun. Nicely spotted."],"idl_nagyung":["You named Nagyung. Very neat."],"idl_jiwon":["Jiwon. A fine card to pull."],"idl_hayoung":["That is Hayoung. Into the sleeve."],"idl_jungwon":["Yes, Jungwon. Nicely spotted."],"idl_jake":["You named Jake. Very neat."],"idl_sunoo":["Sunoo. A fine card to pull."],"idl_sumin":["That is Sumin. Into the sleeve."],"idl_wooyoung":["Yes, Wooyoung. Nicely spotted."],"idl_junkyu":["You named Junkyu. Very neat."],"idl_jihoon":["Jihoon. A fine card to pull."],"idl_kyujin":["That is Kyujin. Into the sleeve."],"idl_taerae":["Yes, Taerae. Nicely spotted."],"idl_anton":["You named Anton. Very neat."],"idl_eunseok":["Eunseok. A fine card to pull."],"idl_minju":["That is Minju. Into the sleeve."],"idl_minhee":["Yes, Minhee. Nicely spotted."],"idl_j":["You named J. Very neat."],"idl_sojunghwan":["So Jung Hwan. A fine card to pull."],"idl_yoshi":["That is Yoshi. Into the sleeve."],"idl_hueningbahiyyih":["Yes, Huening Bahiyyih. Nicely spotted."],"idl_bae":["You named Bae. Very neat."],"idl_julie":["Julie. A fine card to pull."],"idl_haneul":["That is Haneul. Into the sleeve."],"idl_wonbin":["Yes, Wonbin. Nicely spotted."],"idl_asa":["You named Asa. Very neat."],"idl_yunah":["Yunah. A fine card to pull."],"idl_moka":["That is Moka. Into the sleeve."],"idl_iroha":["Yes, Iroha. Nicely spotted."],"idl_bailey":["You named Bailey. Very neat."],"idl_tarzzan":["Tarzzan. A fine card to pull."],"idl_jiheon":["That is Jiheon. Into the sleeve."],"idl_jongseob":["Yes, Jongseob. Nicely spotted."],"idl_taeyoung":["You named Taeyoung. Very neat."],"idl_jay":["Jay. A fine card to pull."],"idl_doyoung":["That is Doyoung. Into the sleeve."],"idl_matthew":["Yes, Matthew. Nicely spotted."],"idl_yushi":["You named Yushi. Very neat."],"idl_rora":["Rora. A fine card to pull."],"idl_youngseo":["That is Youngseo. Into the sleeve."],"idl_woobin":["Yes, Woobin. Nicely spotted."],"idl_jungmo":["You named Jungmo. Very neat."],"idl_wonjin":["Wonjin. A fine card to pull."],"idl_keeho":["That is Keeho. Into the sleeve."],"idl_jiung":["Yes, Jiung. Nicely spotted."],"idl_parkjeongwoo":["You named Park Jeong Woo. Very neat."],"idl_asahi":["Asahi. A fine card to pull."],"idl_haruto":["That is Haruto. Into the sleeve."],"idl_yoonjaehyuk":["Yes, Yoon Jae Hyuk. Nicely spotted."],"idl_jiwoo":["You named Jiwoo. Very neat."],"idl_gunwook":["Gunwook. A fine card to pull."],"idl_sion":["That is Sion. Into the sleeve."],"idl_sakuya":["Yes, Sakuya. Nicely spotted."],"idl_chiquita":["You named Chiquita. Very neat."],"idl_dohoon":["Dohoon. A fine card to pull."],"idl_ian":["That is Ian. Into the sleeve."],"idl_martin":["Yes, Martin. Nicely spotted."],"idl_seongmin":["You named Seongmin. Very neat."],"idl_isa":["Isa. A fine card to pull."],"idl_yoon":["That is Yoon. Into the sleeve."],"idl_seeun":["Yes, Seeun. Nicely spotted."],"idl_riku":["You named Riku. Very neat."],"idl_sohee":["Sohee. A fine card to pull."],"idl_ruka":["That is Ruka. Into the sleeve."],"idl_pharita":["Yes, Pharita. Nicely spotted."],"idl_hanjin":["You named Hanjin. Very neat."],"idl_yuha":["Yuha. A fine card to pull."],"idl_jiyu":["That is Jiyu. Into the sleeve."],"idl_leesol":["Yes, Leesol. Nicely spotted."],"idl_james":["You named James. Very neat."],"idl_annie":["Annie. A fine card to pull."],"idl_serim":["That is Serim. Into the sleeve."],"idl_theo":["Yes, Theo. Nicely spotted."],"idl_intak":["You named Intak. Very neat."],"idl_keena":["Keena. A fine card to pull."],"idl_ryo":["That is Ryo. Into the sleeve."],"idl_rami":["Yes, Rami. Nicely spotted."],"idl_chanellemoon":["You named Chanelle Moon. Very neat."],"idl_yewon":["Yewon. A fine card to pull."],"idl_hana":["That is Hana. Into the sleeve."],"idl_athena":["Yes, Athena. Nicely spotted."],"idl_shinyu":["You named Shinyu. Very neat."],"idl_youngjae":["Youngjae. A fine card to pull."],"idl_kyungmin":["That is Kyungmin. Into the sleeve."],"idl_stella":["Yes, Stella. Nicely spotted."],"idl_juun":["You named Juun. Very neat."],"idl_ana":["A-na. A fine card to pull."],"idl_yeon":["That is Ye-on. Into the sleeve."],"idl_sui":["Yes, Sui. Nicely spotted."],"idl_haum":["You named Haum. Very neat."],"idl_kya":["Kya. A fine card to pull."],"idl_keonho":["That is Keonho. Into the sleeve."],"idl_juhoon":["Yes, Juhoon. Nicely spotted."],"idl_seonghyeon":["You named Seonghyeon. Very neat."],"idl_allen":["Allen. A fine card to pull."],"idl_yunha":["That is Yunha. Into the sleeve."],"idl_hyunjae":["Yes, Hyunjae. Nicely spotted."],"idl_sunwoo":["You named Sunwoo. Very neat."],"idl_eric":["Eric. A fine card to pull."],"idl_kevin":["That is Kevin. Into the sleeve."],"idl_younghoon":["Yes, Younghoon. Nicely spotted."],"idl_jacob":["You named Jacob. Very neat."],"idl_juyeon":["Juyeon. A fine card to pull."],"idl_q":["That is Q. Into the sleeve."],"idl_anna":["Yes, Anna. Nicely spotted."],"idl_ella":["You named Ella. Very neat."],"idl_sooin":["Sooin. A fine card to pull."],"idl_gawon":["That is Gawon. Into the sleeve."],"idl_narin":["Yes, Narin. Nicely spotted."],"idl_ningning":["You named Ningning. Very neat."],"idl_taehyun":["Taehyun. A fine card to pull."],"idl_hueningkai":["That is Hueningkai. Into the sleeve."],"idl_beomgyu":["Yes, Beomgyu. Nicely spotted."],"idl_soobin":["You named Soobin. Very neat."],"idl_yeonjun":["Yeonjun. A fine card to pull."],"idl_giselle":["That is Giselle. Into the sleeve."],"idl_woonhak":["Yes, Woonhak. Nicely spotted."],"idl_jaehyun":["You named Jaehyun. Very neat."],"idl_sungho":["Sungho. A fine card to pull."],"idl_taesan":["That is Taesan. Into the sleeve."],"idl_riwoo":["Yes, Riwoo. Nicely spotted."],"idl_leehan":["You named Leehan. Very neat."],"idl_manon":["Manon. A fine card to pull."],"idl_sophia":["That is Sophia. Into the sleeve."],"idl_daniela":["Yes, Daniela. Nicely spotted."],"idl_lara":["You named Lara. Very neat."],"idl_megan":["Megan. A fine card to pull."],"idl_yoonchae":["That is Yoonchae. Into the sleeve."],"idl_karina":["Yes, Karina. Nicely spotted."],"idl_winter":["You named Winter. Very neat."],"idl_jurin":["Jurin. A fine card to pull."],"idl_chisa":["That is Chisa. Into the sleeve."],"idl_hinata":["Yes, Hinata. Nicely spotted."],"idl_harvey":["You named Harvey. Very neat."],"idl_juria":["Juria. A fine card to pull."],"idl_maya":["That is Maya. Into the sleeve."],"idl_cocona":["Yes, Cocona. Nicely spotted."],"idl_jin":["You named Jin. Very neat."],"idl_suga":["Suga. A fine card to pull."],"idl_jisoo":["That is Jisoo. Into the sleeve."],"idl_jennie":["Yes, Jennie. Nicely spotted."],"idl_rose":["You named Rosé. Very neat."],"idl_nayeon":["Nayeon. A fine card to pull."],"idl_jeongyeon":["That is Jeongyeon. Into the sleeve."],"idl_momo":["Yes, Momo. Nicely spotted."],"idl_sana":["You named Sana. Very neat."],"idl_scoups":["S.Coups. A fine card to pull."],"idl_jeonghan":["That is Jeonghan. Into the sleeve."],"idl_joshua":["Yes, Joshua. Nicely spotted."],"idl_jun":["You named Jun. Very neat."],"idl_the8":["The8. A fine card to pull."],"idl_hoshi":["That is Hoshi. Into the sleeve."],"idl_wonwoo":["Yes, Wonwoo. Nicely spotted."],"idl_woozi":["You named Woozi. Very neat."],"idl_dk":["DK. A fine card to pull."],"idl_miyeon":["That is Miyeon. Into the sleeve."],"idl_yabukinako":["Yes, Yabuki Nako. Nicely spotted."],"idl_hondahitomi":["You named Honda Hitomi. Very neat."],"idl_soul":["Soul. A fine card to pull."],"idl_hyeonju":["That is Hyeonju. Into the sleeve."],"idl_nana":["Yes, Nana. Nicely spotted."],"idl_gehlee":["You named Gehlee. Very neat."],"idl_jaehee":["Jaehee. A fine card to pull."],"idl_kyehoon":["That is Kyehoon. Into the sleeve."],"idl_donghwa":["Yes, Donghwa. Nicely spotted."],"idl_juwang":["You named Juwang. Very neat."],"idl_minje":["Minje. A fine card to pull."],"idl_keiju":["That is Keiju. Into the sleeve."],"idl_donghyeon":["Yes, Donghyeon. Nicely spotted."],"idl_hyeonbin":["You named Hyeonbin. Very neat."],"idl_yeonwoo":["Yeonwoo. A fine card to pull."],"idl_jinhyuk":["That is Jinhyuk. Into the sleeve."],"idl_siyun":["Yes, Siyun. Nicely spotted."],"idl_emma":["You named Emma. Very neat."],"idl_chloeyoung":["Chloe Young. A fine card to pull."],"idl_hue":["That is HU'E. Into the sleeve."],"idl_ina":["Yes, INA. Nicely spotted."],"idl_yunseo":["You named YunSeo. Very neat."],"idl_vin":["Vin. A fine card to pull."],"idl_kelly":["That is Kelly. Into the sleeve."],"idl_sangyeon":["Yes, Sangyeon. Nicely spotted."],"idl_kotoko":["You named Kotoko. Very neat."],"idl_elisia":["Elisia. A fine card to pull."],"idl_yoona":["That is Yoona. Into the sleeve."],"idl_seowon":["Yes, Seowon. Nicely spotted."],"idl_onda":["You named Onda. Very neat."],"idl_aisha":["Aisha. A fine card to pull."],"idl_amaru":["That is Amaru. Into the sleeve."]}};
+  for (const who in G) if (MASCOTS[who]) Object.assign(MASCOTS[who].lines = MASCOTS[who].lines || {}, G[who]); }
+
 /* ---------------- sidekick voices: recorded Kokoro clips, one voice per sidekick (pipelines/make_voices.py) ----------------
    A clip's file name is a hash of "sidekick|line", so there is no index to download or go stale. A line without a clip stays silent. */
 const Voice = {
@@ -3108,6 +3328,18 @@ function collect(w, x) { if (!x || !imgOf(x) || x.kind === "album" || x.kind ===
 const dexHas = (k) => (prof().dex[k] || 0) >= 3;
 
 /* ---------------- sidekick dock (ballknowledge's #mascot markup and CSS; the sidekick follows the world you are in) ---------------- */
+function lineFits(t, kind) {
+  const h = new Date().getHours();
+  if (!["morning", "evening", "night"].includes(kind)) {
+    if (/^(good )?evening\b/i.test(t) && !(h >= 17 && h < 23)) return false;
+    if (/^(good )?morning\b|\bgood morning\b/i.test(t) && !(h >= 5 && h < 12)) return false;
+  }
+  const n = /\b(two|three|four|five|six|ten) in a row\b/i.exec(t);
+  if (n) { const streak = (Q.s && Q.s.streak) || (typeof H !== "undefined" && H.s && H.s.streak) || 0; if ({ two: 2, three: 3, four: 4, five: 5, six: 6, ten: 10 }[n[1].toLowerCase()] !== streak) return false; }
+  if (kind === "miss" && /\b(not him|not her)\b/i.test(t)) return false;
+  if (kind !== "hit_blur" && /\bbadge\b/i.test(t) && S.world !== "football") return false;
+  return true;
+}
 const Mascot = (() => {
   let hideT = null, last = 0; const said = [];
   const id = () => { const w = S.world && WORLDS[S.world] ? S.world : null, k = w ? (prof().kick || {})[w] : prof().kickHome; return k && MASCOT_SVG[k] ? k : w ? WORLDS[w].mascot : "bongi"; };
@@ -3123,8 +3355,8 @@ const Mascot = (() => {
   }
   const api = {
     id, mode, dock, name: () => MASCOTS[id()].name, face: (m) => MASCOT_SVG[id()](m), setCtx() {},
-    react(kind, force) { const now = performance.now(), big = ["streak", "best", "over", "rankup", "achieve", "welcome"].includes(kind); if (!big && !force && now - last < 5000) return; last = now; const L = MASCOTS[id()].lines || {}, pool = L[kind] || L.hit || []; if (pool.length) show(kind, pick(pool)); },
-    hello() { const L = MASCOTS[id()].lines; if (L && L.welcome) show("welcome", pick(L.welcome)); },
+    react(kind, force) { const now = performance.now(), big = ["streak", "best", "over", "rankup", "achieve", "welcome"].includes(kind); if (!big && !force && now - last < 5000) return; last = now; const L = MASCOTS[id()].lines || {}, back = { rankup: "best", ch_win: "best", ch_loss: "over", ch_draw: "over" }[kind], pool = (L[kind] || L[back] || []).filter((t) => lineFits(t, kind)); if (pool.length) show(kind, pick(pool)); },
+    hello() { const L = MASCOTS[id()].lines, pool = ((L && L.welcome) || []).filter((t) => lineFits(t, "welcome")); if (pool.length) show("welcome", pick(pool)); },
   };
   return api;
 })();
@@ -3210,34 +3442,34 @@ const Q = { timer: null, s: null };
 function stopQuiz() { if (Q.timer) { clearInterval(Q.timer); Q.timer = null; } try { Aud.stop(); } catch (e) { /* not ready */ } }
 /* Hear the song: Apple's 30-second previews, played in slices (3 s, then 5 s more, then the rest), paused while someone answers */
 const Aud = {
-  a: null, t: null, ok: true,
-  load(url) { this.stop(); this.ok = true; this.blocked = false; if (!url) { this.a = null; return; } const a = new Audio(); a.preload = "auto"; a.src = url; a.onerror = () => { this.ok = false; this.note(window.ARTIFACT ? "Audio can't play in this preview. It plays on moultimateball.vercel.app." : "This preview didn't load. Skip it or use the hints."); }; this.a = a; setTimeout(() => this.stage(1), 400); },
-  play(from, to) { const a = this.a; if (!a) return; clearTimeout(this.t); try { a.currentTime = from; a.play().then(() => { this.blocked = false; this.note(""); }).catch(() => { this.blocked = true; this.note(""); }); } catch (e) { return; } this.t = setTimeout(() => a.pause(), (to - from) * 1000); },
+  a: null, b: null, t: null, ok: true,
+  load(url, url2) { this.stop(); this.ok = true; this.blocked = false; if (!url) { this.a = null; return; } if (url2) { this.b = new Audio(); this.b.preload = "auto"; this.b.src = url2; this.b.onerror = () => { this.ok = false; this.note("One of the two previews didn't load. Skip this one."); }; } const a = new Audio(); a.preload = "auto"; a.src = url; a.onerror = () => { this.ok = false; this.note(window.ARTIFACT ? "Audio can't play in this preview. It plays on moultimateball.vercel.app." : "This preview didn't load. Skip it or use the hints."); }; this.a = a; setTimeout(() => this.stage(1), 400); },
+  play(from, to) { const a = this.a, b = this.b; if (!a) return; clearTimeout(this.t); try { if (b) { b.currentTime = from; b.play().catch(() => {}); } a.currentTime = from; a.play().then(() => { this.blocked = false; this.note(""); }).catch(() => { this.blocked = true; this.note(""); }); } catch (e) { return; } this.t = setTimeout(() => { a.pause(); if (b) b.pause(); }, (to - from) * 1000); },
   stage(n) { if (n === 1) this.play(0, 3); else if (n === 2) this.play(3, 8); else if (n >= 5) this.play(8, 30); },
   note(t) { const n = $("#audNote"); if (!n) return; n.innerHTML = t ? esc(t) : this.blocked ? `<button class="btn" id="audReplay" type="button">▶ Tap to play</button>` : "Listening… replay with the button below"; },
-  pause() { if (this.a) this.a.pause(); clearTimeout(this.t); },
-  stop() { this.pause(); if (this.a) { this.a.src = ""; this.a = null; } },
+  pause() { if (this.a) this.a.pause(); if (this.b) this.b.pause(); clearTimeout(this.t); },
+  stop() { this.pause(); if (this.a) { this.a.src = ""; this.a = null; } if (this.b) { this.b.src = ""; this.b = null; } },
 };
 const gamesBar = (title) => `<div class="row" style="margin-bottom:12px"><button class="btn ghost" id="gamesBack" type="button">← Back</button><h2 style="font-size:24px">${title}</h2></div>`;
 const diffBar = () => S.world === "kpop" ? "" : `<div class="label" style="margin-top:14px">Difficulty</div><div class="diffbar" role="group" aria-label="Difficulty">${DIFFS.map(([k]) => [k, diffName(k)]).map(([k, n]) => `<button type="button" class="chip" data-diff="${k}" aria-pressed="${S.diff === k}">${n}</button>`).join("")}</div><div class="fine" id="diffNote" style="margin-top:6px">${DIFFNOTE[S.diff]}</div>`;
 const modeIntro = (title, blurb, opts) => `<div class="card">${gamesBar(title)}<p class="sub">${blurb}</p>${diffBar()}<div class="label" style="margin-top:16px">Players and devices</div><div class="modes">${opts.map((o) => `<button class="mode" data-mode="${o.id}" type="button"><b>${o.t}</b><span>${o.d}</span></button>`).join("")}</div><div id="roomBox"></div></div>`;
 const NAMES = () => { try { const n = JSON.parse(sessionStorage.getItem("gp_names") || "null"); return n && n.length === 2 ? n : ["Player 1", "Player 2"]; } catch (e) { return ["Player 1", "Player 2"]; } };
 function openGame(id) {
-  S.game = id; if (S.world === "kpop") S.diff = "medium"; const g = gameOf(S.world, id); stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
+  S.game = id; if (S.world === "kpop") S.diff = "medium"; else { try { S.diff = localStorage.getItem("gp_diff") || "medium"; } catch (e) { /* blocked */ } } const g = gameOf(S.world, id); stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
   const how = { play: "The difficulty sets how strong the computer plays.", photo: "The picture is there from the start; hints arrive at one third and two thirds of the time.", clue: "Clues start hard and get easier.", blur: "The picture starts blurred and sharpens every few seconds.", scramble: "The letters of every word are shuffled. Hints arrive slowly.", hol: "Two picks, one question. Tap the right side.", all: "Type names in any order. Initials cost 30 points, a wrong name 20.", ttt: "Tap a square and name someone who fits its row and column. A wrong or repeated name loses your turn.", roulette: "Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.", audio: "A real song plays in short slices: 3 seconds, then 5 more, then the rest." }[g.kind];
   $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how} ${g.kind === "hol" ? "Solo: keep the streak going. Two players: take turns, five each." : "Buzz in whenever you think you know it. The sooner you are right, the more you score (up to 1,000); a wrong guess costs 150."}`, [
     { id: "solo", t: g.kind === "ttt" || g.kind === "play" ? "Solo, against the computer" : g.kind === "roulette" || g.kind === "all" ? "Solo, against the clock" : "Solo streak", d: g.kind === "ttt" ? "The computer gets smarter with the difficulty." : g.kind === "all" ? "Name everyone before the clock runs out." : g.kind === "roulette" ? "Name as many as you can before time runs out." : "Keep going for as long as you can. The run ends the first time you miss." },
     ...(g.kind === "all" ? [] : [{ id: "duo", t: "Two players, one device", d: g.kind === "play" ? "One board, pass the device after every move." : g.kind === "hol" ? "Take turns. Most right after five each wins." : g.kind === "roulette" ? "Three rounds. Take turns typing names on the same screen." : "Five rounds. Race to buzz: A for player 1, L for player 2." }]),
-    ...(["hol", "roulette", "all", "ttt", "play"].includes(g.kind) ? [] : [{ id: "online", t: "Two players, two devices", d: "The same race on two phones or computers, with a four-letter room code." }])]);
+    ...(["hol", "roulette", "all", "ttt", "play"].includes(g.kind) ? [] : [{ id: "surv", t: "Survival", d: "Three lives. The questions get harder every three. One high score." }, { id: "online", t: "Two players, two devices", d: "The same race on two phones or computers, with a four-letter room code." }])]);
   if ($('#room [data-mode="duo"]')) { try { $("#room .modes").insertAdjacentHTML("afterend", duoNamesHTML()); } catch (e) { /* not ready */ } }
   if (["clue", "blur", "photo", "audio", "scramble", "hol"].includes(g.kind)) { $("#room").insertAdjacentHTML("beforeend", `<div class="card" id="boardBox"></div>`); if (Boards) Boards.paint(`${S.world}:${id}`, g.kind === "hol" ? "streak" : "points"); }
   Snd.mode("game");
 }
 function startMode(m) {
-  const g = gameOf(S.world, S.game); if (m === "online") return openOnline(); document.body.classList.add("ingame");
+  const g = gameOf(S.world, S.game); if (m === "online") return openOnline(); if (m === "surv") Q.next = { surv: { lives: 3 }, rounds: 999 }; document.body.classList.add("ingame");
   { const p = prof(); p.last = { w: S.world, g: S.game, t: Date.now() }; p.gplays = p.gplays || {}; p.gplays[S.world + ":" + S.game] = (p.gplays[S.world + ":" + S.game] || 0) + 1; saveProf(); }
   addPlay(S.world);
-  const go2 = () => { if (g.kind === "play") return newChessPlay(m); if (g.kind === "all") return newAll(m); if (g.kind === "ttt") return newTTT(m); if (g.kind === "hol") return newHol(m); if (g.kind === "roulette") return newRou(m); newQuiz(S.world, S.game, m); };
+  const go2 = () => { if (g.kind === "play") return newChessPlay(m); if (g.kind === "all") return newAll(m); if (g.kind === "ttt") return newTTT(m); if (g.kind === "hol") return newHol(m); if (g.kind === "roulette") return newRou(m); newQuiz(S.world, S.game, m === "surv" ? "solo" : m); };
   if (m === "duo") { const n = NAMES(); Vs.match({ nick: n[0], avatar: prof().avatar }, { nick: n[1], avatar: "" }, go2); } else go2();
 }
 /* ---------------- roulette (ballknowledge's Club roulette): name members or players of a group, club or team ---------------- */
@@ -3274,11 +3506,11 @@ function rouLose(why) { const s = RO.s; if (s.phase !== "play") return; clearInt
 
 function addPlay(w) { const p = prof(); const W = p.worlds[w] || (p.worlds[w] = { xp: 0, plays: 0 }); W.plays++; saveProf(); const n = WORLD_IDS.filter((x) => (p.worlds[x] || {}).plays).length; if (n >= 3) award("tourist"); if (n >= WORLD_IDS.length) award("explorer"); }
 
-function newQuiz(w, game, mode, mix) { Q.hold = false; clearTimeout(Q.auto); Q.s = { w, game, mode, round: 0, rounds: mix ? mix.length : mode === "solo" ? 10 : 5, scores: mode === "solo" ? [0] : [0, 0], streak: 0, phase: "run", mix: mix || null, wins: [0, 0], used: new Set() }; nextRound(); }
+function newQuiz(w, game, mode, mix) { Q.hold = false; clearTimeout(Q.auto); Q.s = { w, game, mode, round: 0, rounds: mix ? mix.length : mode === "solo" ? 10 : 5, scores: mode === "solo" ? [0] : [0, 0], streak: 0, phase: "run", mix: mix || null, wins: [0, 0], used: new Set() }; if (Q.next) { Object.assign(Q.s, Q.next); Q.next = null; } nextRound(); }
 function curDef() { const s = Q.s; return s.mix ? gameOf(s.mix[s.round - 1].w, s.mix[s.round - 1].g) : gameOf(s.w, s.game); }
 function curWorld() { const s = Q.s; return s.mix ? s.mix[s.round - 1].w : s.w; }
 function nextRound() {
-  const s = Q.s; s.round++; const d = curDef(), pool = byFame(d.pool()); let r;
+  const s = Q.s; s.round++; if (s.surv) S.diff = DIFFS[Math.min(3, Math.floor((s.round - 1) / 3))][0]; const d = curDef(), pool = byFame(d.pool()); let r;
   const kp = curWorld() === "kpop" && !s.daily && !s.redo; s.pk = s.pk || Pick.ctx();
   const fresh = (x) => !s.used.has(x.id) && (d.kind !== "scramble" || qnorm(x.n).length >= 4);
   const pickR = s.daily ? (k) => pool[Math.floor(seeded(`${s.daily}:${s.round}:${k}`) * pool.length)] : () => rnd(pool);
@@ -3286,12 +3518,13 @@ function nextRound() {
   if (kp) Pick.record(r, s.pk);
   if (s.fixed) r = items(s.w).find((x) => x.id === s.fixed[s.round - 1]) || r;   // a challenge replays the challenger's exact rounds
   if (s.redo) r = d.pool().find((x) => x.id === s.redo[s.round - 1]) || r;
+  if (Q.first && s.round === 1) { r = d.pool().find((x) => x.id === Q.first) || r; Q.first = null; }   // "play this one" from search
   s.used.add(r.id); s.r = r; (s.picks = s.picks || []).push(r.id);
   s.clues = d.kind === "audio" ? [["Listen", "3 seconds"], ["Listen", "5 more seconds"], [r.kind === "theme" ? "Performed by" : "By", r.by], [r.kind === "theme" ? "Series from" : "Year", r.year], ["Listen", "the whole preview"], ...(r.kind === "theme" ? [["Song", r.n], ["Series initials", first(r.anime)]] : [["Initials", first(r.n)]])].filter((c) => c[1]) : d.kind === "blur" ? BLUR.map((b) => ["Blur", b]) : d.kind === "scramble" ? [["Letters", scrambleName(r.n)], ["It is", KIND_WORD[r.kind] || "a name"], ...(CLUES[r.kind] ? CLUES[r.kind](r).filter((c) => !/Initials|Starts|Letters/.test(c[0])).slice(-1) : []), ["Starts with", first(r.n)]] : d.kind === "photo" ? d.hints(r) : d.clues(r);
   /* a hint must never contain the answer (Tottenham Hotspur Stadium for Tottenham, "Albanian lek" for Albania): drop it, unless the clue IS the prompt */
   if (!["capital", "whose", "albumname", "where", "from", "quiz"].includes(d.id) && d.kind !== "scramble" && d.kind !== "audio") { const an = qnorm(nameOfAnswer(d, r)); if (an.length >= 5) { const stem = an.slice(0, Math.max(5, an.length - 2)), keep = s.clues.filter((c, i) => i === 0 || !qnorm(String(c[1])).includes(stem) || /^(Initials|Starts with)$/.test(c[0])); if (keep.length >= 2) s.clues = keep; } }
   s.elapsed = 0; s.paused = false; s.buzzed = null; s.locked = [false, false]; s.phase = "run"; s.result = null; s.hn = 0;
-  Aud.load(d.kind === "audio" ? r.pv : null); s.cs = (d.kind === "audio" ? 7 : d.kind === "blur" ? 3.2 : d.kind === "scramble" ? 7 : d.kind === "photo" ? 8 : 6) * clueSpeed(); s.total = d.kind === "photo" ? 3 * s.cs : s.clues.length * s.cs + 6;
+  Aud.load(d.kind === "audio" ? r.pv : null, r.pv2); s.cs = (d.kind === "audio" ? 7 : d.kind === "blur" ? 3.2 : d.kind === "scramble" ? 7 : d.kind === "photo" ? 8 : 6) * clueSpeed(); s.total = d.kind === "photo" ? 3 * s.cs : s.clues.length * s.cs + 6;
   if (s.mix) { setTheme(curWorld()); }
   renderQuiz(); if (Q.timer) clearInterval(Q.timer); Q.timer = setInterval(tickQuiz, 250); Net.sync();   /* not stopQuiz(): that would also stop this round's song */
 }
@@ -3335,16 +3568,16 @@ function endRound(winner, gave) {
     if (s.mode === "solo") { FX.streak(s.streak); if (s.streak >= 3) award("hat3"); if (s.streak >= 10) award("streak10"); Mascot.react(pts > 800 ? "bighit" : s.streak >= 3 && s.streak % 3 === 0 ? "streak" : "hit"); }
     if (d.unit === "country" && d.kind === "blur") { const p = prof(); p.flags = (p.flags || 0) + 1; saveProf(); if (p.flags >= 20) award("flags20"); }
     addXP(10 + Math.round(pts / 100), w);
-  } else { if (s.mode === "solo") { s.streak = 0; Mascot.react("miss"); } FX.miss(""); Snd.wrong(); }
+  } else { if (s.surv) s.surv.lives--; if (s.mode === "solo") { s.streak = 0; Mascot.react("miss"); } FX.miss(""); Snd.wrong(); }
   if (winner != null && typeof countRound === "function") countRound(s, winner, pts);
   s.result = { winner, pts, gave: !!gave }; (s.marks = s.marks || []).push(winner != null); renderQuiz(); Net.sync();
 }
 function finishQuiz() {
   const s = Q.s; s.phase = "done"; stopQuiz();
-  if (s.mode === "solo" && !s.redo) { const k = s.w + ":" + s.game, p = prof(), b = p.best[k]; if (!b || s.scores[0] > b.score) { p.best[k] = { score: s.scores[0], streak: s.best || 0 }; saveProf(); if (b) Mascot.react("best", true); } }
+  if (s.mode === "solo" && !s.redo) { const k = s.surv ? `${s.w}:${s.game}:survival` : s.marathon ? `${s.w}:marathon` : s.w + ":" + s.game, p = prof(), b = p.best[k]; if (!b || s.scores[0] > b.score) { p.best[k] = { score: s.scores[0], streak: s.best || 0 }; saveProf(); if (b) Mascot.react("best", true); } }
   else if (!s.redo) award("duo");
-  if (s.mix && !s.redo) mixFinished(s);
-  if (s.mode === "solo" && !s.mix) { if (typeof recordGame === "function") recordGame(s); if (s.daily) Daily.finish(s); else if (Boards) Boards.record(`${s.w}:${s.game}`, s.scores[0]); }
+  if (s.mix && !s.redo && !s.marathon) mixFinished(s);
+  if (s.mode === "solo" && !s.mix && !s.surv) { if (typeof recordGame === "function") recordGame(s); if (s.daily) Daily.finish(s); else if (Boards) Boards.record(`${s.w}:${s.game}`, s.scores[0]); }
   renderQuiz(); Net.sync();
 }
 function paintClues() { const b = $("#qClues"); if (b) b.innerHTML = cluesHTML(); }
@@ -3371,15 +3604,15 @@ function answerCard() {
   return `<div class="rcard on"><div class="label">The answer</div><div class="row" style="gap:14px;margin:8px 0;align-items:center">${imgOf(x) ? `<img class="ansimg ${x.logo || x.flag ? "contain" : ""} ${isCut(x) ? "cutpic" : ""}" src="${imgOf(x)}" alt="">` : ""}<div><h3 style="font-size:28px">${wikiLink(curWorld(), ans === x.n ? x : wikiFind(curWorld(), ans) || x, esc(ans))}</h3>${ans !== x.n ? `<div class="fine">${esc(x.n)}</div>` : ""}<div class="fine">${facts}</div></div></div>${credOf(x, d.imgKey)}${x.am ? `<a class="credit" href="${x.am}" target="_blank" rel="noopener">Preview courtesy of Apple Music. Listen to the full song there.</a>` : ""}</div>`;
 }
 function renderQuiz() {
-  const s = Q.s, d = curDef(), duo = s.mode !== "solo", names = s.mode === "online" ? Net.names() : NAMES(), title = s.redo ? `Redemption ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : s.mix ? `Round ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : esc(d.name);
-  const strip = s.mix ? `<div class="mixstrip" style="margin-bottom:10px">${s.mix.map((m, i) => { const x = items(m.w, (y) => y.img)[0]; return `<span class="${i === s.round - 1 ? "now" : ""} ${s.mixW && s.mixW[i] != null && s.mixW[i] >= 0 ? "w" + s.mixW[i] : ""}">${x ? `<img src="${x.img}" alt="">` : ""}${esc(WORLDS[m.w].name)}</span>`; }).join("")}</div>` : "";
+  const s = Q.s, d = curDef(), duo = s.mode !== "solo", names = s.mode === "online" ? Net.names() : NAMES(), title = s.surv ? `Survival: ${esc(d.name)}` : s.marathon ? `Marathon ${s.round}: ${esc(d.name)}` : s.redo ? `Redemption ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : s.mix ? `Round ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : esc(d.name);
+  const strip = s.mix && !s.marathon ? `<div class="mixstrip" style="margin-bottom:10px">${s.mix.map((m, i) => { const x = items(m.w, (y) => y.img)[0]; return `<span class="${i === s.round - 1 ? "now" : ""} ${s.mixW && s.mixW[i] != null && s.mixW[i] >= 0 ? "w" + s.mixW[i] : ""}">${x ? `<img src="${x.img}" alt="">` : ""}${esc(WORLDS[m.w].name)}</span>`; }).join("")}</div>` : "";
   const head = gamesBar(title) + strip;
   if (s.phase === "done") {
     if (s.mode === "online") rankedDone(s);
     const best = Math.max(...s.scores), winner = duo ? (s.scores[0] === s.scores[1] ? -1 : s.scores[0] > s.scores[1] ? 0 : 1) : 0;
-    $("#room").innerHTML = `<div class="card">${head}${finale({ label: duo ? "Full time" : `${s.wins[0]} of ${s.rounds} right · best streak ${s.best || s.streak}`, verdict: s.redo ? (s.wins[0] === s.rounds ? "All redeemed." : s.wins[0] ? "Getting there." : "They will be back.") : duo ? (winner < 0 ? "A draw." : esc(names[winner]) + " wins!") : best >= 6000 ? "Serious knowledge." : best >= 3500 ? "Solid." : "Keep practising.", players: s.scores.map((sc, k) => ({ name: duo ? names[k] : prof().nick || "You", score: sc, av: duo ? null : avatarHTML(prof().avatar, "lg", prof().nick || "You") })), winner: duo ? winner : null, good: s.redo ? s.wins[0] * 2 >= s.rounds : duo ? true : best >= 3500, tiles: duo ? [[`${s.wins[0]}–${s.wins[1]}`, "rounds won"]] : [[`${s.wins[0]}/${s.rounds}`, "right"], [s.best || 0, "best streak"], [best.toLocaleString(), "points"]], buttons: s.redo ? `${Redo.due().length ? `<button class="btn" type="button" data-redo="1">Next batch (${Redo.due().length} due)</button>` : ""}<button class="btn ghost" data-go="home" type="button">Back home</button>` : s.daily ? `<button class="btn" id="dShare" type="button">Copy my result</button><button class="btn ghost" data-go="home" type="button">Back home</button>` : `${s.chal ? challengeVerdict(s) : ""}<button class="btn" id="qAgain" type="button">Play again</button>${!duo && !s.mix ? `<button class="btn ghost" id="qChal" type="button">Challenge a friend</button>` : ""}${s.mix ? `<button class="btn ghost" data-go="mix" type="button">New match</button>` : ""}` })}</div>`; return;
+    $("#room").innerHTML = `<div class="card">${head}${finale({ label: duo ? "Full time" : s.surv ? `${s.wins[0]} answered · reached question ${s.round}` : `${s.wins[0]} of ${s.rounds} right · best streak ${s.best || s.streak}`, verdict: s.surv ? (s.wins[0] >= 12 ? "A survivor." : s.wins[0] >= 6 ? "Held on well." : "Out of lives.") : s.redo ? (s.wins[0] === s.rounds ? "All redeemed." : s.wins[0] ? "Getting there." : "They will be back.") : duo ? (winner < 0 ? "A draw." : esc(names[winner]) + " wins!") : best >= 6000 ? "Serious knowledge." : best >= 3500 ? "Solid." : "Keep practising.", players: s.scores.map((sc, k) => ({ name: duo ? names[k] : prof().nick || "You", score: sc, av: duo ? null : avatarHTML(prof().avatar, "lg", prof().nick || "You") })), winner: duo ? winner : null, good: s.redo ? s.wins[0] * 2 >= s.rounds : duo ? true : best >= 3500, tiles: duo ? [[`${s.wins[0]}–${s.wins[1]}`, "rounds won"]] : [[`${s.wins[0]}/${s.rounds}`, "right"], [s.best || 0, "best streak"], [best.toLocaleString(), "points"]], buttons: s.redo ? `${Redo.due().length ? `<button class="btn" type="button" data-redo="1">Next batch (${Redo.due().length} due)</button>` : ""}<button class="btn ghost" data-go="home" type="button">Back home</button>` : s.daily ? `<button class="btn" id="dShare" type="button">Copy my result</button><button class="btn ghost" data-go="home" type="button">Back home</button>` : `${s.chal ? challengeVerdict(s) : ""}<button class="btn" id="qAgain" type="button">Play again</button>${!duo && !s.mix ? `<button class="btn ghost" id="qChal" type="button">Challenge a friend</button>` : ""}${s.mix ? `<button class="btn ghost" data-go="mix" type="button">New match</button>` : ""}` })}</div>`; return;
   }
-  const last = s.round >= s.rounds, hud = `<div class="qhud"><span class="label">Round ${s.round} of ${s.rounds}${duo ? "" : ` · streak ${s.streak}`}</span>${s.scores.map((v, i) => `<span class="num qscore"><small>${duo ? esc(names[i]) : "Score"}</small> <b>${v}</b></span>`).join("")}</div>`;
+  const last = s.round >= s.rounds || (s.surv && s.surv.lives <= 0), hud = `<div class="qhud"><span class="label">${s.surv ? `Question ${s.round} · ${"♥".repeat(Math.max(0, s.surv.lives))}${"♡".repeat(3 - Math.max(0, s.surv.lives))} · ${diffName(S.diff)}` : `Round ${s.round} of ${s.rounds}`}${duo ? "" : ` · streak ${s.streak}`}</span>${s.scores.map((v, i) => `<span class="num qscore"><small>${duo ? esc(names[i]) : "Score"}</small> <b>${v}</b></span>`).join("")}</div>`;
   if (s.phase === "reveal") { const r = s.result, nm = r.winner == null ? (duo ? "Nobody got it" : r.gave ? "Skipped" : "Not this time") : duo ? esc(names[r.winner]) + " got it" : "You got it"; $("#room").innerHTML = `<div class="card">${head}${hud}<div class="rcard on" style="margin-bottom:10px"><b style="font-size:20px">${nm}${r.winner != null ? `: +${r.pts}` : ""}</b></div>${answerCard()}<div class="row" style="margin-top:14px"><button class="btn" id="${last ? "qFinish" : "qNext"}" type="button">${last ? "See the final score" : "Next round"}</button>${!last && Net.role !== "guest" && !Q.hold ? `<button class="btn ghost" id="qHold" type="button">Pause</button>` : ""}</div>${!last && Net.role !== "guest" && !Q.hold ? `<div class="autometer"><i></i></div>` : ""}</div>`;
     clearTimeout(Q.auto); if (!last && Net.role !== "guest" && !Q.hold) { const rd = s.round; Q.auto = setTimeout(() => { if (Q.s === s && s.phase === "reveal" && s.round === rd && !Q.hold) { const b = $("#qNext"); if (b) b.click(); } }, 4500); }
     return; }
@@ -3538,7 +3771,7 @@ function renderSettings() {
 /* ================= wiki: every group, idol, song, country, player... with its facts and links; any name with data-wiki opens it ================= */
 const WIKI_SKIP = new Set(["lineup", "trivia"]);
 const wikiKey = (w, x) => `${w}:${x.id}`;
-const wikiLink = (w, x, label) => (x && x.id && x.kind !== "album" && x.kind !== "theme" ? `<a class="wlink" href="#wiki" data-wiki="${esc(wikiKey(w, x))}">${label}</a>` : label);
+const wikiLink = (w, x, label) => (x && x.id && !["album", "theme", "twosongs"].includes(x.kind) ? `<a class="wlink" href="#wiki" data-wiki="${esc(wikiKey(w, x))}">${label}</a>` : label);
 const wikiFind = (w, n) => items(w, (x) => !WIKI_SKIP.has(x.kind) && qnorm(x.n) === qnorm(n))[0];
 const KIND_NAME = { idol: "Idol", group: "Group", song: "Song", player: "Footballer", club: "Club", bplayer: "NBA player", team: "NBA team", cplayer: "Chess player", opening: "Chess opening", country: "Country", person: "Historical figure", dish: "Dish", anime: "Anime", event: "Event", invention: "Invention", oldstate: "Former country", landmark: "Landmark", character: "Anime character" };
 let WQ = { q: "", w: "all" };
@@ -3620,13 +3853,13 @@ document.addEventListener("click", (e) => {
   if (t.dataset.game) { Snd.tick(); go(`w-${S.world}-${t.dataset.game}`, e); return; }
   if (t.dataset.diff) { S.diff = t.dataset.diff; try { localStorage.setItem("gp_diff", S.diff); } catch (x) { /* blocked */ } Snd.tick(); document.querySelectorAll("[data-diff]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.diff === S.diff)); $("#diffNote").textContent = DIFFNOTE[S.diff]; return; }
   if (t.dataset.mode) { startMode(t.dataset.mode); return; }
-  if (t.id === "gamesBack") { if (Q.s && Q.s.redo) { Q.s = null; go("home"); return; } if (Q.s && Q.s.mix) { Q.s = null; go("mix"); return; } go("w-" + S.world); return; }
+  if (t.id === "gamesBack") { if (Q.s && Q.s.redo) { Q.s = null; go("home"); return; } if (Q.s && Q.s.mix) { const back = Q.s.marathon ? "w-" + Q.s.marathon : "mix"; Q.s = null; go(back); return; } go("w-" + S.world); return; }
   if (t.id === "qB0") { buzz(0); return; } if (t.id === "qB1") { buzz(1); return; }
   if (t.id === "qGuess") { submitAnswer(null); return; } if (t.dataset.sug) { submitAnswer(t.dataset.sug); return; }
   if (t.id === "qHold") { Q.hold = true; clearTimeout(Q.auto); t.remove(); const m = $(".autometer"); if (m) m.remove(); return; }
   if (t.id === "qNext") { if (Net.role === "guest") { Net.send({ k: "next" }); return; } if (Q.s.mix) { Q.s.mixW = Q.s.mixW || []; Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } nextRound(); return; }
-  if (t.id === "qFinish") { if (Net.role === "guest") { Net.send({ k: "finish" }); return; } if (Q.s.mix) { Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } finishQuiz(); return; }
-  if (t.id === "qAgain") { if (Q.s && Q.s.mix) { go("mix"); return; } startMode(Q.s.mode); return; }
+  if (t.id === "qFinish") { if (Net.role === "guest") { Net.send({ k: "finish" }); return; } if (Q.s.mix) { Q.s.mixW = Q.s.mixW || []; Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } finishQuiz(); return; }
+  if (t.id === "qAgain") { if (Q.s && Q.s.marathon) { Marathon.start(Q.s.marathon, Q.s.mode); return; } if (Q.s && Q.s.surv) { startMode("surv"); return; } if (Q.s && Q.s.mix) { go("mix"); return; } startMode(Q.s.mode); return; }
   if (t.dataset.hol) { answerHol(t.dataset.hol); return; }
   if (t.id === "hNext") { if (H.s.mode === "solo" && H.s.over) { H.s.phase = "done"; if (Boards) Boards.record(`${H.s.w}:${H.s.game}`, H.s.streak); renderHol(); return; } if (H.s.mode === "duo") { if (H.s.over) { H.s.phase = "done"; award("duo"); renderHol(); return; } H.s.turn = 1 - H.s.turn; } nextHol(); return; }
   if (t.id === "hAgain") { newHol(H.s.mode); return; }
@@ -4122,8 +4355,8 @@ function renderChess() {
 function cpCheckEnd() {
   const s = CP.s, c = s.c; if (!c.game_over()) return false; const solo = s.mode === "solo", names = NAMES();
   if (c.in_checkmate()) { const winner = c.turn() === "w" ? "b" : "w", won = solo && winner === s.you; s.over = { cls: solo ? (won ? "win" : "loss") : "win", title: solo ? (won ? "You win!" : "Checkmate. You lost.") : `${names[winner === "w" ? 0 : 1]} wins!`, why: "Checkmate." };
-    if (!solo || won) { Snd.win(); confetti(); addXP(solo ? { easy: 20, medium: 40, hard: 80, elite: 150 }[s.lvl] : 30, "chess"); Mascot.react("bighit", true); if (solo && s.lvl === "elite") award("elite_win"); if (!solo) award("duo"); } else { Snd.wrong(); Mascot.react("over", true); } }
-  else { s.over = { cls: "draw", title: "Draw", why: c.in_stalemate() ? "Stalemate." : c.in_threefold_repetition() ? "Threefold repetition." : c.insufficient_material() ? "Not enough pieces left to mate." : "Fifty-move rule." }; addXP(10, "chess"); }
+    if (!solo || won) { Snd.win(); confetti(); addXP(solo ? { easy: 20, medium: 40, hard: 80, elite: 150 }[s.lvl] : 30, "chess"); Mascot.react(solo ? "ch_win" : "duo_end", true); if (solo && s.lvl === "elite") award("elite_win"); if (!solo) award("duo"); } else { Snd.wrong(); Mascot.react("ch_loss", true); } }
+  else { s.over = { cls: "draw", title: "Draw", why: c.in_stalemate() ? "Stalemate." : c.in_threefold_repetition() ? "Threefold repetition." : c.insufficient_material() ? "Not enough pieces left to mate." : "Fifty-move rule." }; addXP(10, "chess"); Mascot.react("ch_draw", true); }
   if (solo) { const p = prof(); p.chessRec = p.chessRec || { w: 0, d: 0, l: 0 }; p.chessRec[s.over.cls === "win" ? "w" : s.over.cls === "loss" ? "l" : "d"]++; saveProf(); }
   return true;
 }
@@ -4152,7 +4385,7 @@ document.addEventListener("click", (e) => {
   const t = e.target.closest("button"); if (!t || !CP.s) return;
   if (t.id === "cpAgain") { newChessPlay(CP.s.mode); return; }
   if (t.id === "cpUndo") { const s = CP.s; s.c.undo(); if (s.mode === "solo" && s.c.turn() !== s.you) s.c.undo(); s.sel = null; s.targets = []; s.last = null; renderChess(); return; }
-  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; const p = prof(); p.chessRec = p.chessRec || { w: 0, d: 0, l: 0 }; p.chessRec.l++; saveProf(); Mascot.react("over", true); } else s.over = { cls: "draw", title: "Game over", why: "Ended by agreement." }; renderChess(); return; }
+  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; const p = prof(); p.chessRec = p.chessRec || { w: 0, d: 0, l: 0 }; p.chessRec.l++; saveProf(); Mascot.react("ch_loss", true); } else s.over = { cls: "draw", title: "Game over", why: "Ended by agreement." }; renderChess(); return; }
 });
 
 /* ================= light / dark ================= */
@@ -4594,7 +4827,7 @@ const Train = {
 /* ================= game review: Stockfish goes through your last game and grades every move ================= */
 const Review = {
   s: null,
-  GRADE: { best: ["Best", "#5ee6a8", "hit"], good: ["Good", "#9ec5ff", "idle"], inaccuracy: ["Inaccuracy", "#ffd23f", "miss"], mistake: ["Mistake", "#ff9d3d", "miss"], blunder: ["Blunder", "#ff5d5d", "miss"] },
+  GRADE: { best: ["Best", "#5ee6a8", "rv_best"], good: ["Good", "#9ec5ff", "rv_good"], inaccuracy: ["Inaccuracy", "#ffd23f", "rv_inaccuracy"], mistake: ["Mistake", "#ff9d3d", "rv_mistake"], blunder: ["Blunder", "#ff5d5d", "rv_blunder"] },
   async score(c) {   // centipawns for the side to move
     if (c.in_checkmate()) return { cp: -10000, best: null };
     if (c.in_draw() || c.in_stalemate()) return { cp: 0, best: null };
@@ -4924,7 +5157,7 @@ const sayIf = (kind, delay = 0) => setTimeout(() => { const L = MASCOTS[Mascot.i
 }; }
 { const end1 = endRound; endRound = function (winner) {   // sometimes praise that fits the game just won
   const s = Q.s, d = s && s.phase !== "reveal" && s.mode === "solo" && winner != null ? curDef() : null, out = end1.apply(this, arguments);
-  const kind = d && (d.kind === "blur" ? "hit_blur" : d.id === "career" ? "hit_career" : null);
+  const kind = d && (d.kind === "blur" && d.imgKey === "logo" && curWorld() === "football" ? "hit_blur" : d.id === "career" ? "hit_career" : null);   // badge praise only for badges
   if (kind && Math.random() < 0.35) sayIf(kind, 200);
   return out;
 }; }
@@ -4938,6 +5171,670 @@ const sayIf = (kind, delay = 0) => setTimeout(() => { const L = MASCOTS[Mascot.i
   if (k && Math.random() < 0.35 && (MASCOTS[Mascot.id()].lines || {})[k]) return react0.call(this, k, force);
   return react0.apply(this, arguments);
 }; }
+
+/* ================= Odd one out, Two songs at once, Mixed marathon, the photocard binder, "play this one" from search,
+   and sidekick lines about the idol or group just named ================= */
+const seededShuffle = (list, key) => list.map((x, i) => [seedOf(`${key}:${i}`), x]).sort((a, b) => a[0] - b[0]).map((p) => p[1]);
+
+/* ---------- Odd one out: five faces, four from one group ---------- */
+function oddPool() {
+  if (oddPool.c) return oddPool.c;
+  const full = items("kpop", (g) => g.kind === "group" && g.gender && rosterOf("kpop", g).filter((m) => m.img).length >= 4);
+  const genderOf = (p) => { const g = (p.groups || []).map(groupOf).find((x) => x && x.gender); return g && g.gender; };
+  return (oddPool.c = items("kpop", (p) => p.kind === "idol" && p.img).map((p) => {
+    const mine = new Set((p.groups || []).map(qnorm)), gender = genderOf(p);
+    const others = full.filter((g) => g.gender === gender && !mine.has(qnorm(g.n)) && !rosterOf("kpop", g).some((m) => qnorm(m.n) === qnorm(p.n) || (m.groups || []).some((x) => mine.has(qnorm(x)))));
+    if (!gender || !others.length) return null;
+    const g = rnd(others), line = shuffle(rosterOf("kpop", g).filter((m) => m.img)).slice(0, 4).map((m) => m.id);
+    return { ...p, odd: g.n, line };
+  }).filter(Boolean));
+}
+function oddTop(x) {
+  const byId = new Map(items("kpop", (p) => p.kind === "idol").map((p) => [p.id, p]));
+  const five = seededShuffle([x.id, ...(x.line || [])], x.id + x.odd).map((id) => byId.get(id)).filter(Boolean);
+  return `<h3 class="oddq">Who is not in the same group as the others?</h3>${faceRow(five)}`;
+}
+GAMES.kpop.push(G("odd", "Odd one out", "photo", { tag: "Five idols, four from one group. Type the name of the one who doesn't belong.", pool: oddPool, top: oddTop, hints: (d) => [["The other four are in", d.odd], ["Initials", first(d.n)]], unit: "idol" }));
+
+/* ---------- Two songs at once ---------- */
+function twoPool() {
+  if (twoPool.c) return twoPool.c;
+  const songs = byFameAll(items("kpop", (x) => x.kind === "song" && x.pv && x.by)).slice(0, 360), mixed = shuffle(songs), out = [];
+  for (let i = 0; i + 1 < mixed.length; i += 2) {
+    const a = mixed[i], b = mixed[i + 1];
+    if (a.by === b.by || qnorm(a.n) === qnorm(b.n)) continue;
+    out.push({ id: `two-${a.id}-${b.id}`, kind: "twosongs", n: `${a.n} + ${b.n}`, fame: Math.round(((a.fame || 0) + (b.fame || 0)) / 2), pv: a.pv, pv2: b.pv, songs: [{ n: a.n, by: a.by, year: a.year, alt: a.alt || [] }, { n: b.n, by: b.by, year: b.year, alt: b.alt || [] }] });
+  }
+  return (twoPool.c = out);
+}
+CLUES.twosongs = (d) => d.songs.map((x, i) => [`Song ${i + 1}`, `${x.n} by ${x.by}`]);
+GAMES.kpop.push(G("two", "Two songs at once", "audio", { tag: "Two song previews play together. Name both titles, one at a time or with a + between them.", pool: twoPool, two: true, unit: "song" }));
+const TWO_CLUES = (r) => [["Listen", "3 seconds of both"], ["Listen", "5 more seconds"], ["One is by", r.songs[0].by], ["The other is by", r.songs[1].by], ["Listen", "the whole previews"], ["Initials", `${first(r.songs[0].n)}  and  ${first(r.songs[1].n)}`]];
+const foundNote = () => { const s = Q.s; if (!s || !s.r || !s.r.songs || s.phase !== "run" || !(s.found || []).length) return; const box = $("#qClues"); if (box && !$("#twoFound")) box.insertAdjacentHTML("afterend", `<div class="schint" id="twoFound"><span class="label">Got one</span><b>${esc(s.found.map((i) => s.r.songs[i].n).join(", "))}. Now name the other.</b></div>`); };
+{ const next0 = nextRound; nextRound = function () { const out = next0.apply(this, arguments), s = Q.s; if (s && curDef().two) { s.found = []; s.clues = TWO_CLUES(s.r); s.total = s.clues.length * s.cs + 12; renderQuiz(); Net.sync(); } return out; }; }
+{ const render0 = renderQuiz; renderQuiz = function () { const out = render0.apply(this, arguments); foundNote(); return out; }; }
+{ const submit0 = submitAnswer; submitAnswer = function (pickName, typedRemote) {
+  const s = Q.s; if (!s || !s.paused || !curDef().two) return submit0.apply(this, arguments);
+  const typed = String(pickName != null ? pickName : typedRemote != null ? typedRemote : ($("#qIn") && $("#qIn").value) || "");
+  if (Net.role === "guest") { Net.send({ k: "ans", t: typed }); return; }
+  if (s.foundBy !== s.buzzed) { if (s.mode !== "solo") s.found = []; s.foundBy = s.buzzed; }
+  s.found = s.found || [];
+  const hit = (t) => s.r.songs.findIndex((x, i) => !s.found.includes(i) && nameOK(t, x.n, x.alt));
+  const whole = hit(typed), parts = whole >= 0 ? [typed] : typed.split(/\s*\+\s*|\s*\/\s*|\s*,\s*|\s+and\s+/i);
+  let got = 0;
+  parts.forEach((t) => { const i = t.trim() ? hit(t) : -1; if (i >= 0) { s.found.push(i); got++; } });
+  if (s.found.length >= 2) return endRound(s.buzzed);
+  if (!got) return wrongGuess(false);
+  Snd.right(); s.answerLeft = answerTime() + 4; renderQuiz(); Net.sync(); focusIn();
+}; }
+
+/* ---------- Mixed marathon: one run that jumps between a category's games ---------- */
+const Marathon = {
+  LEN: 12,
+  games: (w) => GAMES[w].filter((g) => ["clue", "blur", "photo"].includes(g.kind)),
+  start(w, mode) {
+    const list = this.games(w); if (!list.length) return;
+    let bag = []; const mix = Array.from({ length: this.LEN }, () => { if (!bag.length) bag = shuffle(list); return { w, g: bag.pop().id }; });
+    const go2 = () => { document.body.classList.add("ingame"); S.world = w; S.game = mix[0].g; if (w === "kpop") S.diff = "medium"; addPlay(w); Q.next = { marathon: w, mixW: [] }; newQuiz(w, mix[0].g, mode, mix); };
+    if (mode === "duo") { const n = NAMES(); Vs.match({ nick: n[0], avatar: prof().avatar }, { nick: n[1], avatar: "" }, go2); } else go2();
+  },
+  intro(w) {
+    stopQuiz(); Net.close();
+    $("#room").innerHTML = modeIntro("Mixed marathon", `${this.LEN} questions in a row, each from a different ${esc(WORLDS[w].name)} game. One score.`, [
+      { id: "mar-solo", t: "Solo", d: "All twelve, as many points as you can." }, { id: "mar-duo", t: "Two players, one device", d: "Race to buzz: A for player 1, L for player 2." }]);
+    $("#room .modes").insertAdjacentHTML("afterend", duoNamesHTML());
+    $("#room").querySelectorAll('[data-mode^="mar-"]').forEach((b) => { const m = b.dataset.mode.slice(4); delete b.dataset.mode; b.dataset.marathon = m; });
+    const best = prof().best[w + ":marathon"]; if (best) $("#room .card").insertAdjacentHTML("beforeend", `<p class="fine num">Your best: ${best.score.toLocaleString()} pts</p>`);
+  },
+};
+
+/* ---------- hub cards for the modes that are not one game ---------- */
+{ const hub0 = renderHub; renderHub = function () {
+  const out = hub0.apply(this, arguments), w = S.world, box = $("#room .hub"); if (!box || !Marathon.games(w).length) return out;
+  const card = (attr, name, modes, tag) => `<button type="button" class="gcard modecard" ${attr}><div class="gname">${name}</div><div class="gmodes">${modes}</div><div class="gtag">${tag}</div></button>`;
+  box.insertAdjacentHTML("afterbegin", card('data-modecard="marathon"', "Mixed marathon", "Solo · 2 players", "One run that jumps between games.") + card('data-modecard="party"', "Party room", "3 to 8 players, own phones", "One code, everyone answers at once, fastest scores most.")
+    + (w === "kpop" ? card('data-modecard="binder"', "Photocard binder", "Your collection", "Every idol you name correctly leaves a card here.") : ""));
+  return out;
+}; }
+
+/* ---------- photocard binder: one answer unlocks a card, more make it rarer ---------- */
+const cardTier = (n) => (n >= 6 ? "gold" : n >= 3 ? "holo" : n >= 1 ? "own" : "locked");
+function binderHTML() {
+  const p = prof(), have = (x) => p.dex["kpop:" + x.id] || 0, groups = byFameAll(items("kpop", (g) => g.kind === "group"));
+  const idols = items("kpop", (x) => x.kind === "idol" && x.img), owned = idols.filter(have).length;
+  const pages = groups.map((g) => ({ g, m: rosterOf("kpop", g).filter((x) => x.img) })).filter((x) => x.m.length)
+    .sort((a, b) => b.m.filter(have).length - a.m.filter(have).length);
+  return `<p class="sub"><b class="num">${owned}</b> of ${idols.length} cards. Name an idol correctly to unlock their card. Three times makes it holographic, six times gold.</p>` + pages.map(({ g, m }) => `<details class="bpage" ${m.some(have) ? "open" : ""}><summary><b>${esc(g.n)}</b><span class="fine num">${m.filter(have).length} of ${m.length}</span></summary><div class="pcards">${m.map((x) => { const t = cardTier(have(x)); return `<div class="pcard ${t}" ${t === "locked" ? 'aria-label="Locked card"' : `data-wiki="${esc(wikiKey("kpop", x))}" role="button" tabindex="0"`}><img src="${imgOf(x)}" alt="" loading="lazy"><span>${t === "locked" ? "?" : esc(x.n)}</span></div>`; }).join("")}</div></details>`).join("");
+}
+{ const coll0 = renderCollection; renderCollection = function () {
+  const out = coll0.apply(this, arguments), box = $("#collRoom"), bar = box && box.querySelector(".scope"); if (!bar) return out;
+  bar.insertAdjacentHTML("afterbegin", `<button type="button" class="chip" data-coll="cards" aria-pressed="${S.coll === "cards"}">Photocards</button>`);
+  if (S.coll === "cards") { bar.querySelector('[data-coll="dex"]').setAttribute("aria-pressed", "false"); while (bar.nextSibling) bar.nextSibling.remove(); box.insertAdjacentHTML("beforeend", binderHTML()); }
+  return out;
+}; }
+{ const collect0 = collect; collect = function (w, x) {
+  const fresh = w === "kpop" && x && x.kind === "idol" && x.img && !prof().dex["kpop:" + x.id], out = collect0.apply(this, arguments);
+  if (fresh) toast(`<b>New photocard</b><br>${esc(x.n)}`, "ach");
+  return out;
+}; }
+
+/* ---------- search: every entry offers the games it appears in ---------- */
+const playableWith = (w, x) => (GAMES[w] || []).filter((g) => ["clue", "blur", "photo", "audio"].includes(g.kind) && !g.two && g.id !== "odd" && g.pool().some((y) => y.id === x.id)).slice(0, 6);
+{ const wiki0 = openWiki; openWiki = function (key) {
+  const out = wiki0.apply(this, arguments), i = key.indexOf(":"), w = key.slice(0, i), x = items(w).find((y) => y.id === key.slice(i + 1)), body = $("#wikiPop .wp-body");
+  if (!x || !body) return out;
+  const list = playableWith(w, x);
+  if (list.length) body.insertAdjacentHTML("beforeend", `<div class="label">Play a round that starts with this one</div><div class="wchips">${list.map((g) => `<button type="button" class="wchip" data-play="${esc(`${w}|${g.id}|${x.id}`)}"><span>${esc(g.name)}</span></button>`).join("")}</div><p class="fine">The first question is this entry, so you will know the answer. The rest are random.</p>`);
+  return out;
+}; }
+document.addEventListener("keydown", (e) => { if (e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) { e.preventDefault(); go("wiki"); } });
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.modecard === "marathon") { Snd.tick(); Marathon.intro(S.world); }
+  else if (t.dataset.modecard === "party") { Snd.tick(); Party.intro(S.world); }
+  else if (t.dataset.modecard === "binder") { Snd.tick(); S.coll = "cards"; go("collection"); }
+  else if (t.dataset.marathon) { Snd.tick(); Marathon.start(S.world, t.dataset.marathon); }
+  else if (t.dataset.play) { const [w, gid, id] = t.dataset.play.split("|"); closeWiki(); Snd.tick(); go(`w-${w}-${gid}`); Q.first = id; startMode("solo"); }
+});
+
+/* ---------- a line about whoever was just named, instead of the usual praise, about half the time ---------- */
+{ const end0 = endRound; endRound = function (winner) {
+  const s = Q.s;
+  Mascot.about = null;
+  if (s && s.phase !== "reveal" && winner != null && curWorld() === "kpop") {
+    const d = curDef(), x = s.r, ans = nameOfAnswer(d, x);
+    Mascot.about = x.kind === "idol" && ans === x.n ? "idl_" + qnorm(x.n) : x.kind === "group" && ans === x.n ? "grp_" + qnorm(x.n) : x.kind === "song" && x.by ? "grp_" + qnorm(x.by) : null;
+  }
+  const out = end0.apply(this, arguments);
+  if (s && s.mode !== "solo" && Mascot.about) sayIf(Mascot.about, 700);
+  Mascot.about = null;
+  return out;
+}; }
+{ const react1 = Mascot.react; Mascot.react = function (kind, force) {
+  const about = Mascot.about;
+  if (about && (kind === "hit" || kind === "bighit") && Math.random() < 0.6 && (MASCOTS[Mascot.id()].lines || {})[about]) { Mascot.about = null; return react1.call(this, about, true); }
+  return react1.apply(this, arguments);
+}; }
+
+/* ================= Party room: up to 8 players on their own phones, one 4-letter code. Everyone answers at once.
+   The host's device runs the game and sends what to show; the answer is only sent at the reveal. Every incoming message has
+   already been through cleanData() (bk_core.js), and everything is escaped again when drawn. ================= */
+const PARTY_MAX = 8, PARTY_ROUNDS = 10, PARTY_SECS = 30;
+const Party = {
+  role: null, code: "", mq: [], seen: new Set(), pid: "", s: null, timer: null, h: null, drawn: "", lastState: 0,
+  games: (w) => (GAMES[w] || []).filter((g) => ["clue", "blur", "photo"].includes(g.kind) && !g.top && !g.reveal && !g.two),
+  me() { let v = ""; try { v = sessionStorage.getItem("gp_pid") || ""; if (!v) { v = Math.random().toString(36).slice(2, 10); sessionStorage.setItem("gp_pid", v); } } catch (e) { v = Math.random().toString(36).slice(2, 10); } return v; },
+  name() { return (prof().nick || "").trim().slice(0, 16) || "Player"; },
+  intro(w) {
+    stopQuiz(); Net.close(); this.stop(); this.world = w;
+    $("#room").innerHTML = `<div class="card">${gamesBar("Party room")}<p class="sub">Made for 3 to 8 players, each on their own phone or computer. ${PARTY_ROUNDS} questions from ${esc(WORLDS[w].name)}. Everyone types at once: the sooner you are right, the more you score, and a wrong guess costs 50.</p>
+      <label class="label" for="pName">Your name</label><input id="pName" maxlength="16" value="${esc(prof().nick || "")}" placeholder="Your name">
+      <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:14px"><button class="btn" type="button" data-party="make">Start a party</button><span class="fine">or</span><input id="pCode" maxlength="4" placeholder="CODE" aria-label="Party code" style="width:90px;text-transform:uppercase"><button class="btn ghost" type="button" data-party="join">Join</button></div></div>`;
+  },
+  open(code) {
+    this.code = code; this.seen.clear(); this.drawn = "";
+    this.mq = BROKERS.map((u) => mqttConnect(u, "gamesite/v1/party/" + code, (m) => this.recv(m), () => {}));
+  },
+  send(m) { m.id = Math.random().toString(36).slice(2); m.pid = this.pid; this.mq.forEach((c) => { try { c.send(m); } catch (e) { /* broker down */ } }); },
+  stop() {
+    if (this.role === "host") this.send({ k: "bye" });
+    clearInterval(this.timer); this.timer = null; const old = this.mq; this.mq = []; setTimeout(() => old.forEach((c) => { try { c.close(); } catch (e) { /* closed */ } }), 300);
+    this.role = null; this.s = null; this.h = null; this.drawn = "";
+  },
+  keepName() { const v = ($("#pName") || {}).value; if (v != null && v.trim()) { prof().nick = v.trim().slice(0, 16); saveProf(); paintProfileBtn(); } },
+
+  /* ---- host ---- */
+  host() {
+    this.keepName(); this.stop(); const code = Array.from({ length: 4 }, () => rnd([...codeChars])).join("");
+    this.role = "host"; this.pid = "host"; this.open(code);
+    this.h = { phase: "lobby", round: 0, players: [{ pid: "host", n: this.name(), score: 0, got: false, fb: "", tries: 0, seen: Date.now(), last: 0 }], used: new Set(), elapsed: 0, wait: 0, q: null };
+    this.timer = setInterval(() => this.tick(), 500); this.publish();
+  },
+  question() {
+    const h = this.h, w = this.world, list = this.games(w);
+    for (let k = 0; k < 40; k++) {
+      const d = rnd(list), x = rnd(byFame(d.pool())); if (!x || h.used.has(x.id)) continue;
+      const ans = nameOfAnswer(d, x), img = d.kind === "blur" ? (d.imgKey && x[d.imgKey]) || imgOf(x) : d.kind === "photo" || d.showImg ? imgOf(x) || "" : "";
+      if ((d.kind === "blur" || d.kind === "photo") && !img) continue;
+      let clues = d.kind === "blur" ? [] : (d.kind === "photo" ? d.hints(x) : d.clues(x)).map((c) => [String(c[0]), String(c[1])]);
+      const an = qnorm(ans); if (an.length >= 5 && !["capital", "whose", "albumname", "where", "from", "quiz"].includes(d.id)) clues = clues.filter((c, i) => (i === 0 && d.kind === "clue") || !qnorm(c[1]).includes(an.slice(0, Math.max(5, an.length - 2))) || /^(Initials|Starts with)$/.test(c[0]));
+      h.used.add(x.id); return { d, x, ans, img, clues };
+    }
+    return null;
+  },
+  next() {
+    const h = this.h; if (h.round >= PARTY_ROUNDS) { h.phase = "done"; this.publish(); return; }
+    const q = this.question(); if (!q) { h.phase = "done"; this.publish(); return; }
+    h.q = q; h.round++; h.phase = "ask"; h.elapsed = 0; h.players.forEach((p) => { p.got = false; p.fb = ""; p.tries = 0; }); this.publish();
+  },
+  here() { const t = Date.now(); return this.h.players.filter((p) => p.pid === "host" || t - p.seen < 20000); },
+  tick() {
+    const h = this.h; if (!h) return;
+    if (h.phase === "ask") { h.elapsed += 0.5; if (h.elapsed >= PARTY_SECS || this.here().every((p) => p.got)) { h.phase = "reveal"; h.wait = 6; } }
+    else if (h.phase === "reveal") { h.wait -= 0.5; if (h.wait <= 0) return this.next(); }
+    if (Math.round(h.elapsed * 2) % 2 === 0) this.publish();
+  },
+  guess(pid, text) {
+    const h = this.h, p = h && h.players.find((y) => y.pid === pid); if (!p || h.phase !== "ask" || p.got || Date.now() - p.last < 900) return;
+    p.last = Date.now(); const t = String(text || "").slice(0, 80); if (!t.trim()) return;
+    const { d, x, ans } = h.q, w = this.world;
+    let ok = nameOK(t, ans, altsFor(d, x, ans));
+    if (!ok) { const m = resolveGuess(t, suggestPool(d, w), (y) => y.n); ok = !!m && qnorm(m.n) === qnorm(ans); }
+    p.tries++;
+    if (ok) { const pts = Math.max(100, Math.round(1000 * (1 - h.elapsed / PARTY_SECS))); p.score += pts; p.got = true; p.fb = `Right! +${pts}`; }
+    else { p.score = Math.max(0, p.score - 50); p.fb = "Not that. Try again."; }
+    this.publish();
+  },
+  view() {
+    const h = this.h, q = h.q, s = { phase: h.phase, round: h.round, rounds: PARTY_ROUNDS, world: this.world, left: Math.max(0, Math.ceil(PARTY_SECS - h.elapsed)),
+      players: h.players.map((p) => ({ pid: p.pid, n: p.n, score: p.score, got: p.got, fb: p.fb, tries: p.tries, here: p.pid === "host" || Date.now() - p.seen < 20000 })) };
+    if (q && (h.phase === "ask" || h.phase === "reveal")) {
+      const kind = q.d.kind, n = kind === "photo" ? Math.floor(h.elapsed / (PARTY_SECS / 3)) : 1 + Math.floor(h.elapsed / (PARTY_SECS / (q.clues.length + 1)));
+      s.game = q.d.name; s.img = q.img; s.blur = kind === "blur" && h.phase === "ask" ? BLUR[Math.min(BLUR.length - 1, Math.floor(h.elapsed / 4))] : 0;
+      s.clues = h.phase === "reveal" ? q.clues : q.clues.slice(0, n);
+      if (h.phase === "reveal") s.answer = q.ans;
+    }
+    return s;
+  },
+  publish() { if (this.role !== "host" || !this.h) return; const s = this.view(); this.send({ k: "state", s }); this.s = s; this.draw(); },
+
+  /* ---- guest ---- */
+  join(code) {
+    this.keepName(); this.stop(); const c = String(code || "").toUpperCase().replace(/[^A-Z]/g, "");
+    if (c.length !== 4) { toast("Type the 4-letter code"); return; }
+    this.role = "guest"; this.pid = this.me(); this.open(c); this.lastState = Date.now();
+    $("#room").innerHTML = `<div class="card">${gamesBar("Party room")}<p class="fine" id="pWait">Looking for party ${esc(c)}…</p></div>`;
+    const hello = () => this.send({ k: "join", n: this.name() });
+    setTimeout(hello, 900); let beat = 0;
+    this.timer = setInterval(() => {
+      beat++; if (!this.s) { hello(); if (beat >= 4 && $("#pWait")) $("#pWait").textContent = `No party found with code ${c} yet. Check the code, and that the host still has the page open.`; }
+      else { this.send({ k: "ping" }); if (Date.now() - this.lastState > 15000) { const f = $("#pFeed"); if (f) f.textContent = "The host has gone quiet. Waiting…"; } }
+    }, 3000);
+  },
+  recv(m) {
+    if (!m || typeof m !== "object" || m.pid === this.pid || this.seen.has(m.id)) return; this.seen.add(m.id); if (this.seen.size > 4000) this.seen.clear();
+    if (this.role === "host" && this.h) {
+      const h = this.h; let p = h.players.find((y) => y.pid === m.pid);
+      if (m.k === "join") {
+        if (!p) { if (h.players.length >= PARTY_MAX) return; let n = String(m.n || "Player").slice(0, 16); while (h.players.some((y) => y.n === n)) n = n.slice(0, 13) + " " + (h.players.length + 1); p = { pid: String(m.pid).slice(0, 12), n, score: 0, got: false, fb: "", tries: 0, last: 0 }; h.players.push(p); Snd.lock(); }
+        p.seen = Date.now(); this.publish();
+      } else if (p) { p.seen = Date.now(); if (m.k === "ans" && m.r === h.round) this.guess(p.pid, m.t); }
+    } else if (this.role === "guest" && m.pid === "host") {
+      if (m.k === "bye") { this.stop(); $("#room").innerHTML = `<div class="card">${gamesBar("Party room")}<p class="fine">The host closed the party.</p></div>`; return; }
+      if (m.k === "state" && m.s && Array.isArray(m.s.players)) {
+        const first = !this.s; this.s = m.s; this.lastState = Date.now();
+        if (first && WORLDS[m.s.world]) { this.world = m.s.world; if (!m.s.players.some((p) => p.pid === this.pid) && m.s.players.length >= PARTY_MAX) { this.stop(); $("#room").innerHTML = `<div class="card">${gamesBar("Party room")}<p class="fine">That party is full.</p></div>`; return; } }
+        this.draw();
+      }
+    }
+  },
+  say() {
+    const i = $("#pIn"), t = i ? i.value : ""; if (!t.trim() || !this.s) return; i.value = ""; i.focus({ preventScroll: true });
+    if (this.role === "host") this.guess("host", t); else this.send({ k: "ans", t: t.slice(0, 80), r: this.s.round });
+  },
+
+  /* ---- both: draw the skeleton when the phase changes, then only update what moves, so typing is never interrupted ---- */
+  draw() {
+    const s = this.s, room = $("#room"); if (!s || !room) return;
+    const mine = s.players.find((p) => p.pid === this.pid), key = `${s.phase}:${s.round}:${s.phase === "lobby" ? s.players.length : ""}:${mine && mine.got ? 1 : 0}`;
+    const board = [...s.players].sort((a, b) => b.score - a.score).map((p) => `<li class="${p.pid === this.pid ? "me" : ""} ${p.here === false ? "gone" : ""}"><span>${esc(p.n)}${p.got ? " ✓" : ""}</span><b class="num">${Number(p.score) || 0}</b></li>`).join("");
+    if (key !== this.drawn || !$("#pBoard")) {
+      const had = ($("#pIn") || {}).value || "", sameRound = this.drawn.startsWith(`${s.phase}:${s.round}:`);
+      this.drawn = key; let body = "";
+      if (s.phase === "lobby") body = `<p class="sub">Party code</p><div class="pcode num">${esc(this.code)}</div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn ghost" type="button" data-party="copy">Copy the invite link</button>${this.role === "host" ? `<button class="btn" type="button" data-party="start" ${s.players.length < 2 ? "disabled" : ""}>Start with ${s.players.length} player${s.players.length === 1 ? "" : "s"}</button>` : ""}</div><p class="fine">${this.role === "host" ? "Made for 3 to 8. Keep this page open: your device runs the game." : "You're in. Waiting for the host to start."}</p>`;
+      else if (s.phase === "done") { const top = [...s.players].sort((a, b) => b.score - a.score)[0]; body = `<h3 class="pwin">${esc(top.n)} wins the party</h3>${this.role === "host" ? `<button class="btn" type="button" data-party="again">Play again</button>` : `<p class="fine">The host can start another.</p>`}`; if (top.pid === this.pid) { try { confetti(); Snd.win(); } catch (e) { /* quiet */ } } }
+      else body = `<div class="qhud"><span class="label">Question ${Number(s.round)} of ${Number(s.rounds)} · ${esc(s.game || "")}</span><span class="num qscore" id="pLeft"></span></div>${s.img ? `<div class="blurpic"><img id="pImg" src="${esc(s.img)}" alt=""></div>` : ""}<div id="pClues" class="clues"></div>${s.phase === "reveal" ? `<div class="rcard on"><div class="label">The answer</div><h3 style="font-size:28px">${esc(s.answer || "")}</h3></div>` : mine && mine.got ? `<div class="rcard on"><b>You got it. Waiting for the others…</b></div>` : `<div class="answerbox"><div class="row"><input id="pIn" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="Type your answer" aria-label="Your answer"><button class="btn" type="button" data-party="say">Guess</button></div></div>`}<div class="fine" id="pFeed" role="status"></div>`;
+      room.innerHTML = `<div class="card">${gamesBar("Party room")}${body}<ol id="pBoard" class="pboard"></ol></div>`;
+      const i = $("#pIn"); if (i) { if (sameRound) i.value = had; i.focus({ preventScroll: true }); }
+    }
+    $("#pBoard").innerHTML = board;
+    const left = $("#pLeft"); if (left) left.textContent = s.phase === "ask" ? `${Number(s.left)}s` : "";
+    const img = $("#pImg"); if (img) img.style.filter = s.blur ? `blur(${Number(s.blur)}px)` : "";
+    const cl = $("#pClues"); if (cl) cl.innerHTML = (s.clues || []).map((c) => `<div class="clue on"><span class="label">${esc(c[0])}</span><b>${esc(c[1])}</b></div>`).join("");
+    const feed = $("#pFeed"); if (feed) feed.textContent = mine && s.phase === "ask" ? mine.fb || "" : "";
+  },
+};
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-party]"); if (!t) return; const a = t.dataset.party; Snd.unlock();
+  if (a === "make") Party.host();
+  else if (a === "join") Party.join(($("#pCode") || {}).value);
+  else if (a === "start") Party.next();
+  else if (a === "again") { const h = Party.h; if (h) { h.round = 0; h.used.clear(); h.players.forEach((p) => { p.score = 0; }); Party.next(); } }
+  else if (a === "say") Party.say();
+  else if (a === "copy") { const link = location.href.split("#")[0] + "#party-" + Party.code; (navigator.clipboard ? navigator.clipboard.writeText(link) : Promise.reject()).then(() => toast("Invite link copied")).catch(() => toast(esc(link))); }
+});
+document.addEventListener("keydown", (e) => { if (e.target.id === "pIn" && e.key === "Enter") { e.preventDefault(); Party.say(); } });
+addEventListener("pagehide", () => Party.stop());
+{ const route0 = route; route = function (ev) {
+  const h = (location.hash || "").slice(1);
+  Party.stop();
+  if (h.startsWith("party-")) {
+    const code = h.slice(6).toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4);
+    try { history.replaceState(null, "", "#home"); } catch (e) { /* keep the hash */ }
+    stopQuiz(); Net.close(); S.world = "kpop"; S.game = null; setTheme("kpop", ev); show("league"); renderWorld(); Party.intro("kpop"); $("#pCode").value = code;
+    return;
+  }
+  return route0.apply(this, arguments);
+}; }
+
+/* ================= Languages: German, French, Arabic (right to left), the same three as ballknowledge =================
+   Exact English wording is swapped on screen; anything not listed stays English, and names, clues, answers and sidekick lines are never
+   touched. A first draft: no native speaker has read it. One row per phrase: English|German|French|Arabic */
+const I18N_ROWS = `
+Skip to content|Zum Inhalt springen|Aller au contenu|انتقل إلى المحتوى
+Built by moisback22|Gebaut von moisback22|Créé par moisback22|من صنع moisback22
+Draft|Entwurf|Brouillon|مسودة
+Sign in|Anmelden|Se connecter|تسجيل الدخول
+← Menu|← Menü|← Menu|← القائمة
+← Back|← Zurück|← Retour|→ رجوع
+← Worlds|← Welten|← Mondes|← العوالم
+Menu|Menü|Menu|القائمة
+Worlds|Welten|Mondes|العوالم
+Settings|Einstellungen|Réglages|الإعدادات
+Wiki|Wiki|Wiki|الموسوعة
+Calendar|Kalender|Calendrier|التقويم
+Pictures|Bilder|Images|الصور
+Collection|Sammlung|Collection|المجموعة
+Every topic, one arena|Jedes Thema, eine Arena|Tous les sujets, une arène|كل المواضيع في ساحة واحدة
+K-pop, football, basketball, chess, geography, history, food, anime and general knowledge. Real data, typed answers, solo or against a friend.|K-Pop, Fußball, Basketball, Schach, Erdkunde, Geschichte, Essen, Anime und Allgemeinwissen. Echte Daten, getippte Antworten, allein oder gegen Freunde.|K-pop, football, basket, échecs, géographie, histoire, cuisine, anime et culture générale. De vraies données, des réponses tapées, seul ou contre un ami.|كيبوب وكرة قدم وكرة سلة وشطرنج وجغرافيا وتاريخ وطعام وأنمي ومعلومات عامة. بيانات حقيقية وإجابات مكتوبة، وحدك أو ضد صديق.
+Pick a category|Wähle eine Kategorie|Choisis une catégorie|اختر فئة
+Tap one to see its games. Each has its own sidekick, music, loading screens and rank.|Tippe eine an, um ihre Spiele zu sehen. Jede hat ihren eigenen Sidekick, Musik, Ladebildschirme und Rang.|Touche-en une pour voir ses jeux. Chacune a son compagnon, sa musique, ses écrans et son rang.|اضغط على فئة لترى ألعابها. لكل منها رفيقها وموسيقاها وشاشاتها ورتبتها.
+categories|Kategorien|catégories|فئات
+games|Spiele|jeux|لعبة
+real people, places and things|echte Menschen, Orte und Dinge|personnes, lieux et choses réels|أشخاص وأماكن وأشياء حقيقية
+Multi-genre|Gemischt|Multi-genres|متعدد الفئات
+Every category in one game. Test yourself across all of them, or beat a friend who knows completely different things.|Alle Kategorien in einem Spiel. Teste dich quer durch alles oder schlag jemanden, der ganz andere Dinge weiß.|Toutes les catégories en un jeu. Teste-toi partout, ou bats un ami qui connaît tout autre chose.|كل الفئات في لعبة واحدة. اختبر نفسك فيها كلها أو اغلب صديقًا يعرف أشياء مختلفة تمامًا.
+Cross-category match|Kategorien-Duell|Match entre catégories|مباراة بين الفئات
+Challenge a friend|Freund herausfordern|Défie un ami|تحدَّ صديقًا
+Gamut run|Alles-Lauf|Le grand tour|جولة كل الفئات
+Solo. One round from every category, back to back. How far does your knowledge reach?|Allein. Eine Runde aus jeder Kategorie, direkt hintereinander. Wie weit reicht dein Wissen?|En solo. Une manche par catégorie, à la suite. Jusqu'où vont tes connaissances ?|وحدك. جولة من كل فئة على التوالي. إلى أين تصل معرفتك؟
+Pick your|Wähle deine|Choisis ton|اختر
+world|Welt|monde|عالمك
+What do you want to play?|Worauf hast du Lust?|À quoi veux-tu jouer ?|ماذا تريد أن تلعب؟
+Football|Fußball|Football|كرة القدم
+Basketball|Basketball|Basket|كرة السلة
+Chess|Schach|Échecs|الشطرنج
+K-pop|K-Pop|K-pop|كيبوب
+Geography|Erdkunde|Géographie|الجغرافيا
+History|Geschichte|Histoire|التاريخ
+Food|Essen|Cuisine|الطعام
+Anime|Anime|Anime|أنمي
+General knowledge|Allgemeinwissen|Culture générale|معلومات عامة
+Rank|Rang|Rang|الرتبة
+World XP|Welt-XP|XP du monde|نقاط العالم
+Dex|Dex|Dex|الألبوم
+Difficulty|Schwierigkeit|Difficulté|الصعوبة
+Easy|Leicht|Facile|سهل
+Medium|Mittel|Moyen|متوسط
+Hard|Schwer|Difficile|صعب
+Players and devices|Spieler und Geräte|Joueurs et appareils|اللاعبون والأجهزة
+Solo streak|Solo-Serie|Série en solo|سلسلة فردية
+Solo|Allein|Solo|فردي
+Solo, against the computer|Allein gegen den Computer|Seul contre l'ordinateur|وحدك ضد الحاسوب
+Solo, against the clock|Allein gegen die Uhr|Seul contre la montre|وحدك ضد الساعة
+Two players, one device|Zwei Spieler, ein Gerät|Deux joueurs, un appareil|لاعبان على جهاز واحد
+Two players, two devices|Zwei Spieler, zwei Geräte|Deux joueurs, deux appareils|لاعبان على جهازين
+Survival|Überleben|Survie|البقاء
+Three lives. The questions get harder every three. One high score.|Drei Leben. Alle drei Fragen wird es schwerer. Ein Rekord.|Trois vies. Les questions se corsent toutes les trois. Un seul record.|ثلاث محاولات. تزداد الصعوبة كل ثلاثة أسئلة. رقم قياسي واحد.
+Keep going for as long as you can. The run ends the first time you miss.|Mach weiter, so lange du kannst.|Continue aussi longtemps que possible.|استمر قدر ما تستطيع.
+Five rounds. Race to buzz: A for player 1, L for player 2.|Fünf Runden. Wer zuerst buzzert: A für Spieler 1, L für Spieler 2.|Cinq manches. Au buzzer : A pour le joueur 1, L pour le joueur 2.|خمس جولات. سباق على الجرس: A للاعب الأول وL للثاني.
+The same race on two phones or computers, with a four-letter room code.|Dasselbe Rennen auf zwei Geräten, mit einem Raumcode aus vier Buchstaben.|La même course sur deux appareils, avec un code à quatre lettres.|السباق نفسه على جهازين برمز غرفة من أربعة أحرف.
+Names for two players on one device (optional)|Namen für zwei Spieler an einem Gerät (freiwillig)|Noms des deux joueurs (facultatif)|اسما اللاعبين على جهاز واحد (اختياري)
+Not played yet|Noch nicht gespielt|Pas encore joué|لم تُلعب بعد
+vs computer · 2 players|gegen Computer · 2 Spieler|contre l'ordinateur · 2 joueurs|ضد الحاسوب · لاعبان
+Solo streak · 2 players|Solo-Serie · 2 Spieler|Série solo · 2 joueurs|سلسلة فردية · لاعبان
+Solo 60 seconds · 2 players|Solo 60 Sekunden · 2 Spieler|Solo 60 secondes · 2 joueurs|فردي ٦٠ ثانية · لاعبان
+Solo streak · 2 players · online|Solo-Serie · 2 Spieler · online|Série solo · 2 joueurs · en ligne|سلسلة فردية · لاعبان · عبر الإنترنت
+Solo · 2 players|Allein · 2 Spieler|Solo · 2 joueurs|فردي · لاعبان
+Buzz|Buzzern|Buzz|اضغط
+BUZZ|BUZZ|BUZZ|الجرس
+space bar|Leertaste|barre d'espace|مفتاح المسافة
+Give up|Aufgeben|Abandonner|استسلم
+Skip this one|Überspringen|Passer|تخطَّ
+Guess|Raten|Valider|خمّن
+Your answer|Deine Antwort|Ta réponse|إجابتك
+Type your answer|Antwort eintippen|Tape ta réponse|اكتب إجابتك
+Type a name|Namen eintippen|Tape un nom|اكتب اسمًا
+Next round|Nächste Runde|Manche suivante|الجولة التالية
+Next|Weiter|Suivant|التالي
+Pause|Pause|Pause|إيقاف مؤقت
+See the final score|Endstand ansehen|Voir le score final|النتيجة النهائية
+See the result|Ergebnis ansehen|Voir le résultat|النتيجة
+Play again|Nochmal spielen|Rejouer|العب مجددًا
+The answer|Die Antwort|La réponse|الإجابة
+You got it|Richtig|Bien joué|أصبت
+Not this time|Diesmal nicht|Pas cette fois|ليس هذه المرة
+Nobody got it|Niemand wusste es|Personne n'a trouvé|لم يعرفها أحد
+Skipped|Übersprungen|Passé|تم التخطي
+Full time|Abpfiff|Terminé|انتهت المباراة
+A draw.|Unentschieden.|Égalité.|تعادل.
+Serious knowledge.|Echtes Fachwissen.|Sacrées connaissances.|معرفة كبيرة.
+Solid.|Solide.|Solide.|جيد.
+Keep practising.|Weiter üben.|Continue à t'entraîner.|واصل التدريب.
+Out of lives.|Keine Leben mehr.|Plus de vies.|انتهت المحاولات.
+Held on well.|Gut durchgehalten.|Belle résistance.|صمود جيد.
+A survivor.|Ein Überlebenskünstler.|Un vrai survivant.|ناجٍ حقيقي.
+Score|Punkte|Score|النتيجة
+Worth|Wert|Vaut|تساوي
+points now|Punkte jetzt|points maintenant|نقطة الآن
+Sharpens every few seconds|Wird alle paar Sekunden schärfer|Plus net toutes les quelques secondes|تتضح كل بضع ثوانٍ
+Zooming out every few seconds|Zoomt alle paar Sekunden heraus|Dézoome toutes les quelques secondes|يبتعد التكبير كل بضع ثوانٍ
+Tiles fall away every few seconds|Alle paar Sekunden fallen Kacheln weg|Des tuiles tombent toutes les quelques secondes|تسقط المربعات كل بضع ثوانٍ
+Listening… replay with the button below|Läuft… unten nochmal abspielen|Écoute… relance avec le bouton|استمع… أعد التشغيل بالزر أدناه
+▶ Tap to play|▶ Antippen zum Abspielen|▶ Touche pour écouter|▶ اضغط للتشغيل
+Your rival is answering…|Dein Gegner antwortet…|Ton rival répond…|منافسك يجيب…
+Sound|Ton|Son|الصوت
+Off|Aus|Non|إيقاف
+Soft|Leise|Doux|خافت
+Full|Voll|Fort|كامل
+On|An|Oui|تشغيل
+Lobby music|Menümusik|Musique du menu|موسيقى القائمة
+Language|Sprache|Langue|اللغة
+Your profile, ranks and achievements|Dein Profil, Ränge und Erfolge|Ton profil, tes rangs et succès|ملفك ورتبك وإنجازاتك
+Your collection|Deine Sammlung|Ta collection|مجموعتك
+All worlds|Alle Welten|Tous les mondes|كل العوالم
+Photocards|Fotokarten|Photocards|بطاقات الصور
+Loading screens|Ladebildschirme|Écrans de chargement|شاشات التحميل
+In your Dex|In deinem Dex|Dans ton Dex|في ألبومك
+New photocard|Neue Fotokarte|Nouvelle photocard|بطاقة جديدة
+Odd one out|Wer passt nicht?|L'intrus|من الدخيل؟
+Five idols, four from one group. Type the name of the one who doesn't belong.|Fünf Idols, vier aus einer Gruppe. Tippe den Namen, der nicht dazugehört.|Cinq idoles, quatre du même groupe. Tape le nom de l'intrus.|خمسة نجوم، أربعة من فرقة واحدة. اكتب اسم الدخيل.
+Who is not in the same group as the others?|Wer ist nicht in derselben Gruppe?|Qui n'est pas du même groupe ?|من ليس في الفرقة نفسها؟
+Two songs at once|Zwei Songs auf einmal|Deux chansons à la fois|أغنيتان معًا
+Two song previews play together. Name both titles, one at a time or with a + between them.|Zwei Hörproben laufen gleichzeitig. Nenne beide Titel, einzeln oder mit + dazwischen.|Deux extraits jouent ensemble. Donne les deux titres, un par un ou séparés par +.|مقطعان يعملان معًا. اذكر العنوانين، واحدًا تلو الآخر أو بينهما +.
+Mixed marathon|Mix-Marathon|Marathon mixte|ماراثون منوّع
+One run that jumps between games.|Ein Lauf quer durch die Spiele.|Une course d'un jeu à l'autre.|جولة تقفز بين الألعاب.
+All twelve, as many points as you can.|Alle zwölf, so viele Punkte wie möglich.|Les douze, un maximum de points.|الأسئلة الاثنا عشر بأكبر عدد من النقاط.
+Race to buzz: A for player 1, L for player 2.|Buzzer-Rennen: A für Spieler 1, L für Spieler 2.|Au buzzer : A pour le joueur 1, L pour le joueur 2.|سباق على الجرس: A للأول وL للثاني.
+Party room|Partyraum|Salle de fête|غرفة الحفلة
+3 to 8 players, own phones|3 bis 8 Spieler, eigene Handys|3 à 8 joueurs, chacun son téléphone|من ٣ إلى ٨ لاعبين بهواتفهم
+One code, everyone answers at once, fastest scores most.|Ein Code, alle antworten gleichzeitig, die Schnellsten punkten am meisten.|Un code, tout le monde répond en même temps, le plus rapide marque le plus.|رمز واحد، الجميع يجيب معًا، والأسرع يكسب أكثر.
+Your name|Dein Name|Ton nom|اسمك
+Start a party|Party starten|Lancer une fête|ابدأ حفلة
+Join|Beitreten|Rejoindre|انضم
+or|oder|ou|أو
+Party code|Party-Code|Code de la fête|رمز الحفلة
+Copy the invite link|Einladungslink kopieren|Copier le lien|انسخ رابط الدعوة
+Create a room|Raum erstellen|Créer un salon|أنشئ غرفة
+Play a friend: room code|Gegen Freunde: Raumcode|Contre un ami : code du salon|العب مع صديق: رمز الغرفة
+Photocard binder|Fotokarten-Album|Classeur de photocards|ألبوم البطاقات
+Your collection|Deine Sammlung|Ta collection|مجموعتك
+Every idol you name correctly leaves a card here.|Jedes richtig genannte Idol hinterlässt hier eine Karte.|Chaque idole trouvée laisse une carte ici.|كل نجم تسمّيه بشكل صحيح يترك بطاقة هنا.
+Play a round that starts with this one|Eine Runde, die hiermit beginnt|Jouer une manche qui commence par ceci|العب جولة تبدأ بهذا
+Quick quiz|Schnellquiz|Quiz express|اختبار سريع
+Answer scramble|Antwort-Salat|Réponse mélangée|إجابة مبعثرة
+Scramble|Buchstabensalat|Lettres mêlées|حروف مبعثرة
+Who am I?|Wer bin ich?|Qui suis-je ?|من أنا؟
+Career path|Karriereweg|Parcours|مسيرة اللاعب
+Name that club|Welcher Verein?|Quel club ?|ما اسم النادي؟
+Badge blur|Wappen-Rätsel|Écusson flou|شعار ضبابي
+Logo blur|Logo-Rätsel|Logo flou|شارة ضبابية
+Flag blur|Flaggen-Rätsel|Drapeau flou|علم ضبابي
+Who's that player?|Wer ist der Spieler?|Qui est ce joueur ?|من هذا اللاعب؟
+Market value|Marktwert|Valeur marchande|القيمة السوقية
+Starting XI|Startelf|Le onze de départ|التشكيلة الأساسية
+Starting five|Startfünf|Le cinq majeur|الخماسي الأساسي
+Football tic-tac-toe|Fußball-Tic-Tac-Toe|Morpion foot|إكس أو الكروي
+Hoops tic-tac-toe|Basketball-Tic-Tac-Toe|Morpion basket|إكس أو السلة
+K-pop tic-tac-toe|K-Pop-Tic-Tac-Toe|Morpion K-pop|إكس أو الكيبوب
+Club roulette|Vereins-Roulette|Roulette des clubs|روليت الأندية
+Team roulette|Team-Roulette|Roulette des équipes|روليت الفرق
+Career points|Karrierepunkte|Points en carrière|نقاط المسيرة
+Play chess|Schach spielen|Jouer aux échecs|العب الشطرنج
+Who is this player?|Wer ist das?|Qui est ce joueur ?|من هذا اللاعب؟
+Who's that grandmaster?|Welcher Großmeister?|Quel grand maître ?|من هذا الأستاذ الكبير؟
+Name the opening|Welche Eröffnung?|Quelle ouverture ?|ما اسم الافتتاحية؟
+Higher peak?|Höhere Bestzahl?|Meilleur record ?|أي ذروة أعلى؟
+Who's that idol?|Welches Idol?|Quelle idole ?|من هذا النجم؟
+Who's missing?|Wer fehlt?|Qui manque ?|من الغائب؟
+Name the group|Welche Gruppe?|Quel groupe ?|ما اسم الفرقة؟
+Album → song|Album → Song|Album → chanson|من الألبوم إلى الأغنية
+Blurred album cover|Verschwommenes Cover|Pochette floue|غلاف ضبابي
+Hear the song|Song hören|Écoute la chanson|استمع للأغنية
+Guess the song|Song erraten|Devine la chanson|خمّن الأغنية
+Which album is it from?|Aus welchem Album?|De quel album ?|من أي ألبوم؟
+Whose song is it?|Von wem ist der Song?|De qui est la chanson ?|لمن هذه الأغنية؟
+Group: Who are we?|Gruppe: Wer sind wir?|Groupe : qui sommes-nous ?|الفرقة: من نحن؟
+Which release came first?|Was erschien zuerst?|Quelle sortie en premier ?|أي إصدار جاء أولًا؟
+Name the release|Welche Veröffentlichung?|Quelle sortie ?|ما اسم الإصدار؟
+Name the leader|Wer ist Leader?|Qui est le leader ?|من القائد؟
+Name the maknae|Wer ist Maknae?|Qui est le maknae ?|من أصغر الأعضاء؟
+Whose fandom is this?|Welches Fandom?|À qui ce fandom ?|لمن هذا الجمهور؟
+Whose colours are these?|Wessen Farben?|À qui ces couleurs ?|لمن هذه الألوان؟
+Whose unit is it?|Wessen Unit?|À qui cette sous-unité ?|لمن هذه الوحدة؟
+Which song is newer?|Welcher Song ist neuer?|Quelle chanson est la plus récente ?|أي أغنية أحدث؟
+Bigger fandom?|Größeres Fandom?|Plus grand fandom ?|أي جمهور أكبر؟
+Member roulette|Mitglieder-Roulette|Roulette des membres|روليت الأعضاء
+Name every member|Alle Mitglieder nennen|Tous les membres|سمِّ كل الأعضاء
+Who's older?|Wer ist älter?|Qui est l'aîné ?|من الأكبر سنًا؟
+Label roulette|Label-Roulette|Roulette des agences|روليت الوكالات
+Tile reveal: the idol|Kacheln: das Idol|Tuiles : l'idole|المربعات: النجم
+Tile reveal: the series|Kacheln: die Serie|Tuiles : la série|المربعات: المسلسل
+Tile reveal: the flag|Kacheln: die Flagge|Tuiles : le drapeau|المربعات: العلم
+Tile reveal: the moment|Kacheln: der Moment|Tuiles : le moment|المربعات: الحدث
+Zoom out: the player|Rauszoomen: der Spieler|Dézoom : le joueur|ابتعد: اللاعب
+Zoom out: the grandmaster|Rauszoomen: der Großmeister|Dézoom : le grand maître|ابتعد: الأستاذ الكبير
+Zoom out: the landmark|Rauszoomen: das Wahrzeichen|Dézoom : le monument|ابتعد: المعلم
+Zoom out: the figure|Rauszoomen: die Person|Dézoom : le personnage|ابتعد: الشخصية
+Zoom out: the dish|Rauszoomen: das Gericht|Dézoom : le plat|ابتعد: الطبق
+Zoom out: who is it?|Rauszoomen: wer ist das?|Dézoom : qui est-ce ?|ابتعد: من هذا؟
+Which anime am I?|Welcher Anime bin ich?|Quel anime suis-je ?|أي أنمي أنا؟
+Which anime are they from?|Aus welchem Anime?|De quel anime ?|من أي أنمي هم؟
+Character roulette|Figuren-Roulette|Roulette des personnages|روليت الشخصيات
+Who's that character?|Welche Figur?|Quel personnage ?|من هذه الشخصية؟
+Which aired first?|Was lief zuerst?|Lequel est sorti en premier ?|أيهما عُرض أولًا؟
+Series from its cast|Serie am Ensemble erkennen|La série par ses personnages|المسلسل من شخصياته
+More episodes?|Mehr Folgen?|Plus d'épisodes ?|أيهما أكثر حلقات؟
+Hear the opening|Opening hören|Écoute l'opening|استمع للمقدمة
+Hear the ending|Ending hören|Écoute l'ending|استمع للخاتمة
+Which country am I?|Welches Land bin ich?|Quel pays suis-je ?|أي بلد أنا؟
+Capital cities|Hauptstädte|Capitales|العواصم
+More people?|Mehr Einwohner?|Plus d'habitants ?|أيهما أكثر سكانًا؟
+Name the landmark|Welches Wahrzeichen?|Quel monument ?|ما اسم المعلم؟
+Where in the world?|Wo auf der Welt?|Où dans le monde ?|أين في العالم؟
+Which invention came first?|Welche Erfindung war zuerst?|Quelle invention en premier ?|أي اختراع جاء أولًا؟
+Name the invention|Welche Erfindung?|Quelle invention ?|ما اسم الاختراع؟
+Name the event|Welches Ereignis?|Quel événement ?|ما اسم الحدث؟
+Which happened first?|Was geschah zuerst?|Qu'est-ce qui s'est passé en premier ?|أيهما حدث أولًا؟
+Whose flag was this?|Wessen Flagge war das?|À qui était ce drapeau ?|علم من كان هذا؟
+Who's in the portrait?|Wer ist auf dem Porträt?|Qui est sur le portrait ?|من في الصورة؟
+Who was born first?|Wer wurde zuerst geboren?|Qui est né en premier ?|من وُلد أولًا؟
+Name the dish|Welches Gericht?|Quel plat ?|ما اسم الطبق؟
+Ingredient reveal|Zutaten-Rätsel|Les ingrédients|كشف المكونات
+Where's it from?|Woher kommt es?|D'où ça vient ?|من أين هو؟
+Hard questions only|Nur schwere Fragen|Questions difficiles seulement|الأسئلة الصعبة فقط
+Science and nature|Wissenschaft und Natur|Sciences et nature|العلوم والطبيعة
+History and myth|Geschichte und Mythen|Histoire et mythes|التاريخ والأساطير
+Film and TV|Film und Fernsehen|Cinéma et télé|السينما والتلفاز
+Music|Musik|Musique|الموسيقى
+Video games|Videospiele|Jeux vidéo|ألعاب الفيديو
+Sport and vehicles|Sport und Fahrzeuge|Sport et véhicules|الرياضة والمركبات
+Places|Orte|Lieux|الأماكن
+Books, comics and art|Bücher, Comics und Kunst|Livres, BD et art|الكتب والقصص المصورة والفن
+A close-up that slowly zooms out. Buzz as soon as you know it.|Eine Nahaufnahme, die langsam herauszoomt. Buzzer, sobald du es weißt.|Un gros plan qui dézoome lentement. Buzze dès que tu sais.|لقطة قريبة تبتعد ببطء. اضغط حالما تعرف.
+A picture hidden behind tiles that fall away. Buzz as soon as you know it.|Ein Bild hinter Kacheln, die wegfallen. Buzzer, sobald du es weißt.|Une image cachée derrière des tuiles qui tombent. Buzze dès que tu sais.|صورة خلف مربعات تتساقط. اضغط حالما تعرف.
+An idol's photo, right away. Buzz and type the name. A hint comes at a third of the time, another at two thirds.|Sofort ein Foto eines Idols. Buzzern und Namen tippen. Hinweise nach einem und zwei Dritteln der Zeit.|La photo d'une idole tout de suite. Buzze et tape le nom. Des indices au tiers et aux deux tiers du temps.|صورة نجم فورًا. اضغط واكتب الاسم. تلميح بعد ثلث الوقت وآخر بعد ثلثيه.
+A group's line-up with one empty slot. Name the missing member.|Eine Gruppenaufstellung mit einer Lücke. Wer fehlt?|La formation d'un groupe avec une place vide. Nomme le membre manquant.|تشكيلة فرقة بمكان فارغ. سمِّ العضو الغائب.
+Member names appear one by one. Buzz with the group they're in.|Mitgliedernamen erscheinen nacheinander. Nenne die Gruppe.|Les noms des membres apparaissent un à un. Donne le groupe.|تظهر أسماء الأعضاء واحدًا تلو الآخر. اذكر الفرقة.
+Three seconds of a real song. Then five more. Buzz and type the title before the hints arrive.|Drei Sekunden eines echten Songs, dann fünf mehr. Tippe den Titel, bevor die Hinweise kommen.|Trois secondes d'une vraie chanson, puis cinq de plus. Tape le titre avant les indices.|ثلاث ثوانٍ من أغنية حقيقية ثم خمس أخرى. اكتب العنوان قبل التلميحات.
+A real song: when it came out, its album, then the group. Type the title.|Ein echter Song: Erscheinungsjahr, Album, dann die Gruppe. Tippe den Titel.|Une vraie chanson : date, album, puis le groupe. Tape le titre.|أغنية حقيقية: تاريخها ثم ألبومها ثم الفرقة. اكتب العنوان.
+A mystery player. Clues go from obscure to obvious. Buzz in early for more points.|Ein unbekannter Spieler. Die Hinweise werden immer deutlicher. Früh buzzern bringt mehr Punkte.|Un joueur mystère. Les indices vont de l'obscur à l'évident. Buzze tôt pour plus de points.|لاعب غامض. التلميحات من الأصعب إلى الأوضح. اضغط مبكرًا لنقاط أكثر.
+Type names in any order. Initials cost 30 points, a wrong name 20.|Namen in beliebiger Reihenfolge. Initialen kosten 30 Punkte, ein falscher Name 20.|Les noms dans n'importe quel ordre. Les initiales coûtent 30 points, un mauvais nom 20.|اكتب الأسماء بأي ترتيب. الأحرف الأولى تكلف ٣٠ نقطة والاسم الخاطئ ٢٠.
+The difficulty sets how strong the computer plays.|Die Schwierigkeit bestimmt die Spielstärke des Computers.|La difficulté règle la force de l'ordinateur.|الصعوبة تحدد قوة الحاسوب.
+The picture is there from the start; hints arrive at one third and two thirds of the time.|Das Bild ist von Anfang an da; Hinweise nach einem und zwei Dritteln der Zeit.|L'image est là dès le début ; les indices arrivent au tiers et aux deux tiers.|الصورة ظاهرة من البداية، والتلميحات بعد ثلث الوقت وثلثيه.
+Clues start hard and get easier.|Die Hinweise werden von schwer zu leicht.|Les indices vont du plus dur au plus facile.|تبدأ التلميحات صعبة ثم تسهل.
+The picture starts blurred and sharpens every few seconds.|Das Bild beginnt unscharf und wird nach und nach schärfer.|L'image commence floue et devient nette peu à peu.|تبدأ الصورة ضبابية وتتضح تدريجيًا.
+The letters of every word are shuffled. Hints arrive slowly.|Die Buchstaben jedes Wortes sind vertauscht. Hinweise kommen langsam.|Les lettres de chaque mot sont mélangées. Les indices arrivent lentement.|حروف كل كلمة مبعثرة. التلميحات تأتي ببطء.
+Two picks, one question. Tap the right side.|Zwei Möglichkeiten, eine Frage. Tippe die richtige Seite an.|Deux choix, une question. Touche le bon côté.|خياران وسؤال واحد. اضغط على الجانب الصحيح.
+Tap a square and name someone who fits its row and column. A wrong or repeated name loses your turn.|Feld antippen und jemanden nennen, der zu Zeile und Spalte passt. Falsch oder doppelt kostet den Zug.|Touche une case et nomme quelqu'un qui convient. Un nom faux ou répété fait perdre le tour.|اضغط مربعًا وسمِّ من يناسب صفه وعموده. الاسم الخاطئ أو المكرر يضيع دورك.
+Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.|Nenne so viele wie möglich. Im Duell abwechselnd: Wer nichts weiß, wiederholt oder zu lange braucht, verliert die Runde.|Nomme-en le plus possible. En duel, chacun son tour : sans réponse, répétition ou temps écoulé, la manche est perdue.|سمِّ أكبر عدد ممكن. في المبارزة بالتناوب: من يتوقف أو يكرر أو ينتهي وقته يخسر الجولة.
+A real song plays in short slices: 3 seconds, then 5 more, then the rest.|Ein echter Song in kurzen Stücken: 3 Sekunden, dann 5 weitere, dann der Rest.|Une vraie chanson par petits bouts : 3 secondes, puis 5, puis le reste.|أغنية حقيقية على مقاطع: ٣ ثوانٍ ثم ٥ ثم الباقي.
+Solo: keep the streak going. Two players: take turns, five each.|Allein: die Serie halten. Zu zweit: abwechselnd, je fünf.|En solo : garde la série. À deux : chacun son tour, cinq chacun.|وحدك: حافظ على السلسلة. لاعبان: بالتناوب، خمسة لكل منهما.
+Buzz in whenever you think you know it. The sooner you are right, the more you score (up to 1,000); a wrong guess costs 150.|Buzzer, sobald du es zu wissen glaubst. Je früher richtig, desto mehr Punkte (bis 1.000); falsch kostet 150.|Buzze dès que tu penses savoir. Plus tu trouves tôt, plus tu marques (jusqu'à 1 000) ; une erreur coûte 150.|اضغط متى ظننت أنك تعرف. كلما أسرعت بالصواب زادت نقاطك (حتى ١٠٠٠)، والخطأ يكلف ١٥٠.
+Facts come from Wikidata (CC0), ballknowledge's football data and other credited sources. Some pictures are freely licensed; many belong to their owners and are shown with credit.|Fakten aus Wikidata (CC0), den Fußballdaten von ballknowledge und weiteren genannten Quellen. Manche Bilder sind frei lizenziert; viele gehören ihren Inhabern und werden mit Quellenangabe gezeigt.|Les faits viennent de Wikidata (CC0), des données de ballknowledge et d'autres sources citées. Certaines images sont libres ; beaucoup appartiennent à leurs auteurs et sont créditées.|المعلومات من ويكي بيانات وبيانات ballknowledge ومصادر أخرى مذكورة. بعض الصور حرة الترخيص، وكثير منها ملك لأصحابها وتُعرض مع ذكرهم.
+Picture sources and removal requests|Bildquellen und Löschanfragen|Sources des images et demandes de retrait|مصادر الصور وطلبات الإزالة
+. An independent student project, not affiliated with anyone shown.|. Ein unabhängiges Studentenprojekt ohne Verbindung zu den Gezeigten.|. Un projet étudiant indépendant, sans lien avec les personnes montrées.|. مشروع طلابي مستقل لا علاقة له بمن يظهر فيه.
+Daily missions|Tagesmissionen|Missions du jour|مهام اليوم
+Weekly chest|Wochentruhe|Coffre de la semaine|صندوق الأسبوع
+Play in 3 different categories|Spiele in 3 verschiedenen Kategorien|Joue dans 3 catégories|العب في ٣ فئات مختلفة
+Try a game you've never played|Probier ein neues Spiel|Essaie un jeu jamais joué|جرّب لعبة لم تلعبها
+Answer 10 questions in any game|Beantworte 10 Fragen in beliebigen Spielen|Réponds à 10 questions|أجب عن ١٠ أسئلة في أي لعبة
+All three: +100 XP. New missions every day.|Alle drei: +100 XP. Jeden Tag neue Missionen.|Les trois : +100 XP. De nouvelles missions chaque jour.|الثلاث: ‎+100 XP. مهام جديدة كل يوم.
+done|erledigt|fait|تم
+Redemption round|Revanche-Runde|La revanche|جولة التعويض
+Play|Spielen|Jouer|العب
+Play →|Spielen →|Jouer →|العب ←
+Continue playing|Weiterspielen|Reprendre|تابع اللعب
+Daily challenges|Tagesaufgaben|Défis du jour|تحديات اليوم
+The same five rounds for everyone today, one per category. Come back tomorrow for new ones.|Heute für alle dieselben fünf Runden, je Kategorie. Morgen gibt es neue.|Les mêmes cinq manches pour tous aujourd'hui, une par catégorie. Reviens demain.|الجولات الخمس نفسها للجميع اليوم، واحدة لكل فئة. عد غدًا لجديدة.
+5 rounds · play now|5 Runden · jetzt spielen|5 manches · jouer|٥ جولات · العب الآن
+Comeback calendar|Comeback-Kalender|Calendrier des comebacks|تقويم العودات
+Releases and debut anniversaries, month by month|Veröffentlichungen und Debüt-Jubiläen, Monat für Monat|Sorties et anniversaires de débuts, mois par mois|الإصدارات وذكرى الانطلاق شهرًا بشهر
+For you|Für dich|Pour toi|لك
+Picked from what you play.|Passend zu dem, was du spielst.|Choisi selon tes parties.|مختارة حسب ما تلعب.
+Try something different|Mal was anderes|Essaie autre chose|جرّب شيئًا مختلفًا
+Idols, groups, songs, fandoms|Idols, Gruppen, Songs, Fandoms|Idoles, groupes, chansons, fandoms|النجوم والفرق والأغاني والجماهير
+Five leagues, real data|Fünf Ligen, echte Daten|Cinq championnats, vraies données|خمسة دوريات وبيانات حقيقية
+25 seasons of the NBA|25 NBA-Saisons|25 saisons de NBA|٢٥ موسمًا من دوري NBA
+Grandmasters and openings|Großmeister und Eröffnungen|Grands maîtres et ouvertures|الأساتذة الكبار والافتتاحيات
+Flags, capitals, countries|Flaggen, Hauptstädte, Länder|Drapeaux, capitales, pays|الأعلام والعواصم والدول
+Events, inventions, empires, people|Ereignisse, Erfindungen, Reiche, Menschen|Événements, inventions, empires, personnages|الأحداث والاختراعات والإمبراطوريات والشخصيات
+Science, history, film, sport and more|Wissenschaft, Geschichte, Film, Sport und mehr|Sciences, histoire, cinéma, sport et plus|العلوم والتاريخ والسينما والرياضة وأكثر
+Series, studios, creators|Serien, Studios, Schöpfer|Séries, studios, créateurs|المسلسلات والاستوديوهات والمبدعون
+Dishes of the world|Gerichte der Welt|Plats du monde|أطباق العالم
+The current generation: 4th and 5th gen groups plus TWICE, BLACKPINK, BTS and IZ*ONE, with their idols, songs from 2022 on (every era for TWICE, BLACKPINK, BTS and IZ*ONE), album covers and song previews.|Die aktuelle Generation: Gruppen der 4. und 5. Generation plus TWICE, BLACKPINK, BTS und IZ*ONE, mit Idols, Songs ab 2022 (bei diesen vier aus allen Phasen), Covern und Hörproben.|La génération actuelle : les groupes des 4e et 5e générations plus TWICE, BLACKPINK, BTS et IZ*ONE, avec leurs idoles, les chansons depuis 2022 (toutes les époques pour ces quatre), pochettes et extraits.|الجيل الحالي: فرق الجيلين الرابع والخامس إضافة إلى TWICE وBLACKPINK وBTS وIZ*ONE، مع نجومها وأغانيها منذ ٢٠٢٢ (وكل المراحل لهذه الأربع) وأغلفة الألبومات ومقاطع الأغاني.
+Players, careers, crests and market values from ballknowledge's real data.|Spieler, Karrieren, Wappen und Marktwerte aus den echten Daten von ballknowledge.|Joueurs, carrières, écussons et valeurs marchandes issus des données de ballknowledge.|اللاعبون ومسيراتهم وشعاراتهم وقيمهم السوقية من بيانات ballknowledge الحقيقية.
+Players, careers, team logos and career points from ballknowledge's basketball data.|Spieler, Karrieren, Teamlogos und Karrierepunkte aus den Basketballdaten von ballknowledge.|Joueurs, carrières, logos et points en carrière issus des données de ballknowledge.|اللاعبون ومسيراتهم وشعارات الفرق ونقاطهم من بيانات ballknowledge.
+Elite players with their peak ratings, and the real openings from Lichess.|Spitzenspieler mit ihren Bestwertungen und echte Eröffnungen von Lichess.|Les meilleurs joueurs et leur record Elo, et les vraies ouvertures de Lichess.|كبار اللاعبين وأعلى تصنيفاتهم، وافتتاحيات حقيقية من Lichess.
+Every sovereign country: flags, capitals, languages and populations.|Alle souveränen Staaten: Flaggen, Hauptstädte, Sprachen, Einwohner.|Tous les pays souverains : drapeaux, capitales, langues et populations.|كل الدول ذات السيادة: الأعلام والعواصم واللغات والسكان.
+Wars and revolutions, world-changing inventions, the flags of countries that are gone, and the people who made it all happen.|Kriege und Revolutionen, weltverändernde Erfindungen, Flaggen verschwundener Staaten und die Menschen dahinter.|Guerres et révolutions, grandes inventions, drapeaux de pays disparus et ceux qui ont fait l'histoire.|الحروب والثورات والاختراعات التي غيّرت العالم وأعلام دول اندثرت ومن صنعوا ذلك.
+Real quiz questions from Open Trivia DB, rated easy to hard. Type the answer.|Echte Quizfragen von Open Trivia DB, von leicht bis schwer. Tippe die Antwort.|De vraies questions d'Open Trivia DB, de facile à difficile. Tape la réponse.|أسئلة حقيقية من Open Trivia DB من السهل إلى الصعب. اكتب الإجابة.
+The most famous anime series from Wikidata: year, studio, episodes and the manga behind them.|Die bekanntesten Anime-Serien laut Wikidata: Jahr, Studio, Folgen und Manga-Vorlage.|Les anime les plus connus d'après Wikidata : année, studio, épisodes et manga d'origine.|أشهر مسلسلات الأنمي من ويكي بيانات: السنة والاستوديو والحلقات والمانغا الأصلية.
+Famous dishes, where they come from and what goes in them.|Berühmte Gerichte, ihre Herkunft und Zutaten.|Des plats célèbres, leur origine et leurs ingrédients.|أطباق شهيرة ومن أين جاءت وما مكوناتها.
+Up to 10 at a time. Get one right and it returns later, then retires.|Höchstens 10 auf einmal. Richtig beantwortet kommt sie später wieder und verschwindet dann.|Jusqu'à 10 à la fois. Bien répondue, elle revient plus tard puis disparaît.|حتى ١٠ في المرة. إن أجبت صوابًا يعود السؤال لاحقًا ثم يختفي.
+Leaderboard|Bestenliste|Classement|لوحة الصدارة
+Today|Heute|Aujourd'hui|اليوم
+This week|Diese Woche|Cette semaine|هذا الأسبوع
+All time|Insgesamt|Depuis toujours|كل الأوقات
+Loading…|Lädt…|Chargement…|جارٍ التحميل…
+Your best runs|Deine besten Läufe|Tes meilleures séries|أفضل محاولاتك
+Play a solo run to set your first score.|Spiel eine Solorunde für deinen ersten Eintrag.|Joue en solo pour poser ton premier score.|العب جولة فردية لتسجل أول نتيجة.
+Open|Öffnen|Ouvrir|فتح`;
+const I18N_LANGS = [["en", "English"], ["de", "Deutsch"], ["fr", "Français"], ["ar", "العربية"]];
+/* wording with a number or a name in it */
+const I18N_PATTERNS = [
+  [/^(\d+)\/(\d+) done$/, "$1/$2 erledigt", "$1/$2 faits", "تم $1/$2"],
+  [/^(\d+) questions? you missed (?:is|are) back$/, "$1 verpasste Fragen sind zurück", "$1 questions manquées reviennent", "عادت $1 من الأسئلة الفائتة"],
+  [/^(\d+) games$/, "$1 Spiele", "$1 jeux", "$1 لعبة"],
+  [/^(\d+) rounds$/, "$1 Runden", "$1 manches", "$1 جولات"],
+  [/^Round (\d+) of (\d+)(.*)$/, "Runde $1 von $2$3", "Manche $1 sur $2$3", "الجولة $1 من $2$3"],
+  [/^Question (\d+) of (\d+)(.*)$/, "Frage $1 von $2$3", "Question $1 sur $2$3", "السؤال $1 من $2$3"],
+  [/^Your best: ([\d.,\s]+) pts · streak (\d+)$/, "Dein Rekord: $1 Punkte · Serie $2", "Ton record : $1 pts · série $2", "أفضل نتيجة: $1 نقطة · سلسلة $2"],
+  [/^Hint (\d+)(.*)$/, "Hinweis $1$2", "Indice $1$2", "تلميح $1$2"],
+  [/^(\d+) games in (.+)\. Every one works solo, on one device with a friend, or on two devices\.$/, "$1 Spiele in $2. Jedes geht allein, zu zweit an einem Gerät oder an zwei Geräten.", "$1 jeux dans $2. Tous se jouent seul, à deux sur un appareil ou sur deux.", "$1 لعبة في $2. كلها تُلعب وحدك أو مع صديق على جهاز أو جهازين."],
+  [/^(.+) wins!$/, "$1 gewinnt!", "$1 gagne !", "الفائز: $1"],
+  [/^(\d+) of (\d+) right · best streak (\d+)$/, "$1 von $2 richtig · beste Serie $3", "$1 bonnes sur $2 · meilleure série $3", "$1 صحيحة من $2 · أفضل سلسلة $3"],
+];
+const lang = () => { try { const l = localStorage.getItem("gp_lang"); return ["de", "fr", "ar"].includes(l) ? l : "en"; } catch (e) { return "en"; } };
+const I18N_AT = { de: 1, fr: 2, ar: 3 };
+const I18N_KEEP = ".sugs, .clue b, .schint b, .rcard h3, .wp-card, .wcard, .wchip, .holside, .mbubble, .finskbub, .pboard, .pcard, .oddq + .facerow, .mixstrip, .disco, textarea, script, style";
+const I18N = {
+  map: null, long: [], at: 0,
+  load() {
+    this.at = I18N_AT[lang()]; if (!this.at) return false;
+    this.map = new Map(I18N_ROWS.trim().split("\n").map((r) => r.split("|")).filter((c) => c.length === 4).map((c) => [c[0], c[this.at]]));
+    this.long = [...this.map.keys()].filter((k) => k.length >= 28).sort((a, b) => b.length - a.length);
+    return true;
+  },
+  text(t) {
+    const core = t.trim(); if (!core) return null;
+    let to = this.map.get(core);
+    if (to == null) for (const [re, ...out] of I18N_PATTERNS) if (re.test(core)) { to = core.replace(re, out[this.at - 1]); break; }
+    if (to == null && /^[A-Z0-9 '→-]+$/.test(core)) { const k = [...this.map.keys()].find((x) => x.toUpperCase() === core); if (k) to = this.map.get(k); }
+    if (to == null && core.length >= 28) { let s = core; this.long.forEach((k) => { if (s.includes(k)) s = s.split(k).join(this.map.get(k)); }); if (s !== core) to = s; }
+    return to == null || to === core ? null : t.replace(core, () => to);
+  },
+  walk(root) {
+    if (root.nodeType === 3) { const p = root.parentElement; if (!p || p.closest(I18N_KEEP)) return; const v = this.text(root.nodeValue); if (v != null) root.nodeValue = v; return; }
+    if (root.nodeType !== 1 || root.closest(I18N_KEEP)) return;
+    for (const a of ["placeholder", "title", "aria-label"]) { const v = root.getAttribute(a); if (v) { const t = this.text(v); if (t != null) root.setAttribute(a, t); } }
+    root.childNodes.forEach((n) => this.walk(n));
+  },
+  start() {
+    if (!this.load()) return;
+    const L = lang(), d = document.documentElement; d.lang = L; d.dir = L === "ar" ? "rtl" : "ltr";
+    this.walk(document.body);
+    new MutationObserver((list) => list.forEach((m) => { if (m.type === "characterData") this.walk(m.target); else m.addedNodes.forEach((n) => this.walk(n)); })).observe(document.body, { subtree: true, childList: true, characterData: true });
+  },
+};
+{ const set0 = renderSettings; renderSettings = function () {
+  const out = set0.apply(this, arguments), L = lang();
+  $("#setRoom").insertAdjacentHTML("beforeend", `<div class="card" style="margin-top:12px"><div class="label">Language</div><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap">${I18N_LANGS.map(([c, n]) => `<button class="chip" type="button" data-lang="${c}" aria-pressed="${L === c}">${n}</button>`).join("")}</div><p class="fine">Menus, game names and instructions are translated. Questions, answers and sidekick voices stay in English. A first draft that no native speaker has checked yet.</p></div>`);
+  return out;
+}; }
+document.addEventListener("click", (e) => { const t = e.target.closest("button[data-lang]"); if (!t) return; try { localStorage.setItem("gp_lang", t.dataset.lang); } catch (x) { /* blocked */ } location.reload(); });
+I18N.start();
 
 </script>
 </body>

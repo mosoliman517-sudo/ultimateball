@@ -7,3 +7,5 @@ __pycache__/
 proto_data.js
 prototype.html
 packs/_*
+voice_cb_status.json
+voice_cb.log

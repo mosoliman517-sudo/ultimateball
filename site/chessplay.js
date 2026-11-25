@@ -58,8 +58,8 @@ function renderChess() {
 function cpCheckEnd() {
   const s = CP.s, c = s.c; if (!c.game_over()) return false; const solo = s.mode === "solo", names = NAMES();
   if (c.in_checkmate()) { const winner = c.turn() === "w" ? "b" : "w", won = solo && winner === s.you; s.over = { cls: solo ? (won ? "win" : "loss") : "win", title: solo ? (won ? "You win!" : "Checkmate. You lost.") : `${names[winner === "w" ? 0 : 1]} wins!`, why: "Checkmate." };
-    if (!solo || won) { Snd.win(); confetti(); addXP(solo ? { easy: 20, medium: 40, hard: 80, elite: 150 }[s.lvl] : 30, "chess"); Mascot.react("bighit", true); if (solo && s.lvl === "elite") award("elite_win"); if (!solo) award("duo"); } else { Snd.wrong(); Mascot.react("over", true); } }
-  else { s.over = { cls: "draw", title: "Draw", why: c.in_stalemate() ? "Stalemate." : c.in_threefold_repetition() ? "Threefold repetition." : c.insufficient_material() ? "Not enough pieces left to mate." : "Fifty-move rule." }; addXP(10, "chess"); }
+    if (!solo || won) { Snd.win(); confetti(); addXP(solo ? { easy: 20, medium: 40, hard: 80, elite: 150 }[s.lvl] : 30, "chess"); Mascot.react(solo ? "ch_win" : "duo_end", true); if (solo && s.lvl === "elite") award("elite_win"); if (!solo) award("duo"); } else { Snd.wrong(); Mascot.react("ch_loss", true); } }
+  else { s.over = { cls: "draw", title: "Draw", why: c.in_stalemate() ? "Stalemate." : c.in_threefold_repetition() ? "Threefold repetition." : c.insufficient_material() ? "Not enough pieces left to mate." : "Fifty-move rule." }; addXP(10, "chess"); Mascot.react("ch_draw", true); }
   if (solo) { const p = prof(); p.chessRec = p.chessRec || { w: 0, d: 0, l: 0 }; p.chessRec[s.over.cls === "win" ? "w" : s.over.cls === "loss" ? "l" : "d"]++; saveProf(); }
   return true;
 }
@@ -88,5 +88,5 @@ document.addEventListener("click", (e) => {
   const t = e.target.closest("button"); if (!t || !CP.s) return;
   if (t.id === "cpAgain") { newChessPlay(CP.s.mode); return; }
   if (t.id === "cpUndo") { const s = CP.s; s.c.undo(); if (s.mode === "solo" && s.c.turn() !== s.you) s.c.undo(); s.sel = null; s.targets = []; s.last = null; renderChess(); return; }
-  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; const p = prof(); p.chessRec = p.chessRec || { w: 0, d: 0, l: 0 }; p.chessRec.l++; saveProf(); Mascot.react("over", true); } else s.over = { cls: "draw", title: "Game over", why: "Ended by agreement." }; renderChess(); return; }
+  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; const p = prof(); p.chessRec = p.chessRec || { w: 0, d: 0, l: 0 }; p.chessRec.l++; saveProf(); Mascot.react("ch_loss", true); } else s.over = { cls: "draw", title: "Game over", why: "Ended by agreement." }; renderChess(); return; }
 });

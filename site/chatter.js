@@ -23,7 +23,7 @@ const sayIf = (kind, delay = 0) => setTimeout(() => { const L = MASCOTS[Mascot.i
 }; }
 { const end1 = endRound; endRound = function (winner) {   // sometimes praise that fits the game just won
   const s = Q.s, d = s && s.phase !== "reveal" && s.mode === "solo" && winner != null ? curDef() : null, out = end1.apply(this, arguments);
-  const kind = d && (d.kind === "blur" ? "hit_blur" : d.id === "career" ? "hit_career" : null);
+  const kind = d && (d.kind === "blur" && d.imgKey === "logo" && curWorld() === "football" ? "hit_blur" : d.id === "career" ? "hit_career" : null);   // badge praise only for badges
   if (kind && Math.random() < 0.35) sayIf(kind, 200);
   return out;
 }; }

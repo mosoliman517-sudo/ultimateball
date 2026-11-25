@@ -72,3 +72,13 @@ Younger groups only (debut 2015 on, plus BTS by request); groups from 2020 on we
 - Never invent data. Missing facts or pictures are left out and reported.
 - No song lyrics: they are copyrighted and there is no licensed source.
 - Every game plays the mechanic its name says. Answers are typed, with suggestions, like ballknowledge.
+
+## Modes, party room, binder and languages (25 November)
+
+Odd one out and Two songs at once (K-pop), Survival (three lives, harder every three questions), Mixed marathon, a Party room
+for up to 8 players on their own devices (the host's device runs it; the answer is only sent at the reveal), a photocard binder,
+"play a round that starts with this one" from search (press / to search), and German, French and Arabic menus (`site/i18n.js`,
+not checked by a native speaker; questions, answers and voices stay English). `python3 pipelines/group_lines.py` rewrites the
+sidekick lines about particular groups and idols; then run `pipelines/make_voices.py`.
+
+Not tested yet: the party room across different networks and with more than two players, two songs playing together on iPhone.

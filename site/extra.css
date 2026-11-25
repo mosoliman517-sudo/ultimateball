@@ -462,3 +462,22 @@ body.ingame #tourChip,body:not(.athome) #tourChip{display:none}
 .blurpic.rev .tiles i{background:var(--surface2);box-shadow:inset 0 0 0 1px var(--line);transition:opacity .5s,transform .5s}
 .blurpic.rev .tiles i.gone{opacity:0;transform:scale(.4)}
 .facerow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0}.facerow img{width:min(120px,22vw);aspect-ratio:3/4;object-fit:cover;border-radius:12px}
+/* Odd one out, party room, photocard binder, right-to-left */
+.oddq{font-family:var(--display);font-size:clamp(20px,3.4vw,30px);text-align:center;margin:4px 0 8px}
+.gcard.modecard{min-height:0;border-style:dashed}
+.pcode{font:800 clamp(48px,14vw,88px) var(--display);letter-spacing:.18em;margin:4px 0 12px}
+.pwin{font-family:var(--display);font-size:clamp(30px,7vw,52px);margin:6px 0 12px;overflow-wrap:anywhere}
+.pboard{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:6px}
+.pboard li{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;overflow-wrap:anywhere}
+.pboard li.me{border-width:2px;border-color:var(--ink)} .pboard li.gone{opacity:.45}
+#pName{margin-top:6px;max-width:260px;display:block}
+.bpage{border:1px solid var(--line);border-radius:16px;padding:10px 14px;margin-bottom:10px}
+.bpage summary{cursor:pointer;display:flex;justify-content:space-between;gap:12px;min-height:32px;align-items:center}
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin-top:10px}
+.pcard{position:relative;aspect-ratio:55/85;border-radius:10px;overflow:hidden;background:#17121f;padding:4px;cursor:pointer}
+.pcard img{width:100%;height:100%;object-fit:cover;border-radius:7px;display:block}
+.pcard span{position:absolute;left:4px;right:4px;bottom:4px;padding:14px 4px 4px;font-size:12px;font-weight:700;text-align:center;color:#fff;background:linear-gradient(transparent,#000c);border-radius:0 0 7px 7px}
+.pcard.locked{cursor:default;opacity:.55} .pcard.locked img{filter:brightness(0) opacity(.5)} .pcard.locked span{top:38%;bottom:auto;background:none;font-size:30px}
+.pcard.own{background:#e9e4f2} .pcard.holo{background:linear-gradient(135deg,#7be0ff,#ff8ad4,#ffe27a,#8dffb5)} .pcard.gold{background:linear-gradient(135deg,#ffe9a0,#b8860b,#ffd75e)}
+[dir="rtl"] .num{direction:ltr;unicode-bidi:isolate} [dir="rtl"] .gcard,[dir="rtl"] .gpick,[dir="rtl"] .world,[dir="rtl"] .mode,[dir="rtl"] .wcard{text-align:right}
+.bpage,.pcards,.pcard{min-width:0;max-width:100%} .pcards{grid-template-columns:repeat(auto-fill,minmax(min(96px,28vw),1fr))} .pcard img{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}

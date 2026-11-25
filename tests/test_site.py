@@ -49,10 +49,10 @@ class Code(unittest.TestCase):
         self.assertEqual(d["logo"], "img/a/b.webp"); self.assertTrue(d["pv"].startswith("https://audio")); self.assertEqual(d["n"], 5); self.assertNotIn("constructor", d)
 
     def test_every_sidekick_line_has_a_clip(self):
-        files = ["mascot_lines.js", "coach_lines.js", "chess_coaches.js", "mascot_art.js", "mascots_worlds.js", "more_lines.js", "more_lines2.js", "bk_lines.js"]
+        files = ["mascot_lines.js", "coach_lines.js", "chess_coaches.js", "mascot_art.js", "mascots_worlds.js", "more_lines.js", "more_lines2.js", "bk_lines.js", "more_lines3.js", "group_lines.js"]
         src = "\n".join(rd("site", f) for f in files)
-        kinds = ["welcome", "hit", "bighit", "miss", "streak", "best", "over", "rankup", "achieve", "idle", "tour", "g_audio", "g_photo", "g_hol", "morning", "evening", "night", "duo_start", "duo_point", "duo_end", "hit_blur", "hit_career", "hit_ttt", "hit_value"]
-        src += "\nvar o=[];for(const k in MASCOTS){const L=MASCOTS[k].lines||{};for(const kind of " + json.dumps(kinds) + ")for(const t of (L[kind]||[]))o.push([k,t]);}print(JSON.stringify(o));"
+        kinds = ["welcome", "hit", "bighit", "miss", "streak", "best", "over", "rankup", "achieve", "idle", "tour", "g_audio", "g_photo", "g_hol", "morning", "evening", "night", "duo_start", "duo_point", "duo_end", "hit_blur", "hit_career", "hit_ttt", "hit_value", "ch_win", "ch_loss", "ch_draw", "rv_best", "rv_good", "rv_inaccuracy", "rv_mistake", "rv_blunder"]
+        src += "\nvar o=[];for(const k in MASCOTS){const L=MASCOTS[k].lines||{};for(const kind of " + json.dumps(kinds) + ".concat(Object.keys(L).filter(x=>/^(grp|idl)_/.test(x))))for(const t of (L[kind]||[]))o.push([k,t]);}print(JSON.stringify(o));"
         code, out = js(src)
         lines = json.loads(out.strip().split("\n")[-1])
         def name(who, text):

@@ -437,6 +437,18 @@ function collect(w, x) { if (!x || !imgOf(x) || x.kind === "album" || x.kind ===
 const dexHas = (k) => (prof().dex[k] || 0) >= 3;
 
 /* ---------------- sidekick dock (ballknowledge's #mascot markup and CSS; the sidekick follows the world you are in) ---------------- */
+function lineFits(t, kind) {
+  const h = new Date().getHours();
+  if (!["morning", "evening", "night"].includes(kind)) {
+    if (/^(good )?evening\b/i.test(t) && !(h >= 17 && h < 23)) return false;
+    if (/^(good )?morning\b|\bgood morning\b/i.test(t) && !(h >= 5 && h < 12)) return false;
+  }
+  const n = /\b(two|three|four|five|six|ten) in a row\b/i.exec(t);
+  if (n) { const streak = (Q.s && Q.s.streak) || (typeof H !== "undefined" && H.s && H.s.streak) || 0; if ({ two: 2, three: 3, four: 4, five: 5, six: 6, ten: 10 }[n[1].toLowerCase()] !== streak) return false; }
+  if (kind === "miss" && /\b(not him|not her)\b/i.test(t)) return false;
+  if (kind !== "hit_blur" && /\bbadge\b/i.test(t) && S.world !== "football") return false;
+  return true;
+}
 const Mascot = (() => {
   let hideT = null, last = 0; const said = [];
   const id = () => { const w = S.world && WORLDS[S.world] ? S.world : null, k = w ? (prof().kick || {})[w] : prof().kickHome; return k && MASCOT_SVG[k] ? k : w ? WORLDS[w].mascot : "bongi"; };
@@ -452,8 +464,8 @@ const Mascot = (() => {
   }
   const api = {
     id, mode, dock, name: () => MASCOTS[id()].name, face: (m) => MASCOT_SVG[id()](m), setCtx() {},
-    react(kind, force) { const now = performance.now(), big = ["streak", "best", "over", "rankup", "achieve", "welcome"].includes(kind); if (!big && !force && now - last < 5000) return; last = now; const L = MASCOTS[id()].lines || {}, pool = L[kind] || L.hit || []; if (pool.length) show(kind, pick(pool)); },
-    hello() { const L = MASCOTS[id()].lines; if (L && L.welcome) show("welcome", pick(L.welcome)); },
+    react(kind, force) { const now = performance.now(), big = ["streak", "best", "over", "rankup", "achieve", "welcome"].includes(kind); if (!big && !force && now - last < 5000) return; last = now; const L = MASCOTS[id()].lines || {}, back = { rankup: "best", ch_win: "best", ch_loss: "over", ch_draw: "over" }[kind], pool = (L[kind] || L[back] || []).filter((t) => lineFits(t, kind)); if (pool.length) show(kind, pick(pool)); },
+    hello() { const L = MASCOTS[id()].lines, pool = ((L && L.welcome) || []).filter((t) => lineFits(t, "welcome")); if (pool.length) show("welcome", pick(pool)); },
   };
   return api;
 })();
@@ -539,34 +551,34 @@ const Q = { timer: null, s: null };
 function stopQuiz() { if (Q.timer) { clearInterval(Q.timer); Q.timer = null; } try { Aud.stop(); } catch (e) { /* not ready */ } }
 /* Hear the song: Apple's 30-second previews, played in slices (3 s, then 5 s more, then the rest), paused while someone answers */
 const Aud = {
-  a: null, t: null, ok: true,
-  load(url) { this.stop(); this.ok = true; this.blocked = false; if (!url) { this.a = null; return; } const a = new Audio(); a.preload = "auto"; a.src = url; a.onerror = () => { this.ok = false; this.note(window.ARTIFACT ? "Audio can't play in this preview. It plays on moultimateball.vercel.app." : "This preview didn't load. Skip it or use the hints."); }; this.a = a; setTimeout(() => this.stage(1), 400); },
-  play(from, to) { const a = this.a; if (!a) return; clearTimeout(this.t); try { a.currentTime = from; a.play().then(() => { this.blocked = false; this.note(""); }).catch(() => { this.blocked = true; this.note(""); }); } catch (e) { return; } this.t = setTimeout(() => a.pause(), (to - from) * 1000); },
+  a: null, b: null, t: null, ok: true,
+  load(url, url2) { this.stop(); this.ok = true; this.blocked = false; if (!url) { this.a = null; return; } if (url2) { this.b = new Audio(); this.b.preload = "auto"; this.b.src = url2; this.b.onerror = () => { this.ok = false; this.note("One of the two previews didn't load. Skip this one."); }; } const a = new Audio(); a.preload = "auto"; a.src = url; a.onerror = () => { this.ok = false; this.note(window.ARTIFACT ? "Audio can't play in this preview. It plays on moultimateball.vercel.app." : "This preview didn't load. Skip it or use the hints."); }; this.a = a; setTimeout(() => this.stage(1), 400); },
+  play(from, to) { const a = this.a, b = this.b; if (!a) return; clearTimeout(this.t); try { if (b) { b.currentTime = from; b.play().catch(() => {}); } a.currentTime = from; a.play().then(() => { this.blocked = false; this.note(""); }).catch(() => { this.blocked = true; this.note(""); }); } catch (e) { return; } this.t = setTimeout(() => { a.pause(); if (b) b.pause(); }, (to - from) * 1000); },
   stage(n) { if (n === 1) this.play(0, 3); else if (n === 2) this.play(3, 8); else if (n >= 5) this.play(8, 30); },
   note(t) { const n = $("#audNote"); if (!n) return; n.innerHTML = t ? esc(t) : this.blocked ? `<button class="btn" id="audReplay" type="button">▶ Tap to play</button>` : "Listening… replay with the button below"; },
-  pause() { if (this.a) this.a.pause(); clearTimeout(this.t); },
-  stop() { this.pause(); if (this.a) { this.a.src = ""; this.a = null; } },
+  pause() { if (this.a) this.a.pause(); if (this.b) this.b.pause(); clearTimeout(this.t); },
+  stop() { this.pause(); if (this.a) { this.a.src = ""; this.a = null; } if (this.b) { this.b.src = ""; this.b = null; } },
 };
 const gamesBar = (title) => `<div class="row" style="margin-bottom:12px"><button class="btn ghost" id="gamesBack" type="button">← Back</button><h2 style="font-size:24px">${title}</h2></div>`;
 const diffBar = () => S.world === "kpop" ? "" : `<div class="label" style="margin-top:14px">Difficulty</div><div class="diffbar" role="group" aria-label="Difficulty">${DIFFS.map(([k]) => [k, diffName(k)]).map(([k, n]) => `<button type="button" class="chip" data-diff="${k}" aria-pressed="${S.diff === k}">${n}</button>`).join("")}</div><div class="fine" id="diffNote" style="margin-top:6px">${DIFFNOTE[S.diff]}</div>`;
 const modeIntro = (title, blurb, opts) => `<div class="card">${gamesBar(title)}<p class="sub">${blurb}</p>${diffBar()}<div class="label" style="margin-top:16px">Players and devices</div><div class="modes">${opts.map((o) => `<button class="mode" data-mode="${o.id}" type="button"><b>${o.t}</b><span>${o.d}</span></button>`).join("")}</div><div id="roomBox"></div></div>`;
 const NAMES = () => { try { const n = JSON.parse(sessionStorage.getItem("gp_names") || "null"); return n && n.length === 2 ? n : ["Player 1", "Player 2"]; } catch (e) { return ["Player 1", "Player 2"]; } };
 function openGame(id) {
-  S.game = id; if (S.world === "kpop") S.diff = "medium"; const g = gameOf(S.world, id); stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
+  S.game = id; if (S.world === "kpop") S.diff = "medium"; else { try { S.diff = localStorage.getItem("gp_diff") || "medium"; } catch (e) { /* blocked */ } } const g = gameOf(S.world, id); stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
   const how = { play: "The difficulty sets how strong the computer plays.", photo: "The picture is there from the start; hints arrive at one third and two thirds of the time.", clue: "Clues start hard and get easier.", blur: "The picture starts blurred and sharpens every few seconds.", scramble: "The letters of every word are shuffled. Hints arrive slowly.", hol: "Two picks, one question. Tap the right side.", all: "Type names in any order. Initials cost 30 points, a wrong name 20.", ttt: "Tap a square and name someone who fits its row and column. A wrong or repeated name loses your turn.", roulette: "Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.", audio: "A real song plays in short slices: 3 seconds, then 5 more, then the rest." }[g.kind];
   $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how} ${g.kind === "hol" ? "Solo: keep the streak going. Two players: take turns, five each." : "Buzz in whenever you think you know it. The sooner you are right, the more you score (up to 1,000); a wrong guess costs 150."}`, [
     { id: "solo", t: g.kind === "ttt" || g.kind === "play" ? "Solo, against the computer" : g.kind === "roulette" || g.kind === "all" ? "Solo, against the clock" : "Solo streak", d: g.kind === "ttt" ? "The computer gets smarter with the difficulty." : g.kind === "all" ? "Name everyone before the clock runs out." : g.kind === "roulette" ? "Name as many as you can before time runs out." : "Keep going for as long as you can. The run ends the first time you miss." },
     ...(g.kind === "all" ? [] : [{ id: "duo", t: "Two players, one device", d: g.kind === "play" ? "One board, pass the device after every move." : g.kind === "hol" ? "Take turns. Most right after five each wins." : g.kind === "roulette" ? "Three rounds. Take turns typing names on the same screen." : "Five rounds. Race to buzz: A for player 1, L for player 2." }]),
-    ...(["hol", "roulette", "all", "ttt", "play"].includes(g.kind) ? [] : [{ id: "online", t: "Two players, two devices", d: "The same race on two phones or computers, with a four-letter room code." }])]);
+    ...(["hol", "roulette", "all", "ttt", "play"].includes(g.kind) ? [] : [{ id: "surv", t: "Survival", d: "Three lives. The questions get harder every three. One high score." }, { id: "online", t: "Two players, two devices", d: "The same race on two phones or computers, with a four-letter room code." }])]);
   if ($('#room [data-mode="duo"]')) { try { $("#room .modes").insertAdjacentHTML("afterend", duoNamesHTML()); } catch (e) { /* not ready */ } }
   if (["clue", "blur", "photo", "audio", "scramble", "hol"].includes(g.kind)) { $("#room").insertAdjacentHTML("beforeend", `<div class="card" id="boardBox"></div>`); if (Boards) Boards.paint(`${S.world}:${id}`, g.kind === "hol" ? "streak" : "points"); }
   Snd.mode("game");
 }
 function startMode(m) {
-  const g = gameOf(S.world, S.game); if (m === "online") return openOnline(); document.body.classList.add("ingame");
+  const g = gameOf(S.world, S.game); if (m === "online") return openOnline(); if (m === "surv") Q.next = { surv: { lives: 3 }, rounds: 999 }; document.body.classList.add("ingame");
   { const p = prof(); p.last = { w: S.world, g: S.game, t: Date.now() }; p.gplays = p.gplays || {}; p.gplays[S.world + ":" + S.game] = (p.gplays[S.world + ":" + S.game] || 0) + 1; saveProf(); }
   addPlay(S.world);
-  const go2 = () => { if (g.kind === "play") return newChessPlay(m); if (g.kind === "all") return newAll(m); if (g.kind === "ttt") return newTTT(m); if (g.kind === "hol") return newHol(m); if (g.kind === "roulette") return newRou(m); newQuiz(S.world, S.game, m); };
+  const go2 = () => { if (g.kind === "play") return newChessPlay(m); if (g.kind === "all") return newAll(m); if (g.kind === "ttt") return newTTT(m); if (g.kind === "hol") return newHol(m); if (g.kind === "roulette") return newRou(m); newQuiz(S.world, S.game, m === "surv" ? "solo" : m); };
   if (m === "duo") { const n = NAMES(); Vs.match({ nick: n[0], avatar: prof().avatar }, { nick: n[1], avatar: "" }, go2); } else go2();
 }
 /* ---------------- roulette (ballknowledge's Club roulette): name members or players of a group, club or team ---------------- */
@@ -603,11 +615,11 @@ function rouLose(why) { const s = RO.s; if (s.phase !== "play") return; clearInt
 
 function addPlay(w) { const p = prof(); const W = p.worlds[w] || (p.worlds[w] = { xp: 0, plays: 0 }); W.plays++; saveProf(); const n = WORLD_IDS.filter((x) => (p.worlds[x] || {}).plays).length; if (n >= 3) award("tourist"); if (n >= WORLD_IDS.length) award("explorer"); }
 
-function newQuiz(w, game, mode, mix) { Q.hold = false; clearTimeout(Q.auto); Q.s = { w, game, mode, round: 0, rounds: mix ? mix.length : mode === "solo" ? 10 : 5, scores: mode === "solo" ? [0] : [0, 0], streak: 0, phase: "run", mix: mix || null, wins: [0, 0], used: new Set() }; nextRound(); }
+function newQuiz(w, game, mode, mix) { Q.hold = false; clearTimeout(Q.auto); Q.s = { w, game, mode, round: 0, rounds: mix ? mix.length : mode === "solo" ? 10 : 5, scores: mode === "solo" ? [0] : [0, 0], streak: 0, phase: "run", mix: mix || null, wins: [0, 0], used: new Set() }; if (Q.next) { Object.assign(Q.s, Q.next); Q.next = null; } nextRound(); }
 function curDef() { const s = Q.s; return s.mix ? gameOf(s.mix[s.round - 1].w, s.mix[s.round - 1].g) : gameOf(s.w, s.game); }
 function curWorld() { const s = Q.s; return s.mix ? s.mix[s.round - 1].w : s.w; }
 function nextRound() {
-  const s = Q.s; s.round++; const d = curDef(), pool = byFame(d.pool()); let r;
+  const s = Q.s; s.round++; if (s.surv) S.diff = DIFFS[Math.min(3, Math.floor((s.round - 1) / 3))][0]; const d = curDef(), pool = byFame(d.pool()); let r;
   const kp = curWorld() === "kpop" && !s.daily && !s.redo; s.pk = s.pk || Pick.ctx();
   const fresh = (x) => !s.used.has(x.id) && (d.kind !== "scramble" || qnorm(x.n).length >= 4);
   const pickR = s.daily ? (k) => pool[Math.floor(seeded(`${s.daily}:${s.round}:${k}`) * pool.length)] : () => rnd(pool);
@@ -615,12 +627,13 @@ function nextRound() {
   if (kp) Pick.record(r, s.pk);
   if (s.fixed) r = items(s.w).find((x) => x.id === s.fixed[s.round - 1]) || r;   // a challenge replays the challenger's exact rounds
   if (s.redo) r = d.pool().find((x) => x.id === s.redo[s.round - 1]) || r;
+  if (Q.first && s.round === 1) { r = d.pool().find((x) => x.id === Q.first) || r; Q.first = null; }   // "play this one" from search
   s.used.add(r.id); s.r = r; (s.picks = s.picks || []).push(r.id);
   s.clues = d.kind === "audio" ? [["Listen", "3 seconds"], ["Listen", "5 more seconds"], [r.kind === "theme" ? "Performed by" : "By", r.by], [r.kind === "theme" ? "Series from" : "Year", r.year], ["Listen", "the whole preview"], ...(r.kind === "theme" ? [["Song", r.n], ["Series initials", first(r.anime)]] : [["Initials", first(r.n)]])].filter((c) => c[1]) : d.kind === "blur" ? BLUR.map((b) => ["Blur", b]) : d.kind === "scramble" ? [["Letters", scrambleName(r.n)], ["It is", KIND_WORD[r.kind] || "a name"], ...(CLUES[r.kind] ? CLUES[r.kind](r).filter((c) => !/Initials|Starts|Letters/.test(c[0])).slice(-1) : []), ["Starts with", first(r.n)]] : d.kind === "photo" ? d.hints(r) : d.clues(r);
   /* a hint must never contain the answer (Tottenham Hotspur Stadium for Tottenham, "Albanian lek" for Albania): drop it, unless the clue IS the prompt */
   if (!["capital", "whose", "albumname", "where", "from", "quiz"].includes(d.id) && d.kind !== "scramble" && d.kind !== "audio") { const an = qnorm(nameOfAnswer(d, r)); if (an.length >= 5) { const stem = an.slice(0, Math.max(5, an.length - 2)), keep = s.clues.filter((c, i) => i === 0 || !qnorm(String(c[1])).includes(stem) || /^(Initials|Starts with)$/.test(c[0])); if (keep.length >= 2) s.clues = keep; } }
   s.elapsed = 0; s.paused = false; s.buzzed = null; s.locked = [false, false]; s.phase = "run"; s.result = null; s.hn = 0;
-  Aud.load(d.kind === "audio" ? r.pv : null); s.cs = (d.kind === "audio" ? 7 : d.kind === "blur" ? 3.2 : d.kind === "scramble" ? 7 : d.kind === "photo" ? 8 : 6) * clueSpeed(); s.total = d.kind === "photo" ? 3 * s.cs : s.clues.length * s.cs + 6;
+  Aud.load(d.kind === "audio" ? r.pv : null, r.pv2); s.cs = (d.kind === "audio" ? 7 : d.kind === "blur" ? 3.2 : d.kind === "scramble" ? 7 : d.kind === "photo" ? 8 : 6) * clueSpeed(); s.total = d.kind === "photo" ? 3 * s.cs : s.clues.length * s.cs + 6;
   if (s.mix) { setTheme(curWorld()); }
   renderQuiz(); if (Q.timer) clearInterval(Q.timer); Q.timer = setInterval(tickQuiz, 250); Net.sync();   /* not stopQuiz(): that would also stop this round's song */
 }
@@ -664,16 +677,16 @@ function endRound(winner, gave) {
     if (s.mode === "solo") { FX.streak(s.streak); if (s.streak >= 3) award("hat3"); if (s.streak >= 10) award("streak10"); Mascot.react(pts > 800 ? "bighit" : s.streak >= 3 && s.streak % 3 === 0 ? "streak" : "hit"); }
     if (d.unit === "country" && d.kind === "blur") { const p = prof(); p.flags = (p.flags || 0) + 1; saveProf(); if (p.flags >= 20) award("flags20"); }
     addXP(10 + Math.round(pts / 100), w);
-  } else { if (s.mode === "solo") { s.streak = 0; Mascot.react("miss"); } FX.miss(""); Snd.wrong(); }
+  } else { if (s.surv) s.surv.lives--; if (s.mode === "solo") { s.streak = 0; Mascot.react("miss"); } FX.miss(""); Snd.wrong(); }
   if (winner != null && typeof countRound === "function") countRound(s, winner, pts);
   s.result = { winner, pts, gave: !!gave }; (s.marks = s.marks || []).push(winner != null); renderQuiz(); Net.sync();
 }
 function finishQuiz() {
   const s = Q.s; s.phase = "done"; stopQuiz();
-  if (s.mode === "solo" && !s.redo) { const k = s.w + ":" + s.game, p = prof(), b = p.best[k]; if (!b || s.scores[0] > b.score) { p.best[k] = { score: s.scores[0], streak: s.best || 0 }; saveProf(); if (b) Mascot.react("best", true); } }
+  if (s.mode === "solo" && !s.redo) { const k = s.surv ? `${s.w}:${s.game}:survival` : s.marathon ? `${s.w}:marathon` : s.w + ":" + s.game, p = prof(), b = p.best[k]; if (!b || s.scores[0] > b.score) { p.best[k] = { score: s.scores[0], streak: s.best || 0 }; saveProf(); if (b) Mascot.react("best", true); } }
   else if (!s.redo) award("duo");
-  if (s.mix && !s.redo) mixFinished(s);
-  if (s.mode === "solo" && !s.mix) { if (typeof recordGame === "function") recordGame(s); if (s.daily) Daily.finish(s); else if (Boards) Boards.record(`${s.w}:${s.game}`, s.scores[0]); }
+  if (s.mix && !s.redo && !s.marathon) mixFinished(s);
+  if (s.mode === "solo" && !s.mix && !s.surv) { if (typeof recordGame === "function") recordGame(s); if (s.daily) Daily.finish(s); else if (Boards) Boards.record(`${s.w}:${s.game}`, s.scores[0]); }
   renderQuiz(); Net.sync();
 }
 function paintClues() { const b = $("#qClues"); if (b) b.innerHTML = cluesHTML(); }
@@ -700,15 +713,15 @@ function answerCard() {
   return `<div class="rcard on"><div class="label">The answer</div><div class="row" style="gap:14px;margin:8px 0;align-items:center">${imgOf(x) ? `<img class="ansimg ${x.logo || x.flag ? "contain" : ""} ${isCut(x) ? "cutpic" : ""}" src="${imgOf(x)}" alt="">` : ""}<div><h3 style="font-size:28px">${wikiLink(curWorld(), ans === x.n ? x : wikiFind(curWorld(), ans) || x, esc(ans))}</h3>${ans !== x.n ? `<div class="fine">${esc(x.n)}</div>` : ""}<div class="fine">${facts}</div></div></div>${credOf(x, d.imgKey)}${x.am ? `<a class="credit" href="${x.am}" target="_blank" rel="noopener">Preview courtesy of Apple Music. Listen to the full song there.</a>` : ""}</div>`;
 }
 function renderQuiz() {
-  const s = Q.s, d = curDef(), duo = s.mode !== "solo", names = s.mode === "online" ? Net.names() : NAMES(), title = s.redo ? `Redemption ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : s.mix ? `Round ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : esc(d.name);
-  const strip = s.mix ? `<div class="mixstrip" style="margin-bottom:10px">${s.mix.map((m, i) => { const x = items(m.w, (y) => y.img)[0]; return `<span class="${i === s.round - 1 ? "now" : ""} ${s.mixW && s.mixW[i] != null && s.mixW[i] >= 0 ? "w" + s.mixW[i] : ""}">${x ? `<img src="${x.img}" alt="">` : ""}${esc(WORLDS[m.w].name)}</span>`; }).join("")}</div>` : "";
+  const s = Q.s, d = curDef(), duo = s.mode !== "solo", names = s.mode === "online" ? Net.names() : NAMES(), title = s.surv ? `Survival: ${esc(d.name)}` : s.marathon ? `Marathon ${s.round}: ${esc(d.name)}` : s.redo ? `Redemption ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : s.mix ? `Round ${s.round}: ${esc(WORLDS[curWorld()].name)} · ${esc(d.name)}` : esc(d.name);
+  const strip = s.mix && !s.marathon ? `<div class="mixstrip" style="margin-bottom:10px">${s.mix.map((m, i) => { const x = items(m.w, (y) => y.img)[0]; return `<span class="${i === s.round - 1 ? "now" : ""} ${s.mixW && s.mixW[i] != null && s.mixW[i] >= 0 ? "w" + s.mixW[i] : ""}">${x ? `<img src="${x.img}" alt="">` : ""}${esc(WORLDS[m.w].name)}</span>`; }).join("")}</div>` : "";
   const head = gamesBar(title) + strip;
   if (s.phase === "done") {
     if (s.mode === "online") rankedDone(s);
     const best = Math.max(...s.scores), winner = duo ? (s.scores[0] === s.scores[1] ? -1 : s.scores[0] > s.scores[1] ? 0 : 1) : 0;
-    $("#room").innerHTML = `<div class="card">${head}${finale({ label: duo ? "Full time" : `${s.wins[0]} of ${s.rounds} right · best streak ${s.best || s.streak}`, verdict: s.redo ? (s.wins[0] === s.rounds ? "All redeemed." : s.wins[0] ? "Getting there." : "They will be back.") : duo ? (winner < 0 ? "A draw." : esc(names[winner]) + " wins!") : best >= 6000 ? "Serious knowledge." : best >= 3500 ? "Solid." : "Keep practising.", players: s.scores.map((sc, k) => ({ name: duo ? names[k] : prof().nick || "You", score: sc, av: duo ? null : avatarHTML(prof().avatar, "lg", prof().nick || "You") })), winner: duo ? winner : null, good: s.redo ? s.wins[0] * 2 >= s.rounds : duo ? true : best >= 3500, tiles: duo ? [[`${s.wins[0]}–${s.wins[1]}`, "rounds won"]] : [[`${s.wins[0]}/${s.rounds}`, "right"], [s.best || 0, "best streak"], [best.toLocaleString(), "points"]], buttons: s.redo ? `${Redo.due().length ? `<button class="btn" type="button" data-redo="1">Next batch (${Redo.due().length} due)</button>` : ""}<button class="btn ghost" data-go="home" type="button">Back home</button>` : s.daily ? `<button class="btn" id="dShare" type="button">Copy my result</button><button class="btn ghost" data-go="home" type="button">Back home</button>` : `${s.chal ? challengeVerdict(s) : ""}<button class="btn" id="qAgain" type="button">Play again</button>${!duo && !s.mix ? `<button class="btn ghost" id="qChal" type="button">Challenge a friend</button>` : ""}${s.mix ? `<button class="btn ghost" data-go="mix" type="button">New match</button>` : ""}` })}</div>`; return;
+    $("#room").innerHTML = `<div class="card">${head}${finale({ label: duo ? "Full time" : s.surv ? `${s.wins[0]} answered · reached question ${s.round}` : `${s.wins[0]} of ${s.rounds} right · best streak ${s.best || s.streak}`, verdict: s.surv ? (s.wins[0] >= 12 ? "A survivor." : s.wins[0] >= 6 ? "Held on well." : "Out of lives.") : s.redo ? (s.wins[0] === s.rounds ? "All redeemed." : s.wins[0] ? "Getting there." : "They will be back.") : duo ? (winner < 0 ? "A draw." : esc(names[winner]) + " wins!") : best >= 6000 ? "Serious knowledge." : best >= 3500 ? "Solid." : "Keep practising.", players: s.scores.map((sc, k) => ({ name: duo ? names[k] : prof().nick || "You", score: sc, av: duo ? null : avatarHTML(prof().avatar, "lg", prof().nick || "You") })), winner: duo ? winner : null, good: s.redo ? s.wins[0] * 2 >= s.rounds : duo ? true : best >= 3500, tiles: duo ? [[`${s.wins[0]}–${s.wins[1]}`, "rounds won"]] : [[`${s.wins[0]}/${s.rounds}`, "right"], [s.best || 0, "best streak"], [best.toLocaleString(), "points"]], buttons: s.redo ? `${Redo.due().length ? `<button class="btn" type="button" data-redo="1">Next batch (${Redo.due().length} due)</button>` : ""}<button class="btn ghost" data-go="home" type="button">Back home</button>` : s.daily ? `<button class="btn" id="dShare" type="button">Copy my result</button><button class="btn ghost" data-go="home" type="button">Back home</button>` : `${s.chal ? challengeVerdict(s) : ""}<button class="btn" id="qAgain" type="button">Play again</button>${!duo && !s.mix ? `<button class="btn ghost" id="qChal" type="button">Challenge a friend</button>` : ""}${s.mix ? `<button class="btn ghost" data-go="mix" type="button">New match</button>` : ""}` })}</div>`; return;
   }
-  const last = s.round >= s.rounds, hud = `<div class="qhud"><span class="label">Round ${s.round} of ${s.rounds}${duo ? "" : ` · streak ${s.streak}`}</span>${s.scores.map((v, i) => `<span class="num qscore"><small>${duo ? esc(names[i]) : "Score"}</small> <b>${v}</b></span>`).join("")}</div>`;
+  const last = s.round >= s.rounds || (s.surv && s.surv.lives <= 0), hud = `<div class="qhud"><span class="label">${s.surv ? `Question ${s.round} · ${"♥".repeat(Math.max(0, s.surv.lives))}${"♡".repeat(3 - Math.max(0, s.surv.lives))} · ${diffName(S.diff)}` : `Round ${s.round} of ${s.rounds}`}${duo ? "" : ` · streak ${s.streak}`}</span>${s.scores.map((v, i) => `<span class="num qscore"><small>${duo ? esc(names[i]) : "Score"}</small> <b>${v}</b></span>`).join("")}</div>`;
   if (s.phase === "reveal") { const r = s.result, nm = r.winner == null ? (duo ? "Nobody got it" : r.gave ? "Skipped" : "Not this time") : duo ? esc(names[r.winner]) + " got it" : "You got it"; $("#room").innerHTML = `<div class="card">${head}${hud}<div class="rcard on" style="margin-bottom:10px"><b style="font-size:20px">${nm}${r.winner != null ? `: +${r.pts}` : ""}</b></div>${answerCard()}<div class="row" style="margin-top:14px"><button class="btn" id="${last ? "qFinish" : "qNext"}" type="button">${last ? "See the final score" : "Next round"}</button>${!last && Net.role !== "guest" && !Q.hold ? `<button class="btn ghost" id="qHold" type="button">Pause</button>` : ""}</div>${!last && Net.role !== "guest" && !Q.hold ? `<div class="autometer"><i></i></div>` : ""}</div>`;
     clearTimeout(Q.auto); if (!last && Net.role !== "guest" && !Q.hold) { const rd = s.round; Q.auto = setTimeout(() => { if (Q.s === s && s.phase === "reveal" && s.round === rd && !Q.hold) { const b = $("#qNext"); if (b) b.click(); } }, 4500); }
     return; }
@@ -867,7 +880,7 @@ function renderSettings() {
 /* ================= wiki: every group, idol, song, country, player... with its facts and links; any name with data-wiki opens it ================= */
 const WIKI_SKIP = new Set(["lineup", "trivia"]);
 const wikiKey = (w, x) => `${w}:${x.id}`;
-const wikiLink = (w, x, label) => (x && x.id && x.kind !== "album" && x.kind !== "theme" ? `<a class="wlink" href="#wiki" data-wiki="${esc(wikiKey(w, x))}">${label}</a>` : label);
+const wikiLink = (w, x, label) => (x && x.id && !["album", "theme", "twosongs"].includes(x.kind) ? `<a class="wlink" href="#wiki" data-wiki="${esc(wikiKey(w, x))}">${label}</a>` : label);
 const wikiFind = (w, n) => items(w, (x) => !WIKI_SKIP.has(x.kind) && qnorm(x.n) === qnorm(n))[0];
 const KIND_NAME = { idol: "Idol", group: "Group", song: "Song", player: "Footballer", club: "Club", bplayer: "NBA player", team: "NBA team", cplayer: "Chess player", opening: "Chess opening", country: "Country", person: "Historical figure", dish: "Dish", anime: "Anime", event: "Event", invention: "Invention", oldstate: "Former country", landmark: "Landmark", character: "Anime character" };
 let WQ = { q: "", w: "all" };
@@ -949,13 +962,13 @@ document.addEventListener("click", (e) => {
   if (t.dataset.game) { Snd.tick(); go(`w-${S.world}-${t.dataset.game}`, e); return; }
   if (t.dataset.diff) { S.diff = t.dataset.diff; try { localStorage.setItem("gp_diff", S.diff); } catch (x) { /* blocked */ } Snd.tick(); document.querySelectorAll("[data-diff]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.diff === S.diff)); $("#diffNote").textContent = DIFFNOTE[S.diff]; return; }
   if (t.dataset.mode) { startMode(t.dataset.mode); return; }
-  if (t.id === "gamesBack") { if (Q.s && Q.s.redo) { Q.s = null; go("home"); return; } if (Q.s && Q.s.mix) { Q.s = null; go("mix"); return; } go("w-" + S.world); return; }
+  if (t.id === "gamesBack") { if (Q.s && Q.s.redo) { Q.s = null; go("home"); return; } if (Q.s && Q.s.mix) { const back = Q.s.marathon ? "w-" + Q.s.marathon : "mix"; Q.s = null; go(back); return; } go("w-" + S.world); return; }
   if (t.id === "qB0") { buzz(0); return; } if (t.id === "qB1") { buzz(1); return; }
   if (t.id === "qGuess") { submitAnswer(null); return; } if (t.dataset.sug) { submitAnswer(t.dataset.sug); return; }
   if (t.id === "qHold") { Q.hold = true; clearTimeout(Q.auto); t.remove(); const m = $(".autometer"); if (m) m.remove(); return; }
   if (t.id === "qNext") { if (Net.role === "guest") { Net.send({ k: "next" }); return; } if (Q.s.mix) { Q.s.mixW = Q.s.mixW || []; Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } nextRound(); return; }
-  if (t.id === "qFinish") { if (Net.role === "guest") { Net.send({ k: "finish" }); return; } if (Q.s.mix) { Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } finishQuiz(); return; }
-  if (t.id === "qAgain") { if (Q.s && Q.s.mix) { go("mix"); return; } startMode(Q.s.mode); return; }
+  if (t.id === "qFinish") { if (Net.role === "guest") { Net.send({ k: "finish" }); return; } if (Q.s.mix) { Q.s.mixW = Q.s.mixW || []; Q.s.mixW[Q.s.round - 1] = Q.s.result.winner == null ? -1 : Q.s.result.winner; } finishQuiz(); return; }
+  if (t.id === "qAgain") { if (Q.s && Q.s.marathon) { Marathon.start(Q.s.marathon, Q.s.mode); return; } if (Q.s && Q.s.surv) { startMode("surv"); return; } if (Q.s && Q.s.mix) { go("mix"); return; } startMode(Q.s.mode); return; }
   if (t.dataset.hol) { answerHol(t.dataset.hol); return; }
   if (t.id === "hNext") { if (H.s.mode === "solo" && H.s.over) { H.s.phase = "done"; if (Boards) Boards.record(`${H.s.w}:${H.s.game}`, H.s.streak); renderHol(); return; } if (H.s.mode === "duo") { if (H.s.over) { H.s.phase = "done"; award("duo"); renderHol(); return; } H.s.turn = 1 - H.s.turn; } nextHol(); return; }
   if (t.id === "hAgain") { newHol(H.s.mode); return; }

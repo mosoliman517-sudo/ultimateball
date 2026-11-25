@@ -128,7 +128,7 @@ const Train = {
 /* ================= game review: Stockfish goes through your last game and grades every move ================= */
 const Review = {
   s: null,
-  GRADE: { best: ["Best", "#5ee6a8", "hit"], good: ["Good", "#9ec5ff", "idle"], inaccuracy: ["Inaccuracy", "#ffd23f", "miss"], mistake: ["Mistake", "#ff9d3d", "miss"], blunder: ["Blunder", "#ff5d5d", "miss"] },
+  GRADE: { best: ["Best", "#5ee6a8", "rv_best"], good: ["Good", "#9ec5ff", "rv_good"], inaccuracy: ["Inaccuracy", "#ffd23f", "rv_inaccuracy"], mistake: ["Mistake", "#ff9d3d", "rv_mistake"], blunder: ["Blunder", "#ff5d5d", "rv_blunder"] },
   async score(c) {   // centipawns for the side to move
     if (c.in_checkmate()) return { cp: -10000, best: null };
     if (c.in_draw() || c.in_stalemate()) return { cp: 0, best: null };
