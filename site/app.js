@@ -44,10 +44,10 @@ const DIFFS = [["easy", "Easy"], ["medium", "Medium"], ["hard", "Hard"], ["elite
 const diffName = (k) => (k === "elite" ? `Elite ${ELITE_WORD[S.world] || ""} knowledge` : DIFFS.find((d) => d[0] === k)[1]);
 const DIFFX = { easy: 0.6, medium: 1, hard: 1.4, elite: 2 };
 const DIFFNOTE = {
-  easy: "Only the most famous. Two clues to start, slow reveals, 15 seconds to answer, higher-or-lower pairs far apart. Scores count 0.6x.",
+  easy: "Only the household names. Two clues to start, slow reveals, 15 seconds to answer, higher-or-lower pairs far apart. Scores count 0.6x.",
   medium: "Well known. Normal speed, 12 seconds to answer. Scores count 1x.",
-  hard: "Deeper cuts, faster clues, 10 seconds to answer, closer higher-or-lower pairs. Scores count 1.4x.",
-  elite: "Anyone in the data, mostly the obscure ones. Fast clues, 8 seconds to answer, near-identical pairs. Scores count 2x.",
+  hard: "Past the obvious names, faster clues, 10 seconds to answer, closer higher-or-lower pairs. Scores count 1.4x.",
+  elite: "The deep cuts, for real fans. Fast clues, 8 seconds to answer, near-identical pairs. Scores count 2x.",
 };
 try { const d = localStorage.getItem("gp_diff"); if (d && DIFFNOTE[d]) S.diff = d; } catch (e) { /* storage blocked */ }
 /* Difficulty by fame, measured against everything of the same kind in the category (all K-pop groups, all idols, all songs),
@@ -57,17 +57,28 @@ const FAMECUT = {};
    Easy holds the famous of BOTH (a modern idol is not hidden behind BTS's page views), and questions draw 18% legacy, 82% modern */
 const LEGACY_K = new Set(["twice", "blackpink", "bts", "izone"]);
 const kbucket = (x) => (x.kind === "idol" ? (x.groups || []).some((g) => LEGACY_K.has(qnorm(g))) : x.kind === "song" || x.kind === "release" || x.kind === "unit" || x.kind === "album" ? LEGACY_K.has(qnorm(x.by || "")) : x.kind === "group" ? LEGACY_K.has(qnorm(x.n)) : false) ? "L" : "M";
+/* Each level is a share of the category AND a hard cap on how many names it can hold, so Easy stays the household names even in a
+   list of thousands, and Elite stops before the tail nobody has heard of. */
+const LEVEL_CAP = { anime: [35, 110, 280, 550], character: [60, 200, 500, 900], song: [80, 300, 900, 2000], any: [50, 170, 500, 1200] };
 function fameCuts(w, kind, bucket) {
   const k = w + ":" + kind + ":" + (bucket || ""); if (FAMECUT[k]) return FAMECUT[k];
-  const f = items(w, (x) => x.kind === kind && (!bucket || kbucket(x) === bucket)).map((x) => x.fame || 0).sort((a, b) => b - a), at = (q) => f[Math.min(f.length - 1, Math.floor(f.length * q))] || 0;
-  return (FAMECUT[k] = { easy: at(0.15), medium: at(0.4), hard: at(0.75) });
+  const f = items(w, (x) => x.kind === kind && (!bucket || kbucket(x) === bucket)).map((x) => x.fame || 0).sort((a, b) => b - a), cap = LEVEL_CAP[kind] || LEVEL_CAP.any;
+  const at = (q, c) => f[Math.min(f.length - 1, Math.floor(f.length * q), c)] || 0;
+  return (FAMECUT[k] = { easy: at(0.15, cap[0]), medium: at(0.4, cap[1]), hard: at(0.75, cap[2]), deep: at(0.55, Math.round((cap[1] + cap[2]) / 2)), floor: at(1, cap[3]) });
+}
+/* whether x belongs to the chosen level. Hard leaves out the Easy names; Elite starts well below Medium. Trivia uses its source's rating. */
+function inLevel(x, w) {
+  const f = x.fame || 0, d = S.diff;
+  if (x.kind === "trivia") return d === "easy" ? f >= 3 : d === "medium" ? f >= 2 : d === "hard" ? f <= 2 : f <= 1;
+  if (d === "elite" && x.kind === "player" && x.caps >= 40) return false;      // a long international career is not obscure, whatever the market value
+  const c = fameCuts(w, x.kind, w === "kpop" ? kbucket(x) : "");
+  return d === "easy" ? f >= c.easy : d === "medium" ? f >= c.medium : d === "hard" ? f >= c.hard && f < c.easy : f < c.deep && f >= c.floor;
 }
 function byFame(list) {
   if (!list.length) return list;
   if (S.world === "kpop" || (list[0] && items("kpop").includes(list[0]))) return list;   // K-pop: the whole eligible database, weighted by Pick (see social.js); difficulty metadata stays for later
   const w = S.world && items(S.world).includes(list[0]) ? S.world : WORLD_IDS.find((x) => items(x).includes(list[0])), s2 = list.slice().sort((a, b) => (b.fame || 0) - (a.fame || 0));
-  const top = (x) => { const c = fameCuts(w, x.kind, w === "kpop" ? kbucket(x) : ""); return S.diff === "easy" ? x.fame >= c.easy : S.diff === "medium" ? x.fame >= c.medium : S.diff === "hard" ? x.fame >= c.hard : true; };
-  let r = S.diff === "elite" ? s2.filter((x) => (x.fame || 0) < fameCuts(w, x.kind, w === "kpop" ? kbucket(x) : "").easy) : s2.filter(top);
+  let r = s2.filter((x) => inLevel(x, w));
   if (r.length < 4) r = s2.slice(0, Math.max(4, Math.ceil(s2.length * ({ easy: 0.15, medium: 0.4, hard: 0.75, elite: 1 })[S.diff])));   // a very short list: its own best known
   return r;
 }
@@ -243,7 +254,8 @@ const gameOf = (w, id) => (GAMES[w] || []).find((g) => g.id === id);
 /* forgiving answer check: the full name, any distinctive word of it (a first name, a stage name, a surname), the legal name,
    a few typos on longer names, or most of the name typed from the start all count. Accents, spaces and hyphens are ignored. */
 function nameOK(typed, name, alts) {
-  const t = qnorm(typed); if (t.length < 2) return false;
+  const t = qnorm(typed); if (!t) return false;
+  if (t.length < 2) return [name, ...(alts || [])].some((c) => c && qnorm(c) === t);   // L, V: a one-letter name counts, typed exactly
   for (const c of [name, ...(alts || [])].filter(Boolean)) {
     const n = qnorm(c); if (!n) continue;
     if (t === n || rom(typed) === rom(c)) return true;
@@ -256,7 +268,8 @@ function nameOK(typed, name, alts) {
 /* answers and suggestions forgive typos and romanisation variants (Jisu = Jisoo, Seulgi = Seul-gi, Yeji = Yeiji) */
 const rom = (t) => qnorm(t).replace(/oo/g, "u").replace(/ee/g, "i").replace(/eo/g, "o").replace(/ae/g, "e").replace(/yu/g, "u").replace(/(.)\1/g, "$1");
 function smartSuggest(q, list, key) {
-  const n = rom(q); if (n.length < 2) return [];
+  const n = rom(q), exact = qnorm(q); if (!exact) return [];
+  if (n.length < 2) return list.filter((x) => [key(x), x.full].some((nm) => nm && qnorm(nm) === exact)).slice(0, 6);
   const tol = n.length >= 7 ? 2 : n.length >= 4 ? 1 : 0, out = [];
   for (const x of list) {
     const names = [key(x), x.full].filter(Boolean); let best = -1;

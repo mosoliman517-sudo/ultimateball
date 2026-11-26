@@ -82,3 +82,10 @@ not checked by a native speaker; questions, answers and voices stay English). `p
 sidekick lines about particular groups and idols; then run `pipelines/make_voices.py`.
 
 Not tested yet: the party room across different networks and with more than two players, two songs playing together on iPhone.
+
+## Difficulty levels and the anime ranking (26 November)
+
+Each level is a share of the category with a cap on how many names it holds (`LEVEL_CAP` in `site/app.js`): Easy is the
+household names, Hard leaves those out, Elite starts well below Medium and stops before the unknown tail. K-pop has no levels.
+Anime is ranked by `pipelines/anime_popular.py` (AniList popularity and character favourites, plus a short hand-picked list
+of household names). Run it after anything that rebuilds or re-ranks the anime pack.

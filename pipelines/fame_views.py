@@ -4,6 +4,7 @@ How well known something is, measured the same way everywhere: English Wikipedia
 (Naruto and Demon Slayer, pizza and sushi, France and Japan) rather than whatever has the most translations on Wikidata.
 An anime with no English article of its own uses the manga it adapts (`based`). Items with no article keep a small score from
 their old count, so they land in Hard and Elite. The old count is kept as `fame0`.
+For anime, run pipelines/anime_popular.py afterwards: it replaces the anime ranking with AniList popularity.
 Run (after the packs are built):  python3 pipelines/fame_views.py anime food history geography
 """
 import json, os, re, sys, time, urllib.parse
