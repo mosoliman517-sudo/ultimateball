@@ -3118,7 +3118,7 @@ const GAMES = {
     G("scramble", "Scramble", "scramble", { tag: "A player or team with the letters shuffled.", pool: () => items("basketball") }),
   ],
   chess: [
-    G("play", "Play chess", "play", { tag: "A real game of chess: against eight characters with their own styles and voices, full-strength Stockfish, or a friend on the same device.", pool: () => [{ id: "board", n: "Chess" }], min: 1 }),
+    G("play", "Play chess", "play", { tag: "A real game of chess: against eight characters with their own styles and voices, full-strength Stockfish, or a friend on this device or theirs.", pool: () => [{ id: "board", n: "Chess" }], min: 1 }),
     G("who", "Who is this player?", "clue", { tag: "Born, peak rating, country, world champion or not. Name the grandmaster.", pool: () => items("chess", (x) => x.kind === "cplayer"), clues: CLUES.cplayer, unit: "cplayer" }),
     G("photo", "Who's that grandmaster?", "photo", { tag: "A top player's photo, right away. Name them. Two hints on the way.", pool: () => items("chess", (x) => x.kind === "cplayer" && x.img), hints: (p) => [["Country", p.nat], ["Initials", first(p.n)]].filter((c) => c[1]), unit: "cplayer" }),
     G("opening", "Name the opening", "clue", { tag: "The moves of a real opening appear one by one. Type its name.", pool: () => items("chess", (x) => x.kind === "opening"), clues: CLUES.opening, unit: "opening" }),
@@ -3520,7 +3520,7 @@ function recordLine(w, id) { const b = prof().best[w + ":" + id]; return b ? `Yo
 function renderHub() {
   const w = S.world; let k = 0;
   const faces = (g) => shuffle(g.pool().filter(imgOf)).slice(0, 3).map((x) => `<img class="gface-img ${x.logo || x.flag ? "contain" : ""} ${isCut(x) ? "cutpic" : ""}" src="${imgOf(x)}" alt="">`).join("");
-  $("#room").innerHTML = `<h2 class="sec">What do you want to play?</h2><p class="secsub">${GAMES[w].length} games in ${esc(WORLDS[w].name)}. Play solo or with a friend; most also work across two devices.</p>${w === "kpop" ? calDoorHTML() : ""}${w === "chess" ? Train.strip() : ""}<div class="hub">${GAMES[w].map((g) => `<button type="button" class="gcard" data-game="${g.id}" style="--d:${k++ * 60}ms"><div class="gfaces">${faces(g)}</div><div class="gname">${esc(g.name)}</div><div class="gmodes">${g.kind === "play" ? "vs computer · 2 players" : g.kind === "hol" ? "Solo streak · 2 players" : g.kind === "roulette" ? "Solo 60 seconds · 2 players" : g.kind === "finish" ? "Solo streak · 2 players" : g.kind === "iconic" ? "Solo" : "Solo streak · 2 players · online"}</div><div class="gtag">${esc(g.tag)}</div><div class="grec num">${esc(recordLine(w, g.id))}</div></button>`).join("")}</div>`;
+  $("#room").innerHTML = `<h2 class="sec">What do you want to play?</h2><p class="secsub">${GAMES[w].length} games in ${esc(WORLDS[w].name)}. Play solo or with a friend; most also work across two devices.</p>${w === "kpop" ? calDoorHTML() : ""}${w === "chess" ? Train.strip() : ""}<div class="hub">${GAMES[w].map((g) => `<button type="button" class="gcard" data-game="${g.id}" style="--d:${k++ * 60}ms"><div class="gfaces">${faces(g)}</div><div class="gname">${esc(g.name)}</div><div class="gmodes">${g.kind === "play" ? "vs computer · 2 players · online" : g.kind === "hol" ? "Solo streak · 2 players" : g.kind === "roulette" ? "Solo 60 seconds · 2 players" : g.kind === "finish" ? "Solo streak · 2 players" : g.kind === "iconic" ? "Solo" : "Solo streak · 2 players · online"}</div><div class="gtag">${esc(g.tag)}</div><div class="grec num">${esc(recordLine(w, g.id))}</div></button>`).join("")}</div>`;
   homeTilt();
 }
 
@@ -3548,6 +3548,7 @@ function openGame(id) {
   if (g.kind === "finish") { $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how}`, [{ id: "solo", t: "Solo streak", d: "Keep going while you stay within a few places. The first bigger miss ends the run." }, { id: "duo", t: "Two players, one device", d: "Five rounds. Each slides in turn; the closest scores most." }]); $("#room .modes").insertAdjacentHTML("afterend", duoNamesHTML()); Snd.mode("game"); return; }
   $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how} ${["play", "finish", "iconic"].includes(g.kind) ? "" : g.kind === "hol" ? "Solo: keep the streak going. Two players: take turns, five each." : "Buzz in whenever you think you know it. The sooner you are right, the more you score (up to 1,000); a wrong guess costs 150."}`, [
     { id: "solo", t: g.kind === "ttt" || g.kind === "play" ? "Solo, against the computer" : g.kind === "roulette" || g.kind === "all" ? "Solo, against the clock" : "Solo streak", d: g.kind === "ttt" ? "The computer gets smarter with the difficulty." : g.kind === "play" ? "Pick one of eight characters, or Stockfish at full strength." : g.kind === "all" ? "Name everyone before the clock runs out." : g.kind === "roulette" ? "Name as many as you can before time runs out." : "Keep going for as long as you can. The run ends the first time you miss." },
+    ...(g.kind === "play" ? [{ id: "online", t: "Two players, two devices", d: "Share a four-letter code, pick a clock and play live." }] : []),
     ...(g.kind === "all" ? [] : [{ id: "duo", t: "Two players, one device", d: g.kind === "play" ? "One board, pass the device after every move." : g.kind === "hol" ? "Take turns. Most right after five each wins." : g.kind === "roulette" ? "Three rounds. Take turns typing names on the same screen." : "Five rounds. Race to buzz: A for player 1, L for player 2." }]),
     ...(["hol", "roulette", "all", "ttt", "play"].includes(g.kind) ? [] : [{ id: "surv", t: "Survival", d: "Three lives. The questions get harder every three. One high score." }, { id: "online", t: "Two players, two devices", d: "The same race on two phones or computers, with a four-letter room code." }])], g.kind === "play");
   if ($('#room [data-mode="duo"]')) { try { $("#room .modes").insertAdjacentHTML("afterend", duoNamesHTML()); } catch (e) { /* not ready */ } }
@@ -3555,7 +3556,7 @@ function openGame(id) {
   Snd.mode("game");
 }
 function startMode(m) {
-  const g = gameOf(S.world, S.game); if (m === "online") return openOnline(); if (m === "surv") Q.next = { surv: { lives: 3 }, rounds: 999 }; document.body.classList.add("ingame");
+  const g = gameOf(S.world, S.game); if (m === "online" && g.kind === "play") return ChessNet.menu(); if (m === "online") return openOnline(); if (m === "surv") Q.next = { surv: { lives: 3 }, rounds: 999 }; document.body.classList.add("ingame");
   { const p = prof(); p.last = { w: S.world, g: S.game, t: Date.now() }; p.gplays = p.gplays || {}; p.gplays[S.world + ":" + S.game] = (p.gplays[S.world + ":" + S.game] || 0) + 1; saveProf(); }
   addPlay(S.world);
   const go2 = () => { if (g.kind === "finish") return Fin.start(m); if (g.kind === "play") return newChessPlay(m); if (g.kind === "all") return newAll(m); if (g.kind === "ttt") return newTTT(m); if (g.kind === "hol") return newHol(m); if (g.kind === "roulette") return newRou(m); newQuiz(S.world, S.game, m === "surv" ? "solo" : m); };
@@ -4768,16 +4769,18 @@ function cpCharge(s) {
   if (!s.clock || s.over || s.c.history().length < 2) return false;
   const side = s.c.turn(); s.ms[side] -= gone;
   if (s.ms[side] > 0) return false;
-  s.ms[side] = 0; cpFlag(s, side); return true;
+  s.ms[side] = 0;
+  if (s.mode === "online") { if (side !== s.you) return false; s.sentOver = { k: "flag", game: ChessNet.game }; ChessNet.send({ ...s.sentOver }); }   /* each side calls its own flag */
+  cpFlag(s, side); return true;
 }
 function cpFlag(s, side) {
   const winner = side === "w" ? "b" : "w";
   const left = s.c.board().flat().filter((p) => p && p.color === winner && p.type !== "k").map((p) => p.type);
   s.think = false; s.sel = null; s.targets = [];
   if (!left.length || (left.length === 1 && "nb".includes(left[0]))) { s.over = { cls: "draw", title: "Draw", why: "Time ran out, but there is not enough left to mate." }; addXP(10, "chess"); }
-  else if (winner === s.you) { s.over = { cls: "win", title: "You win!", why: "On time." }; Snd.win(); confetti(); addXP(CPXP[s.bot], "chess"); Mascot.react("ch_win", true); if (s.bot === "stockfish") award("elite_win"); }
+  else if (winner === s.you) { s.over = { cls: "win", title: "You win!", why: "On time." }; Snd.win(); confetti(); addXP(CPXP[s.bot] || 40, "chess"); Mascot.react("ch_win", true); if (s.bot === "stockfish") award("elite_win"); }
   else { s.over = { cls: "loss", title: "You lost on time.", why: "On time." }; Snd.wrong(); Mascot.react("ch_loss", true); }
-  cpRecord(s); renderChess(); cpLastWord();
+  if (s.mode === "solo") cpRecord(s); renderChess(); cpLastWord();
 }
 function cpTick(s) {
   if (CP.s !== s || !$(".cpwrap") || s.over) { clearInterval(s.timer); return; }
@@ -4910,7 +4913,7 @@ function cpLastWord() {
   setTimeout(() => { if (CP.s === s) cpSay(L[k] ? k : base); }, 600);
 }
 function chessBoard(s) {
-  const c = s.c, b = c.board(), flip = s.mode === "solo" ? s.you === "b" : false, order = flip ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7]; let h = "";
+  const c = s.c, b = c.board(), flip = s.mode !== "duo" && s.you === "b", order = flip ? [7, 6, 5, 4, 3, 2, 1, 0] : [0, 1, 2, 3, 4, 5, 6, 7]; let h = "";
   const myTurn = !s.over && !s.think && (s.mode === "duo" || c.turn() === s.you), caps = s.targets.filter((t) => c.get(t));
   order.forEach((r, ri) => order.forEach((f, fi) => { const pc = b[r][f], sq = "abcdefgh"[f] + (8 - r), own = myTurn && pc && pc.color === c.turn(), chk = pc && pc.type === "k" && pc.color === c.turn() && c.in_check();
     h += `<i data-csq="${sq}" tabindex="0" role="button" aria-label="${sq}${pc ? ` ${pc.color === "w" ? "white" : "black"} ${{ p: "pawn", n: "knight", b: "bishop", r: "rook", q: "queen", k: "king" }[pc.type]}` : " empty"}" ${own ? 'data-own="1"' : ""} class="${(r + f) % 2 ? "d" : "l"} ${s.sel === sq ? "sel" : ""} ${s.targets.includes(sq) ? "tgt" : ""} ${caps.includes(sq) ? "cap" : ""} ${s.last && s.last.includes(sq) ? "last" : ""} ${chk ? "chk" : ""}">${pc ? `<b class="pcz pc-${pc.color}${pc.type}"></b>` : ""}${fi === 0 ? `<span class="co r">${8 - r}</span>` : ""}${ri === 7 ? `<span class="co f">${"abcdefgh"[f]}</span>` : ""}</i>`; }));
@@ -4918,18 +4921,18 @@ function chessBoard(s) {
 }
 function capturedOf(c, color) { const have = { p: 0, n: 0, b: 0, r: 0, q: 0 }; c.board().flat().forEach((p) => { if (p && p.color === color && have[p.type] != null) have[p.type]++; }); const full = { p: 8, n: 2, b: 2, r: 2, q: 1 }; return Object.keys(full).flatMap((t) => Array(Math.max(0, full[t] - have[t])).fill(t)); }
 function renderChess() {
-  const s = CP.s, c = s.c, names = NAMES(), solo = s.mode === "solo", opp = solo ? cpOpp(s.bot) : null;
-  const who = (col) => (solo ? (col === s.you ? prof().nick || "You" : opp.name + (opp.elo ? ` · ${opp.elo}` : "")) : names[col === "w" ? 0 : 1]);
+  const s = CP.s, c = s.c, names = NAMES(), solo = s.mode === "solo", online = s.mode === "online", vs = solo || online, opp = solo ? cpOpp(s.bot) : online ? { name: s.oppName } : null;
+  const who = (col) => (vs ? (col === s.you ? prof().nick || "You" : opp.name + (opp.elo ? ` · ${opp.elo}` : "")) : names[col === "w" ? 0 : 1]);
   const lost = (col) => capturedOf(c, col), mat = (col) => lost(col === "w" ? "b" : "w").reduce((a, t) => a + PVAL[t], 0) - lost(col).reduce((a, t) => a + PVAL[t], 0);
   const bar = (col) => `<div class="cpbar ${c.turn() === col && !s.over ? "on" : ""}"><span class="cpdot ${col}"></span><b>${esc(who(col))}</b>${solo && s.think && col !== s.you ? `<span class="cpthink" aria-label="thinking"><i></i><i></i><i></i></span>` : ""}<span class="cpcap">${lost(col === "w" ? "b" : "w").map((t) => `<i class="pcz pc-${col === "w" ? "b" : "w"}${t}"></i>`).join("")}${mat(col) > 0 ? ` +${mat(col)}` : ""}</span>${s.clock ? `<span class="cpclk num ${s.ms[col] < 20000 ? "low" : ""}" data-side="${col}">${cpTime(s.ms[col])}</span>` : ""}</div>`;
-  const top = solo ? (s.you === "w" ? "b" : "w") : "b", bottom = top === "w" ? "b" : "w";
-  const status = s.over ? "" : s.think ? `${esc(opp.name)} is thinking…` : c.in_check() ? "Check!" : solo ? (c.turn() === s.you ? "Your move." : "") : `${esc(who(c.turn()))} to move.`;
+  const top = vs ? (s.you === "w" ? "b" : "w") : "b", bottom = top === "w" ? "b" : "w";
+  const status = s.over ? "" : s.think ? `${esc(opp.name)} is thinking…` : c.in_check() ? "Check!" : vs ? (c.turn() === s.you ? "Your move." : online ? `${esc(opp.name)} to move.` : "") : `${esc(who(c.turn()))} to move.`;
   const moves = c.history(); let ml = ""; for (let i = 0; i < moves.length; i += 2) ml += `<span><small>${i / 2 + 1}.</small> ${esc(moves[i])} ${moves[i + 1] ? esc(moves[i + 1]) : ""}</span>`;
   const over = cpOverHTML(s);
-  cpPaint(`<div class="card cpwrap ${cpTalks(s) ? "vsbot" : ""}" data-view="game${s.id}">${gamesBar(solo ? `Play chess · ${esc(opp.name)}` : "Play chess · two players")}${cpTalks(s) ? `<div class="cpsay" id="cpSay" role="status">${cpSayHTML(s)}</div>` : ""}${bar(top)}<div class="cpboard">${chessBoard(s)}${over}${s.promo ? `<div class="cppromo" role="dialog" aria-label="Choose a piece">${["q", "r", "b", "n"].map((k) => `<button type="button" data-promo="${k}" aria-label="${{ q: "Queen", r: "Rook", b: "Bishop", n: "Knight" }[k]}"><i class="pcz pc-${c.turn()}${k}"></i></button>`).join("")}<button type="button" class="btn ghost" data-promo="x">Cancel</button></div>` : ""}</div>${bar(bottom)}
-    <div class="row" style="justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:8px"><span class="fine">${s.note ? esc(s.note) + " " : ""}${status}</span><span class="row" style="gap:6px">${solo && !s.over ? `<button class="btn ghost" id="cpChange" type="button">Opponent</button>` : ""}<button class="btn ghost" id="cpUndo" type="button" ${moves.length < (solo && s.you === "b" ? 2 : 1) || s.think || s.over ? "disabled" : ""}>Undo</button>${solo ? "" : `<button class="btn ghost" id="cpDraw" type="button" ${s.over ? "disabled" : ""}>Draw</button>`}<button class="btn ghost" id="cpResign" type="button" ${s.over ? "disabled" : ""}>Resign</button></span></div>
+  cpPaint(`<div class="card cpwrap ${cpTalks(s) ? "vsbot" : ""}" data-view="game${s.id}">${gamesBar(vs ? `Play chess · ${esc(opp.name)}` : "Play chess · two players")}${cpTalks(s) ? `<div class="cpsay" id="cpSay" role="status">${cpSayHTML(s)}</div>` : ""}${bar(top)}<div class="cpboard">${chessBoard(s)}${over}${s.promo ? `<div class="cppromo" role="dialog" aria-label="Choose a piece">${["q", "r", "b", "n"].map((k) => `<button type="button" data-promo="${k}" aria-label="${{ q: "Queen", r: "Rook", b: "Bishop", n: "Knight" }[k]}"><i class="pcz pc-${c.turn()}${k}"></i></button>`).join("")}<button type="button" class="btn ghost" data-promo="x">Cancel</button></div>` : ""}</div>${bar(bottom)}
+    <div class="row" style="justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:8px"><span class="fine">${s.note ? esc(s.note) + " " : ""}${status}</span><span class="row" style="gap:6px">${solo && !s.over ? `<button class="btn ghost" id="cpChange" type="button">Opponent</button>` : ""}${online ? "" : `<button class="btn ghost" id="cpUndo" type="button" ${moves.length < (solo && s.you === "b" ? 2 : 1) || s.think || s.over ? "disabled" : ""}>Undo</button>`}${solo ? "" : `<button class="btn ghost" id="cpDraw" type="button" ${s.over || s.drawAsked ? "disabled" : ""}>${s.drawOffered ? "Accept draw" : "Draw"}</button>`}<button class="btn ghost" id="cpResign" type="button" ${s.over ? "disabled" : ""}>Resign</button></span></div>
     ${cpAfterHTML(s)}
-    <div class="cpmoves">${ml || `<span class="fine">${solo ? `You have ${s.you === "w" ? "White" : "Black"}. Tap a piece, then a square.` : "White starts. Tap a piece, then a square. Pass the device after each move."}</span>`}</div><p class="fine" style="margin-top:8px">Engine: Stockfish (free software, GPL), running in your browser. Pieces: cburnett set (CC BY-SA 3.0).</p></div>`);
+    <div class="cpmoves">${ml || `<span class="fine">${vs ? `You have ${s.you === "w" ? "White" : "Black"}. Tap a piece, then a square.` : "White starts. Tap a piece, then a square. Pass the device after each move."}</span>`}</div><p class="fine" style="margin-top:8px">Engine: Stockfish (free software, GPL), running in your browser. Pieces: cburnett set (CC BY-SA 3.0).</p></div>`);
   const ml2 = $(".cpmoves"); if (ml2) ml2.scrollLeft = ml2.scrollWidth;
   cpAnimate(s);
 }
@@ -4939,9 +4942,9 @@ function cpRecord(s) {
   p.chessVs = p.chessVs || {}; (p.chessVs[s.bot] = p.chessVs[s.bot] || { w: 0, d: 0, l: 0 })[k]++; saveProf();
 }
 function cpCheckEnd() {
-  const s = CP.s, c = s.c; if (!c.game_over()) return false; const solo = s.mode === "solo", names = NAMES();
-  if (c.in_checkmate()) { const winner = c.turn() === "w" ? "b" : "w", won = solo && winner === s.you; s.over = { cls: solo ? (won ? "win" : "loss") : "win", title: solo ? (won ? "You win!" : "Checkmate. You lost.") : `${names[winner === "w" ? 0 : 1]} wins!`, why: "Checkmate." };
-    if (!solo || won) { Snd.win(); confetti(); addXP(solo ? CPXP[s.bot] : 30, "chess"); Mascot.react(solo ? "ch_win" : "duo_end", true); if (solo && s.bot === "stockfish") award("elite_win"); if (!solo) award("duo"); } else { Snd.wrong(); Mascot.react("ch_loss", true); } }
+  const s = CP.s, c = s.c; if (!c.game_over()) return false; const solo = s.mode === "solo", duo = s.mode === "duo", names = NAMES();
+  if (c.in_checkmate()) { const winner = c.turn() === "w" ? "b" : "w", won = !duo && winner === s.you; s.over = { cls: !duo ? (won ? "win" : "loss") : "win", title: !duo ? (won ? "You win!" : "Checkmate. You lost.") : `${names[winner === "w" ? 0 : 1]} wins!`, why: "Checkmate." };
+    if (duo || won) { Snd.win(); confetti(); addXP(solo ? CPXP[s.bot] : duo ? 30 : 40, "chess"); Mascot.react(duo ? "duo_end" : "ch_win", true); if (solo && s.bot === "stockfish") award("elite_win"); if (duo) award("duo"); } else { Snd.wrong(); Mascot.react("ch_loss", true); } }
   else { s.over = { cls: "draw", title: "Draw", why: c.in_stalemate() ? "Stalemate." : c.in_threefold_repetition() ? "Threefold repetition." : c.insufficient_material() ? "Not enough pieces left to mate." : "Fifty-move rule." }; addXP(10, "chess"); Mascot.react("ch_draw", true); }
   if (solo) { cpRecord(s); cpLastWord(); }
   return true;
@@ -4952,6 +4955,7 @@ function cpMove(from, to, piece) {
   if (!piece && pawn && pawn.type === "p" && /[18]$/.test(to) && s.c.moves({ square: from, verbose: true }).some((x) => x.to === to)) { s.promo = { from, to }; s.sel = null; s.targets = []; s.dropped = false; renderChess(); return true; }
   const m = s.c.move({ from, to, promotion: piece || "q" }); if (!m) return false;
   s.promo = null; s.last = [from, to]; s.sel = null; s.targets = []; Snd.tick(); if (m.captured) Snd.lock();
+  if (s.mode === "online") { s.drawOffered = false; s.note = ""; ChessNet.moved(s); }
   if (!cpCheckEnd() && s.mode === "solo" && s.c.turn() !== s.you) { s.think = true; renderChess(); setTimeout(cpEngine, 200); } else renderChess();
   cpWatch();
   return true;
@@ -4971,7 +4975,7 @@ async function cpEngine() {
   s.think = false; if (m) { s.last = [m.from, m.to]; Snd.tick(); } cpCheckEnd(); renderChess(); cpWatch();
 }
 function chessClick(sq) {
-  const s = CP.s; if (!s || s.over || s.think || s.promo) return; const c = s.c; if (s.mode === "solo" && c.turn() !== s.you) return;
+  const s = CP.s; if (!s || s.over || s.think || s.promo) return; const c = s.c; if (s.mode !== "duo" && c.turn() !== s.you) return;
   if (s.sel === sq) { s.sel = null; s.targets = []; renderChess(); return; }
   if (s.sel && s.targets.includes(sq)) { cpMove(s.sel, sq); return; }
   const pc = c.get(sq); if (pc && pc.color === c.turn()) { s.sel = sq; s.targets = c.moves({ square: sq, verbose: true }).map((m) => m.to); } else { s.sel = null; s.targets = []; }
@@ -4984,11 +4988,12 @@ document.addEventListener("click", (e) => {
   if (t.dataset.bot) { Snd.tick(); newChessPlay("solo", t.dataset.bot); return; }
   if (!CP.s) return;
   if (t.dataset.promo) { const s = CP.s, p = s.promo; if (!p) return; s.promo = null; if (t.dataset.promo === "x") renderChess(); else cpMove(p.from, p.to, t.dataset.promo); return; }
+  if (t.id === "cpDraw" && CP.s.mode === "online") { ChessNet.draw(); return; }
   if (t.id === "cpDraw") { const s = CP.s; if (s.over || !cpSure(t, "Both agree? Tap again")) return; s.over = { cls: "draw", title: "Draw", why: "Agreed." }; renderChess(); return; }
-  if (t.id === "cpAgain") { newChessPlay(CP.s.mode, CP.s.bot); return; }
+  if (t.id === "cpAgain") { if (CP.s.mode === "online") return ChessNet.rematch(); newChessPlay(CP.s.mode, CP.s.bot); return; }
   if (t.id === "cpChange") { if (cpRunning() && !cpSure(t, "Leave this game?")) return; newChessPlay("solo"); return; }
   if (t.id === "cpUndo") { const s = CP.s; if (cpCharge(s)) return; s.promo = null; s.slid = null; s.c.undo(); if (s.mode === "solo" && s.c.turn() !== s.you) s.c.undo(); s.sel = null; s.targets = []; s.last = null; const n = s.c.history().length; s.talk.seen = n; s.talk.evals.length = Math.min(s.talk.evals.length, n + 1); s.talk.last = Math.min(s.talk.last, n); s.talk.pending = null; renderChess(); if (s.mode === "solo" && s.c.turn() !== s.you) { s.think = true; renderChess(); setTimeout(cpEngine, 400); } return; }
-  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (s.over || cpCharge(s) || !cpSure(t, "Tap again to resign")) return; s.promo = null; if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; cpRecord(s); Mascot.react("ch_loss", true); s.think = false; cpLastWord(); } else { const names = NAMES(), side = s.c.turn(); s.over = { cls: "win", title: `${names[side === "w" ? 1 : 0]} wins!`, why: `${names[side === "w" ? 0 : 1]} resigned.` }; } renderChess(); return; }
+  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (s.over || cpCharge(s) || !cpSure(t, "Tap again to resign")) return; s.promo = null; if (s.mode === "online") return ChessNet.resign(); if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; cpRecord(s); Mascot.react("ch_loss", true); s.think = false; cpLastWord(); } else { const names = NAMES(), side = s.c.turn(); s.over = { cls: "win", title: `${names[side === "w" ? 1 : 0]} wins!`, why: `${names[side === "w" ? 0 : 1]} resigned.` }; } renderChess(); return; }
 });
 
 /* "Back" in a running game asks once more (this runs before the page's own Back handler) */
@@ -5039,11 +5044,11 @@ const Lab = {
 addEventListener("message", (e) => { if (e.origin === location.origin && e.data && e.data.ub === "labclose") Lab.close(); });
 addEventListener("hashchange", () => Lab.close());
 
-const cpGameFor = (s) => ({ sans: s.c.history(), color: s.mode === "solo" ? s.you : "w", names: s.mode === "solo" ? (s.you === "w" ? ["You", cpOpp(s.bot).name] : [cpOpp(s.bot).name, "You"]) : NAMES().slice(0, 2) });
+const cpGameFor = (s) => ({ sans: s.c.history(), color: s.mode !== "duo" ? s.you : "w", names: s.mode !== "duo" ? ((o) => (s.you === "w" ? ["You", o] : [o, "You"]))(s.mode === "solo" ? cpOpp(s.bot).name : s.oppName) : NAMES().slice(0, 2) });
 
 /* grade your own moves once, when a game against the computer ends */
 function cpGrade(s) {
-  if (s.grading || s.mode !== "solo" || !s.c.history().length) return; s.grading = true;
+  if (s.grading || s.mode === "duo" || !s.c.history().length) return; s.grading = true;
   const done = (r) => { s.stats = r || { n: {}, moves: 0 }; const box = CP.s === s && $(".ectiles"); if (box) { box.innerHTML = cpTiles(s); const note = $(".ecnote"); if (note) note.textContent = cpNote(s); } };
   BKBots.grade(new Chess().fen(), s.c.history({ verbose: true }), s.you, () => CP.s === s).then(done, () => done(null));
 }
@@ -5053,16 +5058,16 @@ const cpNote = (s) => (s.stats && s.stats.moves ? `A quick look at your ${s.stat
 /* the card over the board; once closed, the buttons it held sit under the board */
 function cpOverHTML(s) {
   const o = s.over; if (!o || s.cardHidden) return "";
-  const solo = s.mode === "solo", moved = s.c.history().length > 0, mine = solo && s.c.history({ verbose: true }).some((m) => m.color === s.you);
+  const solo = s.mode === "solo", moved = s.c.history().length > 0, mine = s.mode !== "duo" && s.c.history({ verbose: true }).some((m) => m.color === s.you);
   if (mine) cpGrade(s);
   return `<div class="ecwrap ${o.cls}"><div class="eccard" role="dialog" aria-label="Game over"><button type="button" class="ecx" data-ec="x" aria-label="Close and look at the board">×</button>
     <h3>${esc(o.title)}</h3><p class="ecwhy">${esc(o.why)}</p>${mine ? `<div class="ectiles">${cpTiles(s)}</div><p class="ecnote">${cpNote(s)}</p>` : ""}
     ${moved ? `<button type="button" class="btn ecreview" id="cpReview">★ Game review</button>` : ""}
-    <div class="ecrow">${solo ? `<button class="btn ghost" id="cpChange" type="button">New game</button>` : ""}<button class="btn ghost" id="cpAgain" type="button">${solo ? "Rematch" : "Play again"}</button></div></div></div>`;
+    <div class="ecrow">${solo ? `<button class="btn ghost" id="cpChange" type="button">New game</button>` : ""}${s.gone ? "" : `<button class="btn ghost" id="cpAgain" type="button">${s.mode !== "duo" ? "Rematch" : "Play again"}</button>`}</div></div></div>`;
 }
 function cpAfterHTML(s) {
   if (!s.over || !s.cardHidden) return "";
-  return `<div class="row ecafter"><button type="button" class="btn" id="cpReview" ${s.c.history().length ? "" : "disabled"}>★ Game review</button><button class="btn ghost" id="cpAgain" type="button">${s.mode === "solo" ? "Rematch" : "Play again"}</button></div>`;
+  return `<div class="row ecafter"><button type="button" class="btn" id="cpReview" ${s.c.history().length ? "" : "disabled"}>★ Game review</button>${s.gone ? "" : `<button class="btn ghost" id="cpAgain" type="button">${s.mode !== "duo" ? "Rematch" : "Play again"}</button>`}</div>`;
 }
 
 document.addEventListener("click", (e) => {
@@ -5070,6 +5075,115 @@ document.addEventListener("click", (e) => {
   if (t.dataset.lab) { Lab.open(t.dataset.lab); return; }
   if (t.dataset.ec === "x" && CP.s) { CP.s.cardHidden = true; renderChess(); }
 });
+
+/* ================= play a friend on two devices: a four-letter room on the same public relays as the other online games.
+   Each browser checks every move it receives against the rules before playing it, keeps its own clock honest, and sends
+   the whole move list each time, so a lost message is repaired by the next one. Everything received has been through
+   cleanData() (bk_core.js). Anyone who knows the code can try to join; the first one in keeps the seat. ================= */
+const ChessNet = {
+  mq: [], code: null, host: false, me: "", peer: null, peerName: "", seen: new Set(), clock: 0, hostColor: "w", game: 0, beat: null, last: 0, quiet: false,
+  rid: () => Math.random().toString(36).slice(2, 10),
+  menu() {
+    this.close();
+    const clocks = CPCLOCKS.map(([v, n]) => `<button type="button" class="chip" data-netclock="${v}" aria-pressed="${(prof().chessClock || 0) === v}">${n}</button>`).join("");
+    $("#room").innerHTML = `<div class="card">${gamesBar("Play chess · two devices")}<p class="sub">One of you creates a room and reads out the code; the other types it in.</p><div class="label">Clock (the host chooses)</div><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px">${clocks}</div>
+      <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:14px"><button class="btn" type="button" data-net="make">Create a room</button><span class="fine">or</span><input id="netCode" aria-label="Room code" maxlength="4" placeholder="CODE" autocomplete="off" style="width:96px;text-transform:uppercase"><button class="btn ghost" type="button" data-net="join">Join</button></div><p class="fine" id="netMsg" role="status" style="margin-top:10px"></p></div>`;
+  },
+  say(text) { const el = $("#netMsg"); if (el) el.textContent = text; },
+  open(code, host) {
+    this.close(); this.code = code; this.host = host; this.me = this.rid();
+    this.mq = BROKERS.map((u) => mqttConnect(u, "gamesite/v1/chess/" + code, (m) => this.recv(m), () => {}));
+    this.beat = setInterval(() => this.tick(), 2000);
+  },
+  close() {
+    if (!this.code) return;
+    this.send({ k: "bye", game: this.game }); const old = this.mq; this.mq = []; setTimeout(() => old.forEach((c) => c.close()), 400);
+    clearInterval(this.beat); this.code = null; this.peer = null; this.peerName = ""; this.game = 0; this.seen.clear(); this.quiet = false;
+  },
+  send(m) { m.id = this.rid() + this.rid(); m.from = this.me; this.mq.forEach((c) => c.send(m)); },
+  playing() { const s = CP.s; return s && s.mode === "online" && s.net === this.code ? s : null; },
+  make() { const code = Array.from({ length: 4 }, () => rnd([..."ABCDEFGHJKLMNPQRSTUVWXYZ"])).join(""); this.open(code, true); this.clock = prof().chessClock || 0; this.say(`Room ${code}. Tell your friend the code; the game starts when they join.`); },
+  join() { const code = (($("#netCode") || {}).value || "").trim().toUpperCase(); if (!/^[A-Z]{4}$/.test(code)) return this.say("Type the four-letter code."); this.open(code, false); this.say(`Looking for room ${code}…`); this.tries = 0; },
+  startMsg() { return { k: "start", to: this.peer, nick: prof().nick || "Host", clock: this.clock, hostColor: this.hostColor, game: this.game }; },
+  /* every two seconds: say hello until answered, then keep each other up to date */
+  tick() {
+    if (!this.code) return;
+    const s = this.playing();
+    if (s && !$(".cpwrap")) return this.close();                      // walked away from the board
+    if (!this.host && !s) { this.send({ k: "hello", nick: prof().nick || "Guest" }); if (++this.tries === 8) this.say("No answer yet. Check the code, and that your friend's room is still open."); return; }
+    if (!this.peer) return;
+    this.send({ k: "ping", game: this.game, moves: s ? s.c.history() : [], over: !!(s && s.over) });
+    if (s && !s.over && performance.now() - this.last > 12000 && !this.quiet) { this.quiet = true; s.note = `${this.peerName} seems to have lost the connection.`; renderChess(); }
+  },
+  begin(youColor) {
+    const old = CP.s; if (old && old.timer) clearInterval(old.timer);
+    Voice.stop(); document.body.classList.add("ingame"); Snd.mode("game");
+    const s = (CP.s = { id: ++CP.games, mode: "online", net: this.code, oppName: this.peerName, c: new Chess(), you: youColor, sel: null, targets: [], last: null, think: false, over: null, bot: null, say: null, talk: BKBots.TALK.fresh(false), note: "" });
+    s.clock = this.clock; s.ms = { w: s.clock * 1000, b: s.clock * 1000 }; s.stamp = performance.now();
+    if (s.clock) s.timer = setInterval(() => cpTick(s), 100);
+    this.last = performance.now(); this.quiet = false; renderChess(); Snd.win();
+    const card = $(".cpwrap"); if (card) scrollTo({ top: card.getBoundingClientRect().top + scrollY - 4, behavior: "instant" });
+  },
+  moved(s) { this.send({ k: "moves", game: this.game, moves: s.c.history(), left: s.ms[s.you] }); },
+  /* take the other side's move list: only moves of theirs, only legal ones, and only if it agrees with ours */
+  take(m) {
+    const s = this.playing(); if (!s || m.game !== this.game || !Array.isArray(m.moves) || s.over) return;
+    const mine = s.c.history(); if (m.moves.length !== mine.length + 1 || !mine.every((x, i) => x === m.moves[i]) || s.c.turn() === s.you) return;
+    if (s.clock) { cpCharge(s); if (s.over) return; }
+    const mv = s.c.move(String(m.moves[mine.length])); if (!mv) return;
+    if (s.clock && typeof m.left === "number") s.ms[mv.color] = Math.max(0, Math.min(s.clock * 1000, m.left));
+    s.last = [mv.from, mv.to]; s.sel = null; s.targets = []; s.drawAsked = false; Snd.tick(); if (mv.captured) Snd.lock();
+    cpCheckEnd(); renderChess();
+  },
+  recv(m) {
+    if (!m || !this.code || m.from === this.me || this.seen.has(m.id)) return; this.seen.add(m.id);
+    if (this.host && m.k === "hello") {
+      if (this.peer && this.peer !== m.from) return;                   // the seat is taken
+      if (!this.peer) { this.peer = m.from; this.peerName = String(m.nick || "Guest").slice(0, 16); this.game = 1; this.hostColor = "w"; this.begin("w"); }
+      return this.send(this.startMsg());
+    }
+    if (!this.host && m.k === "start" && (m.hostColor === "w" || m.hostColor === "b")) {
+      if (this.peer && this.peer !== m.from) return;
+      if (m.game <= this.game) return;
+      this.peer = m.from; this.peerName = String(m.nick || "Host").slice(0, 16); this.game = m.game; this.clock = CPCLOCKS.some(([v]) => v === m.clock) ? m.clock : 0;
+      return this.begin(m.hostColor === "w" ? "b" : "w");
+    }
+    if (m.from !== this.peer) return;
+    this.last = performance.now(); const s = this.playing();
+    if (this.quiet && s) { this.quiet = false; s.note = ""; renderChess(); }
+    if (m.k === "moves") return this.take(m);
+    if (m.k === "ping") {
+      if (!s || m.game !== this.game || !Array.isArray(m.moves)) return;
+      if (m.moves.length === s.c.history().length + 1) this.take(m);
+      else if (m.moves.length < s.c.history().length) this.moved(s);      // they missed our last move
+      if (s.over && !m.over && s.sentOver) this.send(s.sentOver);       // or the way it ended
+      return;
+    }
+    if (!s || m.game !== this.game) return;
+    if (m.k === "rematch") { if (!s.over) return; if (s.wantAgain && this.host) return this.again(); s.theyWant = true; s.note = `${this.peerName} wants a rematch.`; s.cardHidden = true; return renderChess(); }
+    if (m.k === "bye") { if (!s.over) { s.over = { cls: "win", title: "You win!", why: `${this.peerName} left the game.` }; cpWinFx(); } s.note = `${this.peerName} left the room.`; s.gone = true; return renderChess(); }
+    if (s.over) return;
+    if (m.k === "resign") { s.over = { cls: "win", title: "You win!", why: `${this.peerName} resigned.` }; cpWinFx(); return renderChess(); }
+    if (m.k === "flag") return cpFlag(s, s.you === "w" ? "b" : "w");
+    if (m.k === "draw") { if (s.drawAsked) { this.end({ cls: "draw", title: "Draw", why: "Agreed." }, "drawok"); return; } s.drawOffered = true; s.note = `${this.peerName} offers a draw.`; return renderChess(); }
+    if (m.k === "drawok" && s.drawAsked) { s.over = { cls: "draw", title: "Draw", why: "Agreed." }; return renderChess(); }
+  },
+  /* end the game on this side and tell the other */
+  end(over, kind) { const s = this.playing(); if (!s || s.over) return; s.over = over; s.sentOver = { k: kind, game: this.game }; this.send({ ...s.sentOver }); renderChess(); },
+  resign() { this.end({ cls: "loss", title: "You resigned", why: "Another one?" }, "resign"); },
+  draw() { const s = this.playing(); if (!s || s.over) return; if (s.drawOffered) return this.end({ cls: "draw", title: "Draw", why: "Agreed." }, "drawok"); s.drawAsked = true; s.note = "Draw offered."; this.send({ k: "draw", game: this.game }); renderChess(); },
+  rematch() { const s = this.playing(); if (!s || !s.over || s.gone) return; if (s.theyWant && this.host) return this.again(); s.wantAgain = true; s.note = `Waiting for ${this.peerName} to accept the rematch.`; s.cardHidden = true; this.send({ k: "rematch", game: this.game }); renderChess(); },
+  again() { this.game++; this.hostColor = this.hostColor === "w" ? "b" : "w"; this.begin(this.hostColor); this.send(this.startMsg()); },
+};
+const cpWinFx = () => { Snd.win(); confetti(); addXP(40, "chess"); Mascot.react("ch_win", true); };
+document.addEventListener("click", (e) => {
+  const t = e.target.closest && e.target.closest("button"); if (!t) return;
+  if (t.dataset.netclock != null) { const p = prof(); p.chessClock = +t.dataset.netclock; saveProf(); Snd.tick(); document.querySelectorAll("[data-netclock]").forEach((b) => b.setAttribute("aria-pressed", b === t)); return; }
+  if (t.dataset.net === "make") ChessNet.make(); else if (t.dataset.net === "join") ChessNet.join();
+});
+{ const close0 = Net.close; Net.close = function () { ChessNet.close(); return close0.apply(this, arguments); }; }
+addEventListener("hashchange", () => ChessNet.close());
+addEventListener("pagehide", () => ChessNet.close());
 
 /* ================= "Where did they finish?" (football and basketball) and "Who did it" (football), from ballknowledge.
    Real final tables and match records only (window.HISTORY, pipelines/bk_history.py). Solo and one-device play. ================= */

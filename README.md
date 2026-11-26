@@ -125,3 +125,9 @@ is solo only); no two-device mode for these two. There are no basketball match r
 
 Look, sidekick (per category), outfit and text size are rows of cards to swipe, tap or step with the arrows
 (`site/settings_swipe.js`). Not tried with a finger on a real phone.
+
+## Chess on two devices (26 November)
+
+"Play chess" has a two-device mode (`site/chess_online.js`): a four-letter room on the same public relays as the other
+online games, the host picks the clock, with resign, draw offers, rematch and review. Each browser checks received moves
+against the rules and calls its own flag. Tested with two tabs on one computer, not across two networks or real phones.

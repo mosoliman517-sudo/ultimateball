@@ -13,11 +13,11 @@ const Lab = {
 addEventListener("message", (e) => { if (e.origin === location.origin && e.data && e.data.ub === "labclose") Lab.close(); });
 addEventListener("hashchange", () => Lab.close());
 
-const cpGameFor = (s) => ({ sans: s.c.history(), color: s.mode === "solo" ? s.you : "w", names: s.mode === "solo" ? (s.you === "w" ? ["You", cpOpp(s.bot).name] : [cpOpp(s.bot).name, "You"]) : NAMES().slice(0, 2) });
+const cpGameFor = (s) => ({ sans: s.c.history(), color: s.mode !== "duo" ? s.you : "w", names: s.mode !== "duo" ? ((o) => (s.you === "w" ? ["You", o] : [o, "You"]))(s.mode === "solo" ? cpOpp(s.bot).name : s.oppName) : NAMES().slice(0, 2) });
 
 /* grade your own moves once, when a game against the computer ends */
 function cpGrade(s) {
-  if (s.grading || s.mode !== "solo" || !s.c.history().length) return; s.grading = true;
+  if (s.grading || s.mode === "duo" || !s.c.history().length) return; s.grading = true;
   const done = (r) => { s.stats = r || { n: {}, moves: 0 }; const box = CP.s === s && $(".ectiles"); if (box) { box.innerHTML = cpTiles(s); const note = $(".ecnote"); if (note) note.textContent = cpNote(s); } };
   BKBots.grade(new Chess().fen(), s.c.history({ verbose: true }), s.you, () => CP.s === s).then(done, () => done(null));
 }
@@ -27,16 +27,16 @@ const cpNote = (s) => (s.stats && s.stats.moves ? `A quick look at your ${s.stat
 /* the card over the board; once closed, the buttons it held sit under the board */
 function cpOverHTML(s) {
   const o = s.over; if (!o || s.cardHidden) return "";
-  const solo = s.mode === "solo", moved = s.c.history().length > 0, mine = solo && s.c.history({ verbose: true }).some((m) => m.color === s.you);
+  const solo = s.mode === "solo", moved = s.c.history().length > 0, mine = s.mode !== "duo" && s.c.history({ verbose: true }).some((m) => m.color === s.you);
   if (mine) cpGrade(s);
   return `<div class="ecwrap ${o.cls}"><div class="eccard" role="dialog" aria-label="Game over"><button type="button" class="ecx" data-ec="x" aria-label="Close and look at the board">×</button>
     <h3>${esc(o.title)}</h3><p class="ecwhy">${esc(o.why)}</p>${mine ? `<div class="ectiles">${cpTiles(s)}</div><p class="ecnote">${cpNote(s)}</p>` : ""}
     ${moved ? `<button type="button" class="btn ecreview" id="cpReview">★ Game review</button>` : ""}
-    <div class="ecrow">${solo ? `<button class="btn ghost" id="cpChange" type="button">New game</button>` : ""}<button class="btn ghost" id="cpAgain" type="button">${solo ? "Rematch" : "Play again"}</button></div></div></div>`;
+    <div class="ecrow">${solo ? `<button class="btn ghost" id="cpChange" type="button">New game</button>` : ""}${s.gone ? "" : `<button class="btn ghost" id="cpAgain" type="button">${s.mode !== "duo" ? "Rematch" : "Play again"}</button>`}</div></div></div>`;
 }
 function cpAfterHTML(s) {
   if (!s.over || !s.cardHidden) return "";
-  return `<div class="row ecafter"><button type="button" class="btn" id="cpReview" ${s.c.history().length ? "" : "disabled"}>★ Game review</button><button class="btn ghost" id="cpAgain" type="button">${s.mode === "solo" ? "Rematch" : "Play again"}</button></div>`;
+  return `<div class="row ecafter"><button type="button" class="btn" id="cpReview" ${s.c.history().length ? "" : "disabled"}>★ Game review</button>${s.gone ? "" : `<button class="btn ghost" id="cpAgain" type="button">${s.mode !== "duo" ? "Rematch" : "Play again"}</button>`}</div>`;
 }
 
 document.addEventListener("click", (e) => {
