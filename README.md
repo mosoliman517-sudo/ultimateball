@@ -54,7 +54,7 @@ Younger groups only (debut 2015 on, plus BTS by request); groups from 2020 on we
 - **Redemption round** (`site/redo.js`): solo quiz questions you miss come back, 1, 3, 7 and 16 days apart as you get them right, then retire.
 - **Daily missions, combo effects** (`site/missions.js`, `site/gamefx.js`), from ballknowledge.
 - **Outfits and guided tour** (`site/fits_tour.js`); **light/dark, share card, comeback calendar** (`site/extras.js`).
-- **Chess training** (`site/chess_train.js`): puzzles and puzzle rush (Lichess puzzles, CC0; `pipelines/chess_puzzles.py`), endgame trainer, game review with Stockfish.
+- **Chess training** (`site/chess_train.js`): puzzles and puzzle rush (Lichess puzzles, CC0; `pipelines/chess_puzzles.py`), endgame trainer (game review is in the chess room, below).
 - **Ranked seasons, player links, watching live** (`site/online_extras.js`): shared boards and links need `db/003_seasons_profiles.sql` run once.
 - **Sidekick voices** (`site/voice.js`, `pipelines/make_voices.py`): recorded clips in `docs/voice/`, one Kokoro voice per sidekick. Lines ballknowledge already recorded are copied (some are its expressive Chatterbox takes). Extra lines are in `site/more_lines.js`. After changing any line, run `~/Desktop/football-prediction-model/.venv-tts/bin/python pipelines/make_voices.py` and commit `docs/voice/`.
 
@@ -103,3 +103,14 @@ loses, or draws if the other side has too little left to mate. Undo does not giv
 
 Bots take their time (`CPTEMPO` in `site/chessplay.js`, 1 to 4.5 s; longer in sharp positions, less when their clock is low). The screen is patched in place (`cpPaint`), never rebuilt, and the board is sized so both players stay on screen. Pieces can be dragged or
 tapped; promotion asks for the piece; Resign, Opponent and Back ask for a second tap in a running game.
+
+## Chess room and end-of-game card (26 November)
+
+A finished game against the computer shows ballknowledge's summary card (your moves counted by a quick Stockfish pass,
+then Game review, New game, Rematch).
+
+`docs/lab/` is the chess room: ballknowledge's own game review (with import from Lichess, chess.com or PGN), six position
+games and the World Championship hub, taken from its public build by `python3 pipelines/chess_lab.py`. It opens over the
+current screen (`site/chess_card.js`). `site/lab/` holds the front door and styles added on top. ballknowledge's database
+settings are removed, so nothing there uses its accounts or boards; scores are kept in the browser. Re-run after
+ballknowledge rebuilds its chess page.

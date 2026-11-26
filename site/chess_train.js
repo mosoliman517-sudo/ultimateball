@@ -1,4 +1,4 @@
-/* ================= chess training: puzzles, puzzle rush, endgame trainer and game review =================
+/* ================= chess training: puzzles, puzzle rush and the endgame trainer (game review is in the chess room, site/chess_card.js) =================
    Puzzles: Lichess puzzle database (CC0). Endgame positions follow ballknowledge's trainer. Engine: the same Stockfish as Play chess. */
 const PZ = window.PUZZLES || [];
 const ENDGAMES = [
@@ -18,7 +18,7 @@ const Train = {
   stop() { clearInterval(this.clock); this.s = null; },
   strip() {
     const d = this.data();
-    return `<div class="trstrip">${[["puzzles", "Puzzles", `Your puzzle rating: ${d.r} · ${d.solved} solved`], ["rush", "Puzzle rush", `3 minutes, 3 strikes · best ${d.rush}`], ["endgames", "Endgame trainer", `${Object.keys(d.eg).length}/${ENDGAMES.length} done`]].map(([k, n, t]) => `<button type="button" class="contbar caldoor chessdoor" data-train="${k}"><div><span class="dk">Training</span><b>${n}</b><span class="fine">${t}</span></div></button>`).join("")}</div>`;
+    return `<div class="trstrip">${[["puzzles", "Puzzles", `Your puzzle rating: ${d.r} · ${d.solved} solved`], ["rush", "Puzzle rush", `3 minutes, 3 strikes · best ${d.rush}`], ["endgames", "Endgame trainer", `${Object.keys(d.eg).length}/${ENDGAMES.length} done`]].map(([k, n, t]) => `<button type="button" class="contbar caldoor chessdoor" data-train="${k}"><div><span class="dk">Training</span><b>${n}</b><span class="fine">${t}</span></div></button>`).join("")}${[["review", "Game review", "Your Lichess or chess.com games, or any PGN"], ["positions", "Position games", "Six ways to read a real position"], ["wcc", "World Championship", "Gukesh against Sindarov, live"]].map(([k, n, t]) => `<button type="button" class="contbar caldoor chessdoor" data-lab="${k}"><div><span class="dk">Chess room</span><b>${n}</b><span class="fine">${t}</span></div></button>`).join("")}</div>`;
   },
   frame(title, body) { const s = this.s; if (s && s.last && s.c) queueMicrotask(() => { if (this.s === s) cpAnimate(s); }); cpPaint(`<div class="card cpwrap trwrap" data-view="train:${esc(title)}"><div class="row" style="margin-bottom:12px;gap:10px"><button class="btn ghost" type="button" data-train="back">← Back</button><h2 style="font-size:24px">${title}</h2></div>${body}</div>`); },
   open(kind) {
@@ -125,58 +125,12 @@ const Train = {
   },
 };
 
-/* ================= game review: Stockfish goes through your last game and grades every move ================= */
-const Review = {
-  s: null,
-  GRADE: { best: ["Best", "#5ee6a8", "rv_best"], good: ["Good", "#9ec5ff", "rv_good"], inaccuracy: ["Inaccuracy", "#ffd23f", "rv_inaccuracy"], mistake: ["Mistake", "#ff9d3d", "rv_mistake"], blunder: ["Blunder", "#ff5d5d", "rv_blunder"] },
-  async score(c) {   // centipawns for the side to move
-    if (c.in_checkmate()) return { cp: -10000, best: null };
-    if (c.in_draw() || c.in_stalemate()) return { cp: 0, best: null };
-    Engine.info = ""; const best = await Engine.best(c.fen(), 20, 350), m = /score (cp|mate) (-?\d+)/.exec(Engine.info || "");
-    return { cp: !m ? null : m[1] === "mate" ? Math.sign(+m[2] || -1) * (10000 - Math.abs(+m[2])) : +m[2], best };
-  },
-  win: (cp) => 1 / (1 + Math.pow(10, -cp / 400)),
-  async start(game) {
-    const moves = game.c.history({ verbose: true }); if (!moves.length) return;
-    const you = game.mode === "solo" ? game.you : null, me = (this.s = { moves, rows: [], at: moves.length - 1, you, done: false });
-    if (!(await Engine.boot())) return Train.frame("Game review", "<p>The engine could not start on this device.</p>");
-    const c = new Chess(); let before = await this.score(c);
-    for (let i = 0; i < moves.length; i++) {
-      if (this.s !== me) return; if (!$(".trwrap") && i) return;   // left the screen
-      if (i % 2 === 0) Train.frame("Game review", `<p class="sub">Stockfish is going through the game… move ${i + 1} of ${moves.length}</p><div class="meter"><i style="width:${(100 * i) / moves.length}%"></i></div>`);
-      const m = moves[i], uci = m.from + m.to + (m.promotion || ""); c.move({ from: m.from, to: m.to, promotion: m.promotion }); const after = await this.score(c);
-      const known = before.cp != null && after.cp != null, drop = known ? Math.max(0, this.win(before.cp) - this.win(-after.cp)) : 0;
-      const g = before.best === uci || c.in_checkmate() ? "best" : drop > 0.3 ? "blunder" : drop > 0.2 ? "mistake" : drop > 0.1 ? "inaccuracy" : "good";
-      me.rows.push({ g, drop: g === "best" ? 0 : drop, fen: c.fen(), san: m.san, from: m.from, to: m.to, color: m.color, better: before.best });
-      before = after;
-    }
-    me.done = true; me.at = Math.max(0, me.rows.findIndex((r) => r.g === "blunder" && (!you || r.color === you))); this.paint(true);
-  },
-  accuracy(col) { const r = this.s.rows.filter((x) => x.color === col); return r.length ? Math.round((100 * r.reduce((a, x) => a + Math.exp(-4 * x.drop), 0)) / r.length) : 100; },
-  paint(speak) {
-    const s = this.s, r = s.rows[s.at], c = new Chess(r.fen), view = { c, mode: "solo", you: s.you || "w", over: true, think: false, sel: null, targets: [], last: [r.from, r.to] }, G = this.GRADE[r.g];
-    const coach = ["vera", "bea", "pip"][s.at % 3], pool = (MASCOT_LINES[coach] || {})[G[2]] || [], line = pool.length ? pool[(s.at * 7) % pool.length] : "";
-    const count = (col) => Object.entries(this.GRADE).map(([k, v]) => `<span style="color:${v[1]}">${s.rows.filter((x) => x.color === col && x.g === k).length} ${v[0].toLowerCase()}</span>`).join(" · ");
-    Train.frame("Game review", `<div class="trhead"><span>White accuracy <b class="num">${this.accuracy("w")}%</b></span><span>Black accuracy <b class="num">${this.accuracy("b")}%</b></span></div>
-      <div class="cpboard">${chessBoard(view)}</div>
-      <p class="trmsg"><b>${Math.floor(s.at / 2) + 1}${r.color === "w" ? "." : "…"} ${esc(r.san)}</b> <span style="color:${G[1]};font-weight:800">${G[0]}</span>${r.g !== "best" && r.better ? ` <span class="fine">Stockfish preferred ${r.better.slice(0, 2)}–${r.better.slice(2, 4)}</span>` : ""}</p>
-      <div class="trcoach"><span>${MASCOT_SVG[coach](r.g === "best" ? "happy" : r.g === "good" ? "calm" : "sad")}</span><p><b>${MASCOTS[coach].name}</b>${esc(line)}</p></div>
-      <div class="row" style="gap:8px;justify-content:center"><button type="button" class="btn ghost" data-rv="prev">← Previous</button><button type="button" class="btn" data-rv="next">Next →</button></div>
-      <div class="trmoves">${s.rows.map((x, i) => `<button type="button" data-rvat="${i}" class="${i === s.at ? "on" : ""}" style="--g:${this.GRADE[x.g][1]}">${i % 2 === 0 ? `${i / 2 + 1}. ` : ""}${esc(x.san)}</button>`).join("")}</div>
-      <p class="fine">White: ${count("w")}<br>Black: ${count("b")}</p>`);
-    if (speak && line) { try { if ((localStorage.getItem("gp_voice") || "1") === "1") Voice.say(coach, line); } catch (e) { /* no audio */ } }
-  },
-  go(i) { const s = this.s; if (!s || !s.done) return; s.at = Math.max(0, Math.min(s.rows.length - 1, i)); this.paint(true); },
-};
-
 document.addEventListener("click", (e) => {
   const sq = e.target.closest("[data-csq]"); if (sq && Train.s && $(".trwrap")) { Train.click(sq.dataset.csq); return; }
   const t = e.target.closest("button"); if (!t) return;
-  if (t.dataset.train) { Voice.stop(); if (t.dataset.train === "back") { Train.stop(); Review.s = null; document.body.classList.remove("ingame"); S.game = null; renderHub(); return; } Review.s = null; Train.open(t.dataset.train); return; }
+  if (t.dataset.train) { Voice.stop(); if (t.dataset.train === "back") { Train.stop(); document.body.classList.remove("ingame"); S.game = null; renderHub(); return; } Train.open(t.dataset.train); return; }
   if (t.dataset.eg) { Train.eg(t.dataset.eg); return; }
   if (t.dataset.pz) { if (t.dataset.pz === "next") Train.nextPuzzle(); else if (t.dataset.pz === "hint") Train.hint(); else Train.solve(); return; }
-  if (t.id === "cpReview" && CP.s) { const g = CP.s; CP.s = null; Train.stop(); Review.start(g); return; }
-  if (t.dataset.rv) { Review.go(Review.s.at + (t.dataset.rv === "next" ? 1 : -1)); return; }
-  if (t.dataset.rvat) { Review.go(+t.dataset.rvat); return; }
+  if (t.id === "cpReview" && CP.s) { Lab.open("game", cpGameFor(CP.s)); return; }
 });
-addEventListener("hashchange", () => { Train.stop(); Review.s = null; });
+addEventListener("hashchange", () => { Train.stop(); });

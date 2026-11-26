@@ -1402,6 +1402,21 @@ body:has(.cpwrap) #mascot{display:none}   /* nothing floats over a chess board *
 @keyframes cpdots{0%,80%,100%{opacity:.25}40%{opacity:1}}
 @media (max-width:520px){#room > .cpwrap{padding:6px 8px 12px}.cpwrap .cpsay .cpav{width:40px;height:40px}.cpwrap .cpsay p{font-size:12.5px}}
 
+/* the end-of-game card and the chess room overlay */
+.cpwrap .cpboard{position:relative}
+.ecwrap{position:absolute;inset:0;z-index:7;display:flex;overflow-y:auto;padding:8px;background:rgba(8,12,10,.55);border-radius:6px}
+.eccard{position:relative;margin:auto;width:min(100%,340px);display:flex;flex-direction:column;gap:7px;padding:12px;border-radius:14px;background:#26251f;color:#fff;box-shadow:0 22px 60px -18px #000;text-align:center}
+.eccard h3{margin:0 22px;font:800 clamp(19px,5vw,25px)/1.1 Fraunces,serif;color:#fff}.ecwhy{margin:0;color:#c8c6bd;font-weight:700;font-size:13px}
+.ecx{position:absolute;top:4px;right:6px;border:0;background:none;color:#c8c6bd;font:700 24px/1 inherit;cursor:pointer;padding:4px 6px}
+.ectiles{display:flex;gap:8px;justify-content:center;min-height:46px;align-items:stretch}.ectile{flex:1;min-width:0;border-radius:10px;background:#34332c;padding:6px 4px}.ectile b{display:flex;gap:5px;align-items:center;justify-content:center;font-size:17px}.ectile i{font:800 10px/17px Inter,sans-serif;width:17px;height:17px;border-radius:50%;color:#fff;background:var(--k)}.ectile small{display:block;font-weight:700;font-size:12px;color:var(--k)}
+.ectile.brilliant{--k:#1baca6}.ectile.great{--k:#5c8bb0}.ectile.best{--k:#81b64c}.ectile.excellent{--k:#96bc4b}.ectile.good{--k:#97af8b}.ectile.inaccuracy{--k:#f0c15c}.ectile.mistake{--k:#e6912c}.ectile.blunder{--k:#e0453f}
+.ecwait,.ecnote{margin:0;color:#a9a69c;font-size:12px;align-self:center}.ecnote:empty{display:none}
+.eccard .ecreview{width:100%;justify-content:center;background:#81b64c;color:#fff;font-size:17px;padding:10px;border:0}.ecrow{display:flex;gap:8px}.ecrow .btn{flex:1;justify-content:center;color:#fff;border-color:#55534a}
+.ecafter{justify-content:center;gap:8px;margin-top:8px}
+@media (max-width:520px){.eccard{padding:9px;gap:5px}.eccard .ecreview{font-size:15px;padding:8px}.ecnote{display:none}}
+.labframe{position:fixed;inset:0;width:100%;height:100%;height:100dvh;border:0;z-index:1000;background:#0e1411}
+body.labopen{overflow:hidden}
+
 </style>
 </head>
 <body>
@@ -4398,14 +4413,14 @@ let SF1 = null; const Sf = { analyse: (fen, o) => (SF1 = SF1 || mkSf()).analyse(
 const oppFace = (id, mood = "calm") => (id === "council" ? councilLogo() : id === "pip" ? pipSVG(mood) : COACH_SVG[id](mood));
 const councilLogo = () => `<span class="council">${["bea", "vera", "pip"].map((id, k) => `<span class="cf cf${k}">${oppFace(id, "happy")}</span>`).join("")}</span>`;
 COACH_SVG.council = () => councilLogo();
-const BOT_ELO = { pip: 1080, arteta: 1735, berserker: 1750, bea: 1835, trader: 1980, escaped: 1990, vera: 2110, council: 2065 };   /* measured with botCalib(id, 150) on 2026-11-25; Lichess scale */
+const BOT_ELO = { pip: 1080, arteta: 2515, berserker: 1750, bea: 1835, trader: 1980, escaped: 2070, vera: 2110, council: 2065 };   /* arteta and escaped: 40 games each against Stockfish limited to a rating, performance rounded to 5 (tests/bot_arena.js, 2026-11-26); the rest: botCalib(id, 150), 2026-11-25, Lichess scale */
 const BOTS = [
   { id: "pip", name: "Pip", tag: "The Beginner", kind: "small", small: 1, style: ["Grabs loose pieces", "Looks no moves ahead"], desc: "A pawn who only just learned how the pieces move. He looks no moves ahead and grabs whatever is free." },
-  { id: "arteta", name: "Mikel Arteta", tag: "The Wall", kind: "sf", cap: 14, depth: 7, ms: 300, multipv: 8, style: ["Extremely passive", "Never initiates"], desc: "Plays the quietest move that is still safe. No captures unless forced, no checks, pawns stay home, trades refused. He is waiting for you to overreach." },
+  { id: "arteta", name: "Mikel Arteta", tag: "The Wall", kind: "sf", style: ["Defends, swaps pieces off", "Squeezes the endgame"], desc: "Solid openings, king tucked away, everyone close to home. He swaps your attackers off, refuses to give you anything and waits to win a small edge in the ending." },
   { id: "berserker", name: "The Berserker", tag: "The Attacker", kind: "sf", cap: 12, depth: 8, ms: 300, multipv: 8, style: ["Checks and captures", "Pawn storms at your king"], desc: "Throws everything at your king: checks first, then captures, then pawns. His own king can wait." },
   { id: "bea", name: "Bishop Bea", tag: "The Positional Player", kind: "sf", cap: 16, depth: 7, ms: 300, multipv: 6, style: ["Long diagonals", "Fianchettos, castles early"], desc: "Develops calmly, loves her bishops on the long diagonals, castles early and rarely hurries." },
   { id: "trader", name: "The Trader", tag: "The Simplifier", kind: "sf", cap: 14, depth: 8, ms: 300, multipv: 8, style: ["Trades everything", "Queens off first"], desc: "Offers and accepts a trade at every chance, queens first, and marches into the endgame." },
-  { id: "escaped", name: "The Escaped", tag: "The Sacrificer", kind: "sf", cap: 10, depth: 9, ms: 400, multipv: 6, style: ["Sacrifices whenever he can", "Never on the spot losing"], desc: "Slipped out of the clinic with one idea: give things away. Any sacrifice that does not simply lose, he plays. No sacrifice available? Then he plays like a strong club player." },
+  { id: "escaped", name: "The Escaped", tag: "The Sacrificer", kind: "sf", style: ["Attacks your king", "Sacrifices to get there"], desc: "Plays like a madman who studied Tal: gambit openings, pawns and pieces hurled at your king, lines ripped open. Most of the sacrifices are sound; some you have to prove wrong over the board." },
   { id: "council", name: "The Council", tag: "Pip, Bea and Vera together", kind: "council", style: ["Three coaches vote", "Thinks the longest"], desc: "Pip, Bea and Vera each rank the engine's three best moves their own way and the points are added up. Never a bad move, and he thinks the longest." },
   { id: "vera", name: "Queen Vera", tag: "The Ruthless", kind: "sf", cap: 2, depth: 14, ms: 1000, multipv: 2, style: ["Accurate and cold", "No tricks"], desc: "A retired queen who does not do friendly games. No style, just accurate chess." },
 ];
@@ -4428,11 +4443,9 @@ function botSac(c, m) {
 const botAdv = (m) => { const f = +m.from[1], t = +m.to[1]; return m.color === "w" ? t - f : f - t; };   /* ranks moved forward */
 function botScore(id, c, m, ctx) {
   const adv = botAdv(m), cap = !!m.captured, chk = /\+|#/.test(m.san), q = m.piece, ownMat = ctx.mat;
-  if (id === "arteta") return -(cap ? 4 + (BV[m.captured] >= BV[q] ? 2 : 0) : 0) - (chk ? 3 : 0) - (q === "p" ? Math.max(0, +(m.color === "w" ? m.to[1] - 2 : 7 - m.to[1]) - 1) * 1.2 : 0) - Math.max(0, adv) * 0.6 + Math.max(0, -adv) * 1.4 + (m.flags.includes("k") || m.flags.includes("q") ? 3 : 0) + (q === "k" ? -2.5 : 0) - ctx.sac * 5 - (cap && ctx.exch ? 2 : 0) + ((m.color === "w" ? +m.from[1] === 1 : +m.from[1] === 8) && q !== "p" && q !== "k" ? 0.8 : 0);
   if (id === "bea") { const longDiag = q === "b" && /^[a-h][1-8]$/.test(m.to) && ((m.to.charCodeAt(0) - 97) === (+m.to[1] - 1) || (m.to.charCodeAt(0) - 97) + (+m.to[1] - 1) === 7); const fian = q === "b" && /^(b2|g2|b7|g7)$/.test(m.to); const dev = q === "n" || q === "b" ? 1 : 0; return (longDiag ? 3 : 0) + (fian ? 3 : 0) + (m.flags.includes("k") || m.flags.includes("q") ? 3.5 : 0) + (q === "b" ? 1.2 : 0) + dev * (ctx.ply < 24 ? 1.5 : 0) + (q === "p" && /^[bg][23]$|^[bg][67]$/.test(m.to) ? 1.5 : 0) - (q === "q" && ctx.ply < 20 ? 3 : 0) - ctx.sac * 2; }
   if (id === "trader") return (cap && BV[m.captured] >= BV[q] - 0.1 ? 4 + BV[m.captured] * 0.5 : 0) + (cap && m.captured === "q" ? 4 : 0) + (q === "q" && ctx.qTrade.has(m.to) ? 6 : 0) + ctx.trade.has(m.san) * 6 - (q === "p" && !cap ? 0.4 : 0) - ctx.sac * 5;
   if (id === "berserker") { const k = ctx.oppK; const near = k ? Math.max(0, 7 - Math.max(Math.abs(m.to.charCodeAt(0) - k.charCodeAt(0)), Math.abs(+m.to[1] - +k[1]))) : 0; return (chk ? 6 : 0) + (cap ? 3 + BV[m.captured] * 0.4 : 0) + (q === "p" && near >= 3 ? 2.5 : 0) + near * 0.5 + Math.max(0, adv) * 0.8 - (q === "k" ? 3 : 0) - (m.flags.includes("k") || m.flags.includes("q") ? 0 : 0); }
-  if (id === "escaped") return ctx.sac * 10 + (cap ? 0 : 0);
   return 0;
 }
 function botKingSq(c, color) { const b = c.board(); for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++) { const p = b[r][f]; if (p && p.type === "k" && p.color === color) return "abcdefgh"[f] + (8 - r); } return null; }
@@ -4448,18 +4461,7 @@ async function botMove(level, fen) {
   /* the character's candidates: moves the engine still rates within the character's own tolerance of the best move */
   let cands = lines.map((l, k) => ({ uci: l.pv[0], loss: best - win[k] })).filter((x) => x.loss <= B.cap);
   const ctx = { sac: 0, mat: 0, ply, oppK: botKingSq(c, me === "w" ? "b" : "w"), exch: false, trade: new Set(), qTrade: new Set() };
-  if (B.id === "escaped") {
-    /* every legal move that gives material away, whether or not the engine ranks it: the engine is asked only about those */
-    const sacs = legal.map((m) => ({ m, s: botSac(c, m) })).filter((x) => x.s >= 1);
-    if (sacs.length) {
-      const sl = await Sf.analyse(fen, { skill: 20, depth: 9, ms: 450, multipv: Math.min(6, sacs.length), moves: sacs.map((x) => x.m.from + x.m.to + (x.m.promotion || "")) }).catch(() => []);
-      const ok = sl.map((l) => { const m = sacs.find((x) => x.m.from + x.m.to + (x.m.promotion || "") === l.pv[0]); return m ? { m: m.m, s: m.s, loss: best - winOf(l) } : null; }).filter((x) => x && x.loss <= B.cap);
-      if (ok.length) { ok.sort((a, b) => b.s - a.s || a.loss - b.loss); const pick = ok[0].m; return { from: pick.from, to: pick.to, promotion: pick.promotion }; }
-    }
-  }
-  if (B.id === "escaped") cands = cands.filter((x) => x.loss <= 3);   /* no sacrifice to play: an ordinary strong move */
   if (B.id === "trader") { const t = botTradeSet(c); ctx.trade = t.out; }
-  if (B.id === "arteta") ctx.exch = true;
   const scored = cands.map((x) => { const m = legal.find((l) => l.from + l.to + (l.promotion || "") === x.uci); if (!m) return null; ctx.sac = botSac(c, m) > 0 ? botSac(c, m) : 0; return { m, sc: botScore(B.id, c, m, ctx) - x.loss * 0.15 + Math.random() * 0.4 }; }).filter(Boolean);
   const pick = scored.length ? scored.sort((a, b) => b.sc - a.sc)[0].m : legal.find((l) => l.from + l.to + (l.promotion || "") === lines[0].pv[0]) || legal[0];
   return { from: pick.from, to: pick.to, promotion: pick.promotion };
@@ -4665,8 +4667,41 @@ function botFresh(botId, kind, pool) {
 }
 
 
+const ENDC = (() => {
+  const KINDS = [["brilliant", "Brilliant", "!!"], ["great", "Great", "!"], ["best", "Best", "★"], ["excellent", "Excellent", "✓"], ["good", "Good", "✓"], ["inaccuracy", "Inaccuracy", "?!"], ["mistake", "Mistake", "?"], ["blunder", "Blunder", "??"]];
+  let engine = null;
+  const cache = new Map();
+  const look = (fen) => {
+    if (!cache.has(fen)) { engine = engine || mkSf(); cache.set(fen, engine.analyse(fen, { depth: 12, ms: 500, multipv: 2 })); }
+    return cache.get(fen);
+  };
+  /* grade your own moves; me = "w" or "b" */
+  async function grade(startFen, H, me, alive) {
+    const c = new Chess(); c.load(startFen); const n = {}; KINDS.forEach(([k]) => { n[k] = 0; }); let moves = 0;
+    for (const x of H) {
+      const before = c.fen(), m = c.move({ from: x.from, to: x.to, promotion: x.promotion }); if (!m) break;
+      if (m.color !== me) continue; if (!alive()) return null;
+      const a = await look(before); if (!a.length) continue; moves++;
+      const win = winOf(a[0]), second = a[1] ? winOf(a[1]) : win, uci = m.from + m.to + (m.promotion || "");
+      let after; if (c.game_over()) after = c.in_checkmate() ? 100 : 50; else { const b = await look(c.fen()); after = b.length ? 100 - winOf(b[0]) : win; }
+      const best = a[0].pv[0] === uci, loss = best ? 0 : Math.max(0, win - after), off = TALK.offered(before, c.fen(), m);
+      const k = off && (VAL_(m.captured) < VAL_(off.piece)) && loss <= 2 && after >= 45 && win < 95 ? "brilliant"
+        : best && win - second >= 25 && !m.captured ? "great" : best ? "best" : loss < 2 ? "excellent" : loss < 5 ? "good" : loss < 10 ? "inaccuracy" : loss < 20 ? "mistake" : "blunder";
+      n[k]++;
+    }
+    return { n, moves };
+  }
+  const VAL_ = (p) => ({ p: 1, n: 3, b: 3, r: 5, q: 9 })[p] || 0;
+  /* the three tiles shown: your finest first, and if the game went badly, the worst thing in it */
+  function tiles(n) {
+    const good = KINDS.slice(0, 5).filter(([k]) => n[k]), bad = KINDS.slice(5).reverse().filter(([k]) => n[k]);
+    const pick = [...good.slice(0, bad.length ? 2 : 3), ...bad.slice(0, 1)];
+    return (pick.length ? pick : KINDS.slice(2, 5)).slice(0, 3).map(([k, name, mark]) => `<div class="ectile ${k}"><b><i>${mark}</i>${n[k]}</b><small>${name}</small></div>`).join("");
+  }
+  return { grade, tiles };
+})();
 const smallMove = (fen) => { const m = engineMove(new Chess(fen), 1); return { from: m.from, to: m.to, promotion: m.promotion }; };
-return { BOTS, ELO: BOT_ELO, face: oppFace, move: botMove, smallMove, LINES: BOT_LINES, VOICE: BOT_VOICE, TALK, ALSO: TALK_ALSO, fresh: botFresh, BV };
+return { BOTS, ELO: BOT_ELO, face: oppFace, move: botMove, smallMove, LINES: BOT_LINES, VOICE: BOT_VOICE, TALK, ALSO: TALK_ALSO, fresh: botFresh, BV, grade: ENDC.grade, tiles: ENDC.tiles };
 })();
 
 /* ================= Play chess: against the characters, Stockfish, or a friend on the same device =================
@@ -4868,9 +4903,10 @@ function renderChess() {
   const top = solo ? (s.you === "w" ? "b" : "w") : "b", bottom = top === "w" ? "b" : "w";
   const status = s.over ? "" : s.think ? `${esc(opp.name)} is thinking…` : c.in_check() ? "Check!" : solo ? (c.turn() === s.you ? "Your move." : "") : `${esc(who(c.turn()))} to move.`;
   const moves = c.history(); let ml = ""; for (let i = 0; i < moves.length; i += 2) ml += `<span><small>${i / 2 + 1}.</small> ${esc(moves[i])} ${moves[i + 1] ? esc(moves[i + 1]) : ""}</span>`;
-  const over = s.over ? `<div class="cpover ${s.over.cls}"><h3>${esc(s.over.title)}</h3><p class="fine">${esc(s.over.why)}</p><div class="row" style="justify-content:center;gap:8px"><button class="btn" id="cpAgain" type="button">Play again</button>${solo ? `<button class="btn ghost" id="cpChange" type="button">Change opponent</button>` : ""}<button class="btn ghost" id="cpReview" type="button">Review game</button></div></div>` : "";
+  const over = cpOverHTML(s);
   cpPaint(`<div class="card cpwrap ${cpTalks(s) ? "vsbot" : ""}" data-view="game${s.id}">${gamesBar(solo ? `Play chess · ${esc(opp.name)}` : "Play chess · two players")}${cpTalks(s) ? `<div class="cpsay" id="cpSay" role="status">${cpSayHTML(s)}</div>` : ""}${bar(top)}<div class="cpboard">${chessBoard(s)}${over}${s.promo ? `<div class="cppromo" role="dialog" aria-label="Choose a piece">${["q", "r", "b", "n"].map((k) => `<button type="button" data-promo="${k}" aria-label="${{ q: "Queen", r: "Rook", b: "Bishop", n: "Knight" }[k]}"><i class="pcz pc-${c.turn()}${k}"></i></button>`).join("")}<button type="button" class="btn ghost" data-promo="x">Cancel</button></div>` : ""}</div>${bar(bottom)}
     <div class="row" style="justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:8px"><span class="fine">${s.note ? esc(s.note) + " " : ""}${status}</span><span class="row" style="gap:6px">${solo && !s.over ? `<button class="btn ghost" id="cpChange" type="button">Opponent</button>` : ""}<button class="btn ghost" id="cpUndo" type="button" ${moves.length < (solo && s.you === "b" ? 2 : 1) || s.think || s.over ? "disabled" : ""}>Undo</button>${solo ? "" : `<button class="btn ghost" id="cpDraw" type="button" ${s.over ? "disabled" : ""}>Draw</button>`}<button class="btn ghost" id="cpResign" type="button" ${s.over ? "disabled" : ""}>Resign</button></span></div>
+    ${cpAfterHTML(s)}
     <div class="cpmoves">${ml || `<span class="fine">${solo ? `You have ${s.you === "w" ? "White" : "Black"}. Tap a piece, then a square.` : "White starts. Tap a piece, then a square. Pass the device after each move."}</span>`}</div><p class="fine" style="margin-top:8px">Engine: Stockfish (free software, GPL), running in your browser. Pieces: cburnett set (CC BY-SA 3.0).</p></div>`);
   const ml2 = $(".cpmoves"); if (ml2) ml2.scrollLeft = ml2.scrollWidth;
   cpAnimate(s);
@@ -4965,6 +5001,53 @@ document.addEventListener("click", (e) => { const t = e.target.closest && e.targ
   /* the browser may follow a drag with a click of its own: ignore it */
   document.addEventListener("click", (e) => { if (e.isTrusted && performance.now() - eat < 60 && e.target.closest && e.target.closest(".cpwrap [data-csq]")) e.stopPropagation(); }, true);
 }
+
+/* ================= the end-of-game summary card (as on ballknowledge) and the door to the chess room (docs/lab/) =================
+   The card counts your moves with a quick Stockfish pass; the full Game review searches deeper, so its numbers can differ. */
+const Lab = {
+  el: null,
+  open(hash, game) {
+    this.close(); Voice.stop();
+    if (game) { try { sessionStorage.setItem("ub_review", JSON.stringify(game)); } catch (e) { /* blocked: the review asks for a game */ } }
+    const f = document.createElement("iframe"); f.className = "labframe"; f.title = "Chess room"; f.src = "lab/index.html#" + hash; f.allow = "autoplay";
+    document.body.appendChild(f); document.body.classList.add("labopen"); this.el = f; f.addEventListener("load", () => { try { f.contentWindow.focus(); } catch (e) { /* fine */ } });
+  },
+  close() { if (this.el) this.el.remove(); this.el = null; document.body.classList.remove("labopen"); },
+};
+addEventListener("message", (e) => { if (e.origin === location.origin && e.data && e.data.ub === "labclose") Lab.close(); });
+addEventListener("hashchange", () => Lab.close());
+
+const cpGameFor = (s) => ({ sans: s.c.history(), color: s.mode === "solo" ? s.you : "w", names: s.mode === "solo" ? (s.you === "w" ? ["You", cpOpp(s.bot).name] : [cpOpp(s.bot).name, "You"]) : NAMES().slice(0, 2) });
+
+/* grade your own moves once, when a game against the computer ends */
+function cpGrade(s) {
+  if (s.grading || s.mode !== "solo" || !s.c.history().length) return; s.grading = true;
+  const done = (r) => { s.stats = r || { n: {}, moves: 0 }; const box = CP.s === s && $(".ectiles"); if (box) { box.innerHTML = cpTiles(s); const note = $(".ecnote"); if (note) note.textContent = cpNote(s); } };
+  BKBots.grade(new Chess().fen(), s.c.history({ verbose: true }), s.you, () => CP.s === s).then(done, () => done(null));
+}
+const cpTiles = (s) => (!s.stats ? `<p class="ecwait">Checking your moves…</p>` : s.stats.moves ? BKBots.tiles(s.stats.n) : `<p class="ecwait">The moves could not be checked.</p>`);
+const cpNote = (s) => (s.stats && s.stats.moves ? `A quick look at your ${s.stats.moves} moves. The review checks deeper.` : "");
+
+/* the card over the board; once closed, the buttons it held sit under the board */
+function cpOverHTML(s) {
+  const o = s.over; if (!o || s.cardHidden) return "";
+  const solo = s.mode === "solo", moved = s.c.history().length > 0, mine = solo && s.c.history({ verbose: true }).some((m) => m.color === s.you);
+  if (mine) cpGrade(s);
+  return `<div class="ecwrap ${o.cls}"><div class="eccard" role="dialog" aria-label="Game over"><button type="button" class="ecx" data-ec="x" aria-label="Close and look at the board">×</button>
+    <h3>${esc(o.title)}</h3><p class="ecwhy">${esc(o.why)}</p>${mine ? `<div class="ectiles">${cpTiles(s)}</div><p class="ecnote">${cpNote(s)}</p>` : ""}
+    ${moved ? `<button type="button" class="btn ecreview" id="cpReview">★ Game review</button>` : ""}
+    <div class="ecrow">${solo ? `<button class="btn ghost" id="cpChange" type="button">New game</button>` : ""}<button class="btn ghost" id="cpAgain" type="button">${solo ? "Rematch" : "Play again"}</button></div></div></div>`;
+}
+function cpAfterHTML(s) {
+  if (!s.over || !s.cardHidden) return "";
+  return `<div class="row ecafter"><button type="button" class="btn" id="cpReview" ${s.c.history().length ? "" : "disabled"}>★ Game review</button><button class="btn ghost" id="cpAgain" type="button">${s.mode === "solo" ? "Rematch" : "Play again"}</button></div>`;
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest && e.target.closest("button"); if (!t) return;
+  if (t.dataset.lab) { Lab.open(t.dataset.lab); return; }
+  if (t.dataset.ec === "x" && CP.s) { CP.s.cardHidden = true; renderChess(); }
+});
 
 /* ================= light / dark ================= */
 const Look = {
@@ -5275,7 +5358,7 @@ setTimeout(() => {
   if (!seen) { const c = document.createElement("div"); c.id = "tourChip"; c.innerHTML = `<button type="button" data-tour="1">New here? Take the tour</button><button type="button" id="tourNo" aria-label="No thanks">✕</button>`; document.body.appendChild(c); }
 }, 2600);
 
-/* ================= chess training: puzzles, puzzle rush, endgame trainer and game review =================
+/* ================= chess training: puzzles, puzzle rush and the endgame trainer (game review is in the chess room, site/chess_card.js) =================
    Puzzles: Lichess puzzle database (CC0). Endgame positions follow ballknowledge's trainer. Engine: the same Stockfish as Play chess. */
 const PZ = window.PUZZLES || [];
 const ENDGAMES = [
@@ -5295,7 +5378,7 @@ const Train = {
   stop() { clearInterval(this.clock); this.s = null; },
   strip() {
     const d = this.data();
-    return `<div class="trstrip">${[["puzzles", "Puzzles", `Your puzzle rating: ${d.r} · ${d.solved} solved`], ["rush", "Puzzle rush", `3 minutes, 3 strikes · best ${d.rush}`], ["endgames", "Endgame trainer", `${Object.keys(d.eg).length}/${ENDGAMES.length} done`]].map(([k, n, t]) => `<button type="button" class="contbar caldoor chessdoor" data-train="${k}"><div><span class="dk">Training</span><b>${n}</b><span class="fine">${t}</span></div></button>`).join("")}</div>`;
+    return `<div class="trstrip">${[["puzzles", "Puzzles", `Your puzzle rating: ${d.r} · ${d.solved} solved`], ["rush", "Puzzle rush", `3 minutes, 3 strikes · best ${d.rush}`], ["endgames", "Endgame trainer", `${Object.keys(d.eg).length}/${ENDGAMES.length} done`]].map(([k, n, t]) => `<button type="button" class="contbar caldoor chessdoor" data-train="${k}"><div><span class="dk">Training</span><b>${n}</b><span class="fine">${t}</span></div></button>`).join("")}${[["review", "Game review", "Your Lichess or chess.com games, or any PGN"], ["positions", "Position games", "Six ways to read a real position"], ["wcc", "World Championship", "Gukesh against Sindarov, live"]].map(([k, n, t]) => `<button type="button" class="contbar caldoor chessdoor" data-lab="${k}"><div><span class="dk">Chess room</span><b>${n}</b><span class="fine">${t}</span></div></button>`).join("")}</div>`;
   },
   frame(title, body) { const s = this.s; if (s && s.last && s.c) queueMicrotask(() => { if (this.s === s) cpAnimate(s); }); cpPaint(`<div class="card cpwrap trwrap" data-view="train:${esc(title)}"><div class="row" style="margin-bottom:12px;gap:10px"><button class="btn ghost" type="button" data-train="back">← Back</button><h2 style="font-size:24px">${title}</h2></div>${body}</div>`); },
   open(kind) {
@@ -5402,61 +5485,15 @@ const Train = {
   },
 };
 
-/* ================= game review: Stockfish goes through your last game and grades every move ================= */
-const Review = {
-  s: null,
-  GRADE: { best: ["Best", "#5ee6a8", "rv_best"], good: ["Good", "#9ec5ff", "rv_good"], inaccuracy: ["Inaccuracy", "#ffd23f", "rv_inaccuracy"], mistake: ["Mistake", "#ff9d3d", "rv_mistake"], blunder: ["Blunder", "#ff5d5d", "rv_blunder"] },
-  async score(c) {   // centipawns for the side to move
-    if (c.in_checkmate()) return { cp: -10000, best: null };
-    if (c.in_draw() || c.in_stalemate()) return { cp: 0, best: null };
-    Engine.info = ""; const best = await Engine.best(c.fen(), 20, 350), m = /score (cp|mate) (-?\d+)/.exec(Engine.info || "");
-    return { cp: !m ? null : m[1] === "mate" ? Math.sign(+m[2] || -1) * (10000 - Math.abs(+m[2])) : +m[2], best };
-  },
-  win: (cp) => 1 / (1 + Math.pow(10, -cp / 400)),
-  async start(game) {
-    const moves = game.c.history({ verbose: true }); if (!moves.length) return;
-    const you = game.mode === "solo" ? game.you : null, me = (this.s = { moves, rows: [], at: moves.length - 1, you, done: false });
-    if (!(await Engine.boot())) return Train.frame("Game review", "<p>The engine could not start on this device.</p>");
-    const c = new Chess(); let before = await this.score(c);
-    for (let i = 0; i < moves.length; i++) {
-      if (this.s !== me) return; if (!$(".trwrap") && i) return;   // left the screen
-      if (i % 2 === 0) Train.frame("Game review", `<p class="sub">Stockfish is going through the game… move ${i + 1} of ${moves.length}</p><div class="meter"><i style="width:${(100 * i) / moves.length}%"></i></div>`);
-      const m = moves[i], uci = m.from + m.to + (m.promotion || ""); c.move({ from: m.from, to: m.to, promotion: m.promotion }); const after = await this.score(c);
-      const known = before.cp != null && after.cp != null, drop = known ? Math.max(0, this.win(before.cp) - this.win(-after.cp)) : 0;
-      const g = before.best === uci || c.in_checkmate() ? "best" : drop > 0.3 ? "blunder" : drop > 0.2 ? "mistake" : drop > 0.1 ? "inaccuracy" : "good";
-      me.rows.push({ g, drop: g === "best" ? 0 : drop, fen: c.fen(), san: m.san, from: m.from, to: m.to, color: m.color, better: before.best });
-      before = after;
-    }
-    me.done = true; me.at = Math.max(0, me.rows.findIndex((r) => r.g === "blunder" && (!you || r.color === you))); this.paint(true);
-  },
-  accuracy(col) { const r = this.s.rows.filter((x) => x.color === col); return r.length ? Math.round((100 * r.reduce((a, x) => a + Math.exp(-4 * x.drop), 0)) / r.length) : 100; },
-  paint(speak) {
-    const s = this.s, r = s.rows[s.at], c = new Chess(r.fen), view = { c, mode: "solo", you: s.you || "w", over: true, think: false, sel: null, targets: [], last: [r.from, r.to] }, G = this.GRADE[r.g];
-    const coach = ["vera", "bea", "pip"][s.at % 3], pool = (MASCOT_LINES[coach] || {})[G[2]] || [], line = pool.length ? pool[(s.at * 7) % pool.length] : "";
-    const count = (col) => Object.entries(this.GRADE).map(([k, v]) => `<span style="color:${v[1]}">${s.rows.filter((x) => x.color === col && x.g === k).length} ${v[0].toLowerCase()}</span>`).join(" · ");
-    Train.frame("Game review", `<div class="trhead"><span>White accuracy <b class="num">${this.accuracy("w")}%</b></span><span>Black accuracy <b class="num">${this.accuracy("b")}%</b></span></div>
-      <div class="cpboard">${chessBoard(view)}</div>
-      <p class="trmsg"><b>${Math.floor(s.at / 2) + 1}${r.color === "w" ? "." : "…"} ${esc(r.san)}</b> <span style="color:${G[1]};font-weight:800">${G[0]}</span>${r.g !== "best" && r.better ? ` <span class="fine">Stockfish preferred ${r.better.slice(0, 2)}–${r.better.slice(2, 4)}</span>` : ""}</p>
-      <div class="trcoach"><span>${MASCOT_SVG[coach](r.g === "best" ? "happy" : r.g === "good" ? "calm" : "sad")}</span><p><b>${MASCOTS[coach].name}</b>${esc(line)}</p></div>
-      <div class="row" style="gap:8px;justify-content:center"><button type="button" class="btn ghost" data-rv="prev">← Previous</button><button type="button" class="btn" data-rv="next">Next →</button></div>
-      <div class="trmoves">${s.rows.map((x, i) => `<button type="button" data-rvat="${i}" class="${i === s.at ? "on" : ""}" style="--g:${this.GRADE[x.g][1]}">${i % 2 === 0 ? `${i / 2 + 1}. ` : ""}${esc(x.san)}</button>`).join("")}</div>
-      <p class="fine">White: ${count("w")}<br>Black: ${count("b")}</p>`);
-    if (speak && line) { try { if ((localStorage.getItem("gp_voice") || "1") === "1") Voice.say(coach, line); } catch (e) { /* no audio */ } }
-  },
-  go(i) { const s = this.s; if (!s || !s.done) return; s.at = Math.max(0, Math.min(s.rows.length - 1, i)); this.paint(true); },
-};
-
 document.addEventListener("click", (e) => {
   const sq = e.target.closest("[data-csq]"); if (sq && Train.s && $(".trwrap")) { Train.click(sq.dataset.csq); return; }
   const t = e.target.closest("button"); if (!t) return;
-  if (t.dataset.train) { Voice.stop(); if (t.dataset.train === "back") { Train.stop(); Review.s = null; document.body.classList.remove("ingame"); S.game = null; renderHub(); return; } Review.s = null; Train.open(t.dataset.train); return; }
+  if (t.dataset.train) { Voice.stop(); if (t.dataset.train === "back") { Train.stop(); document.body.classList.remove("ingame"); S.game = null; renderHub(); return; } Train.open(t.dataset.train); return; }
   if (t.dataset.eg) { Train.eg(t.dataset.eg); return; }
   if (t.dataset.pz) { if (t.dataset.pz === "next") Train.nextPuzzle(); else if (t.dataset.pz === "hint") Train.hint(); else Train.solve(); return; }
-  if (t.id === "cpReview" && CP.s) { const g = CP.s; CP.s = null; Train.stop(); Review.start(g); return; }
-  if (t.dataset.rv) { Review.go(Review.s.at + (t.dataset.rv === "next" ? 1 : -1)); return; }
-  if (t.dataset.rvat) { Review.go(+t.dataset.rvat); return; }
+  if (t.id === "cpReview" && CP.s) { Lab.open("game", cpGameFor(CP.s)); return; }
 });
-addEventListener("hashchange", () => { Train.stop(); Review.s = null; });
+addEventListener("hashchange", () => { Train.stop(); });
 
 /* ================= ranked seasons, player links and watching a live match =================
    The shared boards and player links need db/003_seasons_profiles.sql run once; without it, season points are kept on this device. */

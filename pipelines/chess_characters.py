@@ -45,6 +45,8 @@ def main():
         line_of(tpl, "function rvTurn"),
         line_of(tpl, "const VAL = { p: 100"), line_of(tpl, "function evalPos"), line_of(tpl, "function negamax"), line_of(tpl, "function engineMove"),
     ])
+    endcard = rd(BK, "site", "chess_endcard.js")
+    grading = between(endcard, "const KINDS", "  function card(")   # how the end-of-game card grades your moves
     faces = between(bots, "const councilLogo", "/* ---------- the move rules").replace("BOTS.forEach((b, i) => { LVL[i + 1] = b.name; LVC[i + 1] = b.id; });\n", "")
     rules = between(bots, "/* ---------- the move rules", "/* ---------- wiring into the game")
     talking = between(talk, "const TALK = (() => {", "function botWatch()")
@@ -58,8 +60,11 @@ let SF1 = null; const Sf = {{ analyse: (fen, o) => (SF1 = SF1 || mkSf()).analyse
 const oppFace = (id, mood = "calm") => (id === "council" ? councilLogo() : id === "pip" ? pipSVG(mood) : COACH_SVG[id](mood));
 {faces}{rules}{lines_js}
 {talking}
+const ENDC = (() => {{
+  {grading}  return {{ grade, tiles }};
+}})();
 const smallMove = (fen) => {{ const m = engineMove(new Chess(fen), 1); return {{ from: m.from, to: m.to, promotion: m.promotion }}; }};
-return {{ BOTS, ELO: BOT_ELO, face: oppFace, move: botMove, smallMove, LINES: BOT_LINES, VOICE: BOT_VOICE, TALK, ALSO: TALK_ALSO, fresh: botFresh, BV }};
+return {{ BOTS, ELO: BOT_ELO, face: oppFace, move: botMove, smallMove, LINES: BOT_LINES, VOICE: BOT_VOICE, TALK, ALSO: TALK_ALSO, fresh: botFresh, BV, grade: ENDC.grade, tiles: ENDC.tiles }};
 }})();
 """
     assert "LVL[" not in js and "aiThink" not in js, "ballknowledge's wiring leaked in: check the markers"

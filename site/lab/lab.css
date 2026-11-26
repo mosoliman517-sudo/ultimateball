@@ -1,0 +1,6 @@
+.labgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:12px 0 22px}
+.labcard{text-align:left;cursor:pointer;min-height:120px}
+.labcard .gname{display:flex;gap:8px;align-items:center}
+.bar .brand b{color:var(--gold)}
+.whbanner{display:none}
+#setBtn,#meBtn{display:none!important}
