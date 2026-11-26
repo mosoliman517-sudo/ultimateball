@@ -1341,6 +1341,14 @@ body.ingame #tourChip,body:not(.athome) #tourChip{display:none}
 [dir="rtl"] .num{direction:ltr;unicode-bidi:isolate} [dir="rtl"] .gcard,[dir="rtl"] .gpick,[dir="rtl"] .world,[dir="rtl"] .mode,[dir="rtl"] .wcard{text-align:right}
 .bpage,.pcards,.pcard{min-width:0;max-width:100%} .pcards{grid-template-columns:repeat(auto-fill,minmax(min(96px,28vw),1fr))} .pcard img{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}
 
+/* where did they finish? and who did it */
+#room > .card.hg.still{animation:none}
+.hghead{gap:14px;margin:8px 0;flex-wrap:nowrap;align-items:center}.hghead h3{font-size:26px;margin:0}.hgbadge{width:64px;height:64px;object-fit:contain;flex:none}
+.hgslide{text-align:center;margin-top:8px}.hgslide input{width:100%}.hgpos{font-size:44px;font-weight:800}
+.hgscore{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;text-align:center;margin:10px 0;font-size:18px}.hgscore span{font-size:30px;font-weight:800}
+.hglist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.hglist li{display:flex;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;font-size:14px}.hglist li>.num{min-width:34px;font-weight:800}.hglist li.cur{border-color:var(--gold, #e8c35a);border-width:2px}
+.hgask{margin-top:12px;display:flex;flex-direction:column;gap:8px}.hgask input{flex:1;min-width:150px}
+
 /* chess pieces and board, copied from ballknowledge's chess page (piece set: cburnett, CC BY-SA 3.0, via Lichess) */
 .pc-bb{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJjb2xvci1zY2hlbWU6bGlnaHQgb25seSIgd2lkdGg9IjQ1IiBoZWlnaHQ9IjQ1IiB2aWV3Qm94PSIwIDAgNDUgNDUiPjxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMS41Ij48ZyBmaWxsPSIjMDAwIiBzdHJva2UtbGluZWNhcD0iYnV0dCI+PHBhdGggZD0iTTkgMzZjMy40LTEgMTAuMS40IDEzLjUtMiAzLjQgMi40IDEwLjEgMSAxMy41IDIgMCAwIDEuNi41IDMgMi0uNyAxLTEuNiAxLTMgLjUtMy40LTEtMTAuMS41LTEzLjUtMS0zLjQgMS41LTEwLjEgMC0xMy41IDEtMS40LjUtMi4zLjUtMy0uNSAxLjQtMiAzLTIgMy0yeiIvPjxwYXRoIGQ9Ik0xNSAzMmMyLjUgMi41IDEyLjUgMi41IDE1IDAgLjUtMS41IDAtMiAwLTIgMC0yLjUtMi41LTQtMi41LTQgNS41LTEuNSA2LTExLjUtNS0xNS41LTExIDQtMTAuNSAxNC01IDE1LjUgMCAwLTIuNSAxLjUtMi41IDQgMCAwLS41LjUgMCAyeiIvPjxwYXRoIGQ9Ik0yNSA4YTIuNSAyLjUgMCAxIDEtNSAwIDIuNSAyLjUgMCAxIDEgNSAweiIvPjwvZz48cGF0aCBzdHJva2U9IiNlY2VjZWMiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIGQ9Ik0xNy41IDI2aDEwTTE1IDMwaDE1bS03LjUtMTQuNXY1TTIwIDE4aDUiLz48L2c+PC9zdmc+)}
 .pc-bk{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NSA0NSI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2U9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIxLjUiPjxwYXRoIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIGQ9Ik0yMi41IDExLjZWNiIvPjxwYXRoIGZpbGw9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJidXR0IiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBkPSJNMjIuNSAyNXM0LjUtNy41IDMtMTAuNWMwIDAtMS0yLjUtMy0yLjVzLTMgMi41LTMgMi41Yy0xLjUgMyAzIDEwLjUgMyAxMC41Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTExLjUgMzdhMjIuMyAyMi4zIDAgMCAwIDIxIDB2LTdzOS00LjUgNi0xMC41Yy00LTYuNS0xMy41LTMuNS0xNiA0VjI3di0zLjVjLTMuNS03LjUtMTMtMTAuNS0xNi00LTMgNiA1IDEwIDUgMTB6Ii8+PHBhdGggc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgZD0iTTIwIDhoNSIvPjxwYXRoIHN0cm9rZT0iI2VjZWNlYyIgZD0iTTMyIDI5LjVzOC41LTQgNi05LjdDMzQuMSAxNCAyNSAxOCAyMi41IDI0LjZ2Mi4xLTIuMUMyMCAxOCA5LjkgMTQgNyAxOS45Yy0yLjUgNS42IDQuOCA5IDQuOCA5Ii8+PHBhdGggc3Ryb2tlPSIjZWNlY2VjIiBkPSJNMTEuNSAzMGM1LjUtMyAxNS41LTMgMjEgMG0tMjEgMy41YzUuNS0zIDE1LjUtMyAyMSAwbS0yMSAzLjVjNS41LTMgMTUuNS0zIDIxIDAiLz48L2c+PC9zdmc+)}
@@ -1499,7 +1507,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const REDUCED = (() => { let own = ""; try { own = localStorage.getItem("gp_motion"); } catch (e) { /* blocked */ } if (own === "reduced") document.documentElement.setAttribute("data-motion", "reduced"); return own === "reduced" || !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); })();
 
 </script>
-<script src="data.ed7ae4142d.js"></script>
+<script src="data.54ef760358.js"></script>
 <script>
 if (!window.PACKS) document.body.innerHTML = '<p style="padding:24px;font:16px system-ui">The game data did not load. Check your connection and <a href="">reload</a>.</p>';
 </script>
@@ -3501,7 +3509,7 @@ function recordLine(w, id) { const b = prof().best[w + ":" + id]; return b ? `Yo
 function renderHub() {
   const w = S.world; let k = 0;
   const faces = (g) => shuffle(g.pool().filter(imgOf)).slice(0, 3).map((x) => `<img class="gface-img ${x.logo || x.flag ? "contain" : ""} ${isCut(x) ? "cutpic" : ""}" src="${imgOf(x)}" alt="">`).join("");
-  $("#room").innerHTML = `<h2 class="sec">What do you want to play?</h2><p class="secsub">${GAMES[w].length} games in ${esc(WORLDS[w].name)}. Every one works solo, on one device with a friend, or on two devices.</p>${w === "kpop" ? calDoorHTML() : ""}${w === "chess" ? Train.strip() : ""}<div class="hub">${GAMES[w].map((g) => `<button type="button" class="gcard" data-game="${g.id}" style="--d:${k++ * 60}ms"><div class="gfaces">${faces(g)}</div><div class="gname">${esc(g.name)}</div><div class="gmodes">${g.kind === "play" ? "vs computer · 2 players" : g.kind === "hol" ? "Solo streak · 2 players" : g.kind === "roulette" ? "Solo 60 seconds · 2 players" : "Solo streak · 2 players · online"}</div><div class="gtag">${esc(g.tag)}</div><div class="grec num">${esc(recordLine(w, g.id))}</div></button>`).join("")}</div>`;
+  $("#room").innerHTML = `<h2 class="sec">What do you want to play?</h2><p class="secsub">${GAMES[w].length} games in ${esc(WORLDS[w].name)}. Play solo or with a friend; most also work across two devices.</p>${w === "kpop" ? calDoorHTML() : ""}${w === "chess" ? Train.strip() : ""}<div class="hub">${GAMES[w].map((g) => `<button type="button" class="gcard" data-game="${g.id}" style="--d:${k++ * 60}ms"><div class="gfaces">${faces(g)}</div><div class="gname">${esc(g.name)}</div><div class="gmodes">${g.kind === "play" ? "vs computer · 2 players" : g.kind === "hol" ? "Solo streak · 2 players" : g.kind === "roulette" ? "Solo 60 seconds · 2 players" : g.kind === "finish" ? "Solo streak · 2 players" : g.kind === "iconic" ? "Solo" : "Solo streak · 2 players · online"}</div><div class="gtag">${esc(g.tag)}</div><div class="grec num">${esc(recordLine(w, g.id))}</div></button>`).join("")}</div>`;
   homeTilt();
 }
 
@@ -3523,9 +3531,11 @@ const diffBar = () => S.world === "kpop" ? "" : `<div class="label" style="margi
 const modeIntro = (title, blurb, opts, noDiff) => `<div class="card">${gamesBar(title)}<p class="sub">${blurb}</p>${noDiff ? "" : diffBar()}<div class="label" style="margin-top:16px">Players and devices</div><div class="modes">${opts.map((o) => `<button class="mode" data-mode="${o.id}" type="button"><b>${o.t}</b><span>${o.d}</span></button>`).join("")}</div><div id="roomBox"></div></div>`;
 const NAMES = () => { try { const n = JSON.parse(sessionStorage.getItem("gp_names") || "null"); return n && n.length === 2 ? n : ["Player 1", "Player 2"]; } catch (e) { return ["Player 1", "Player 2"]; } };
 function openGame(id) {
-  S.game = id; if (S.world === "kpop") S.diff = "medium"; else { try { S.diff = localStorage.getItem("gp_diff") || "medium"; } catch (e) { /* blocked */ } } const g = gameOf(S.world, id); stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
-  const how = { play: "Solo, you choose who sits across the board.", photo: "The picture is there from the start; hints arrive at one third and two thirds of the time.", clue: "Clues start hard and get easier.", blur: "The picture starts blurred and sharpens every few seconds.", scramble: "The letters of every word are shuffled. Hints arrive slowly.", hol: "Two picks, one question. Tap the right side.", all: "Type names in any order. Initials cost 30 points, a wrong name 20.", ttt: "Tap a square and name someone who fits its row and column. A wrong or repeated name loses your turn.", roulette: "Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.", audio: "A real song plays in short slices: 3 seconds, then 5 more, then the rest." }[g.kind];
-  $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how} ${g.kind === "play" ? "" : g.kind === "hol" ? "Solo: keep the streak going. Two players: take turns, five each." : "Buzz in whenever you think you know it. The sooner you are right, the more you score (up to 1,000); a wrong guess costs 150."}`, [
+  S.game = id; Fin.s = null; Ic.s = null; if (S.world === "kpop") S.diff = "medium"; else { try { S.diff = localStorage.getItem("gp_diff") || "medium"; } catch (e) { /* blocked */ } } const g = gameOf(S.world, id); stopQuiz(); Net.close(); if (typeof Watch !== "undefined") Watch.stop(); Q.s = null; H.s = null; document.body.classList.remove("ingame");
+  const how = { play: "Solo, you choose who sits across the board.", photo: "The picture is there from the start; hints arrive at one third and two thirds of the time.", clue: "Clues start hard and get easier.", blur: "The picture starts blurred and sharpens every few seconds.", scramble: "The letters of every word are shuffled. Hints arrive slowly.", hol: "Two picks, one question. Tap the right side.", all: "Type names in any order. Initials cost 30 points, a wrong name 20.", finish: "Fewer places of slack on the harder levels.", iconic: "", ttt: "Tap a square and name someone who fits its row and column. A wrong or repeated name loses your turn.", roulette: "Name as many as you can. In a duel, take turns: blank, repeat or run out of time and you lose the round.", audio: "A real song plays in short slices: 3 seconds, then 5 more, then the rest." }[g.kind];
+  if (g.kind === "iconic") { document.body.classList.add("ingame"); Snd.mode("game"); addPlay(S.world); return Ic.menu(); }
+  if (g.kind === "finish") { $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how}`, [{ id: "solo", t: "Solo streak", d: "Keep going while you stay within a few places. The first bigger miss ends the run." }, { id: "duo", t: "Two players, one device", d: "Five rounds. Each slides in turn; the closest scores most." }]); $("#room .modes").insertAdjacentHTML("afterend", duoNamesHTML()); Snd.mode("game"); return; }
+  $("#room").innerHTML = modeIntro(esc(g.name), `${esc(g.tag)} ${how} ${["play", "finish", "iconic"].includes(g.kind) ? "" : g.kind === "hol" ? "Solo: keep the streak going. Two players: take turns, five each." : "Buzz in whenever you think you know it. The sooner you are right, the more you score (up to 1,000); a wrong guess costs 150."}`, [
     { id: "solo", t: g.kind === "ttt" || g.kind === "play" ? "Solo, against the computer" : g.kind === "roulette" || g.kind === "all" ? "Solo, against the clock" : "Solo streak", d: g.kind === "ttt" ? "The computer gets smarter with the difficulty." : g.kind === "play" ? "Pick one of eight characters, or Stockfish at full strength." : g.kind === "all" ? "Name everyone before the clock runs out." : g.kind === "roulette" ? "Name as many as you can before time runs out." : "Keep going for as long as you can. The run ends the first time you miss." },
     ...(g.kind === "all" ? [] : [{ id: "duo", t: "Two players, one device", d: g.kind === "play" ? "One board, pass the device after every move." : g.kind === "hol" ? "Take turns. Most right after five each wins." : g.kind === "roulette" ? "Three rounds. Take turns typing names on the same screen." : "Five rounds. Race to buzz: A for player 1, L for player 2." }]),
     ...(["hol", "roulette", "all", "ttt", "play"].includes(g.kind) ? [] : [{ id: "surv", t: "Survival", d: "Three lives. The questions get harder every three. One high score." }, { id: "online", t: "Two players, two devices", d: "The same race on two phones or computers, with a four-letter room code." }])], g.kind === "play");
@@ -3537,7 +3547,7 @@ function startMode(m) {
   const g = gameOf(S.world, S.game); if (m === "online") return openOnline(); if (m === "surv") Q.next = { surv: { lives: 3 }, rounds: 999 }; document.body.classList.add("ingame");
   { const p = prof(); p.last = { w: S.world, g: S.game, t: Date.now() }; p.gplays = p.gplays || {}; p.gplays[S.world + ":" + S.game] = (p.gplays[S.world + ":" + S.game] || 0) + 1; saveProf(); }
   addPlay(S.world);
-  const go2 = () => { if (g.kind === "play") return newChessPlay(m); if (g.kind === "all") return newAll(m); if (g.kind === "ttt") return newTTT(m); if (g.kind === "hol") return newHol(m); if (g.kind === "roulette") return newRou(m); newQuiz(S.world, S.game, m === "surv" ? "solo" : m); };
+  const go2 = () => { if (g.kind === "finish") return Fin.start(m); if (g.kind === "play") return newChessPlay(m); if (g.kind === "all") return newAll(m); if (g.kind === "ttt") return newTTT(m); if (g.kind === "hol") return newHol(m); if (g.kind === "roulette") return newRou(m); newQuiz(S.world, S.game, m === "surv" ? "solo" : m); };
   if (m === "duo") { const n = NAMES(); Vs.match({ nick: n[0], avatar: prof().avatar }, { nick: n[1], avatar: "" }, go2); } else go2();
 }
 /* ---------------- roulette (ballknowledge's Club roulette): name members or players of a group, club or team ---------------- */
@@ -5048,6 +5058,117 @@ document.addEventListener("click", (e) => {
   if (t.dataset.lab) { Lab.open(t.dataset.lab); return; }
   if (t.dataset.ec === "x" && CP.s) { CP.s.cardHidden = true; renderChess(); }
 });
+
+/* ================= "Where did they finish?" (football and basketball) and "Who did it" (football), from ballknowledge.
+   Real final tables and match records only (window.HISTORY, pipelines/bk_history.py). Solo and one-device play. ================= */
+const HIST = window.HISTORY || { football: { leagues: {}, matches: [] }, basketball: { leagues: {} } };
+const finTol = () => ({ easy: 4, medium: 3, hard: 2, elite: 1 })[S.diff] || 3;
+const ordn = (k) => k + (["th", "st", "nd", "rd"][k % 10 > 3 || (k > 10 && k < 14) ? 0 : k % 10]);
+const histClub = (w, name) => items(w, (x) => (x.kind === "club" || x.kind === "team") && x.logo && (x.n === name || x.short === name || x.n.endsWith(" " + name)))[0];
+const histBadge = (w, name) => { const c = histClub(w, name); return c ? `<img class="hgbadge" src="${c.logo}" alt="">` : ""; };
+const histClubs = (w) => items(w, (x) => (x.kind === "club" || x.kind === "team") && x.logo);
+
+GAMES.football.push(G("finish", "Where did they finish?", "finish", { tag: "A club and a season. Slide to where it finished: the closer, the more you score.", pool: () => histClubs("football"), min: 1 }));
+GAMES.basketball.push(G("finish", "Where did they finish?", "finish", { tag: "A team and a season. Slide to where its record ranked: the closer, the more you score.", pool: () => histClubs("basketball"), min: 1 }));
+if ((HIST.football.matches || []).length) GAMES.football.push(G("iconic", "Who did it", "iconic", { tag: "A big match, minute by minute. Name the scorers, the assists, the penalty takers and who was sent off.", pool: () => histClubs("football"), min: 1 }));
+
+function histDone(key, score, streak, xp, w) {
+  const p = prof(), k = w + ":" + key, old = p.best[k];
+  if (!old || score > old.score) p.best[k] = { score, streak: Math.max(streak, (old || {}).streak || 0) };
+  addXP(xp, w); saveProf();
+}
+/* keep the card still when it is redrawn */
+function histPaint(view, body) {
+  const old = $("#room > .hg"), still = old && old.dataset.view === view;
+  $("#room").innerHTML = `<div class="card hg ${still ? "still" : ""}" data-view="${view}">${body}</div>`;
+}
+
+/* ---------- where did they finish? ---------- */
+const Fin = {
+  s: null,
+  start(mode) { this.s = { w: S.world, mode, round: 0, rounds: 5, scores: mode === "duo" ? [0, 0] : [0], streak: 0, turn: 0, over: false, used: new Set(), phase: "ask" }; this.next(); },
+  next() {
+    const f = this.s, L = Object.values(HIST[f.w].leagues); let lg, season, tab, pos;
+    for (let k = 0; k < 60; k++) { lg = rnd(L); season = rnd(Object.keys(lg.tables)); tab = lg.tables[season]; pos = Math.floor(Math.random() * tab.length); if (!f.used.has(tab[pos][0])) break; }
+    f.used.add(tab[pos][0]); f.round++; f.turn = 0; f.phase = "ask";
+    f.cur = { league: lg.name, season, n: tab.length, pos: pos + 1, row: tab[pos], guess: Math.ceil(tab.length / 2), guesses: [], diffs: [], pts: [] };
+    this.paint();
+  },
+  paint() {
+    const f = this.s, c = f.cur, r = c.row, duo = f.mode === "duo", nba = f.w === "basketball", who = NAMES(), title = gamesBar("Where did they finish?");
+    if (f.phase === "done") {
+      const [a, b] = f.scores, verdict = duo ? (a === b ? "A draw." : `${esc(who[a > b ? 0 : 1])} wins!`) : `Run over · streak of ${f.streak}`;
+      return histPaint("fin-done", `${title}<div class="rcard on"><div class="big">${verdict}</div><p class="fine">${f.scores.map((s, i) => `${duo ? esc(who[i]) : "Points"}: ${s}`).join(" · ")}</p></div><div class="row" style="margin-top:12px;gap:8px"><button class="btn" type="button" data-fin="again">Play again</button></div>`);
+    }
+    const hud = `<div class="qhud"><span class="label">${duo ? `Round ${f.round} of ${f.rounds}` : `Streak ${f.streak}`}</span>${f.scores.map((s, i) => `<span class="num qscore"><small>${duo ? esc(who[i]) : "Points"}</small> <b>${s}</b></span>`).join("")}</div>`;
+    const ctx = f.phase === "ask" ? (nba ? `Scored ${r[2]} a game and gave up ${r[3]}` : `Scored ${r[2]} and conceded ${r[3]}`) : nba ? `${r[4]} wins, ${r[6]} defeats` : `${r[1]} points: ${r[4]} wins, ${r[5]} draws, ${r[6]} defeats`;
+    const last = duo ? f.round >= f.rounds : f.over;
+    const body = f.phase === "ask"
+      ? `<div class="hgslide">${duo ? `<b>${esc(who[f.turn])}, your guess</b>` : ""}<div class="num hgpos" id="finVal">${ordn(c.guess)}</div><input type="range" id="finRange" min="1" max="${c.n}" value="${c.guess}" aria-label="Final position"><div class="row fine" style="justify-content:space-between"><span>Top</span><span>Bottom</span></div></div><div class="row" style="margin-top:12px"><button class="btn" type="button" data-fin="lock">${duo && f.turn === 0 ? "Lock in and pass" : "Lock in"}</button></div>`
+      : `<div class="rcard on"><div class="label">${nba ? "Where the record ranked" : "The real table position"}</div><div class="big num">${ordn(c.pos)}</div><p class="fine">${c.guesses.map((g, i) => `${duo ? esc(who[i]) : "You"}: ${ordn(g)}, ${c.diffs[i] === 0 ? "spot on" : `${c.diffs[i]} off`}, ${c.pts[i]} points`).join("<br>")}</p></div><div class="row" style="margin-top:12px"><button class="btn" type="button" data-fin="next">${last ? "See the result" : "Next"}</button></div>`;
+    histPaint("fin", `${title}${hud}<div class="row hghead">${histBadge(f.w, r[0])}<div><h3>${esc(r[0])}</h3><div class="fine">${esc(c.league)}, ${esc(c.season)} · ${c.n} ${nba ? "teams, all ranked by record" : "clubs"}</div><div class="fine">${ctx}</div></div></div>${body}`);
+  },
+  lock() {
+    const f = this.s, c = f.cur, duo = f.mode === "duo"; c.guesses[f.turn] = c.guess; Snd.lock();
+    if (duo && f.turn === 0) { f.turn = 1; c.guess = Math.ceil(c.n / 2); return this.paint(); }
+    c.guesses.forEach((g, i) => { c.diffs[i] = Math.abs(g - c.pos); c.pts[i] = Math.max(0, 1000 - 220 * c.diffs[i]); f.scores[i] += c.pts[i]; });
+    const best = Math.min(...c.diffs); if (!duo) { if (best <= finTol()) f.streak++; else f.over = true; }
+    f.phase = "reveal"; if (best === 0) { Snd.win(); confetti(); } else if (best <= finTol()) Snd.right(); else Snd.wrong();
+    Mascot.react(best <= finTol() ? "hit" : "miss"); this.paint();
+  },
+  advance() {
+    const f = this.s;
+    if (f.mode === "duo" ? f.round >= f.rounds : f.over) { f.phase = "done"; if (f.mode === "solo") histDone("finish", f.scores[0], f.streak, 10 + Math.round(f.scores[0] / 200), f.w); else { addXP(20, f.w); saveProf(); } Mascot.react("over"); return this.paint(); }
+    this.next();
+  },
+};
+
+/* ---------- who did it ---------- */
+const ICKINDS = [["any", "Surprise me", () => true], ["ucl", "Champions League", (m) => m.comp === "Champions League"], ["intl", "World Cups and Euros", (m) => /World Cup|European Championship/.test(m.comp)], ["cup", "Domestic cup finals", (m) => /FA Cup|Copa|DFB|Coppa/.test(m.comp)], ["league", "League giants", (m) => /Premier|Bundesliga|La Liga/.test(m.comp)]];
+const Ic = {
+  s: null, kind: "any",
+  menu() { this.s = null; histPaint("ic-menu", `${gamesBar("Who did it")}<p class="sub">A big match appears with its score and highlights. Name the scorer, whoever set it up, the penalty taker and who was sent off.</p><div class="chips">${ICKINDS.map(([k, n]) => `<button type="button" class="chip ${this.kind === k ? "on" : ""}" data-ickind="${k}">${n}</button>`).join("")}</div><p class="fine">${HIST.football.matches.length} matches, from match records. A surname is enough. 100 points each; a wrong guess costs 15, a hint 30.</p><div class="row" style="margin-top:10px"><button class="btn" type="button" data-ic="start">Start</button></div>`); },
+  start() {
+    const f = (ICKINDS.find((k) => k[0] === this.kind) || ICKINDS[0])[2], pool = HIST.football.matches.filter(f); if (!pool.length) return toast("No matches of that kind.");
+    const m = rnd(pool), qs = [];
+    m.ev.forEach((e, i) => { if (e.k === "goal") { qs.push({ i, q: e.pen ? "Who converted the penalty?" : "Who scored?", ans: e.p }); if (e.a) qs.push({ i, q: "Who set it up?", ans: e.a, assist: true }); } else qs.push({ i, q: e.why === "second yellow" ? "Who was sent off for a second yellow?" : "Who was sent off?", ans: e.p }); });
+    const main = qs.filter((q) => !q.assist);
+    this.s = { m, qs: main.length > 10 ? main.slice(0, 10) : qs.slice(0, 12), k: 0, got: {}, wrong: 0, hints: 0, hint: 0, done: false, msg: "" }; this.paint();
+  },
+  score() { const x = this.s; return Math.max(0, Object.keys(x.got).length * 100 - x.wrong * 15 - x.hints * 30); },
+  hint(s) { const t = s.split(" "), sur = t[t.length - 1]; return this.s.hint === 1 ? `${t.length > 1 ? t[0][0] + ". " : ""}${sur.length} letters in the surname` : `Surname starts with “${sur.slice(0, 3)}”`; },
+  paint() {
+    const x = this.s, m = x.m, cur = x.qs[x.k], correct = Object.keys(x.got).length;
+    const rows = m.ev.map((e, i) => {
+      const mine = x.qs.filter((q) => q.i === i), isCur = !x.done && cur && cur.i === i, side = e.s === "h" ? m.h : m.a;
+      const name = (q, real) => (!q || x.done || x.got[x.qs.indexOf(q)] || x.qs.indexOf(q) < x.k ? esc(real) : isCur && cur === q ? "<b>?</b>" : "…");
+      const scorer = mine.find((q) => !q.assist), assist = mine.find((q) => q.assist);
+      const text = e.k === "goal" ? `${e.pen ? "Penalty" : "Goal"}${e.how && !e.pen ? ` (${esc(e.how)})` : ""} for ${esc(side)}: ${name(scorer, e.p)}${e.a ? ` · assist ${name(assist, e.a)}` : ""}` : `${e.why === "second yellow" ? "Second yellow, red card" : "Red card"} for ${esc(side)}: ${name(scorer || mine[0], e.p)}`;
+      return `<li class="${isCur ? "cur" : ""}"><span class="num">${e.m}'</span><span>${e.k === "goal" ? "⚽" : "🟥"} ${text}</span></li>`;
+    }).join("");
+    const foot = x.done
+      ? `<div class="rcard on" style="margin-top:12px"><b>${correct === x.qs.length ? "Perfect highlights" : `${correct} of ${x.qs.length}`}</b><p class="fine">Score ${this.score()}. ${x.wrong} wrong, ${x.hints} hints.</p></div><div class="row" style="margin-top:12px;gap:8px"><button class="btn" type="button" data-ic="start">Another match</button><button class="btn ghost" type="button" data-ic="menu">Change competition</button></div>`
+      : `<div class="hgask"><b>${esc(cur.q)} <span class="fine">minute ${m.ev[cur.i].m}</span></b><div class="row" style="gap:8px"><input class="t" id="icIn" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="Type a surname" aria-label="Player"><button class="btn" type="button" data-ic="guess">Guess</button><button class="btn ghost" type="button" data-ic="hint" ${x.hint >= 2 ? "disabled" : ""}>Hint (-30)</button><button class="btn ghost" type="button" data-ic="skip">Skip</button></div>${x.hint ? `<div class="fine">Hint: ${esc(this.hint(cur.ans))}</div>` : ""}${x.msg ? `<div class="fine">${esc(x.msg)}</div>` : ""}</div>`;
+    histPaint("ic", `${gamesBar("Who did it")}<div class="qhud"><span class="label">${esc(m.t)}</span><b class="num">${correct}/${x.qs.length}</b></div><div class="hgscore"><b>${esc(m.h)}</b><span class="num">${m.hg} – ${m.ag}</span><b>${esc(m.a)}</b></div><ol class="hglist">${rows}</ol>${foot}`);
+    const input = $("#icIn"); if (input) input.focus({ preventScroll: true });
+  },
+  advance() {
+    const x = this.s; x.k++; x.hint = 0; x.msg = "";
+    if (x.k >= x.qs.length) { x.done = true; const n = Object.keys(x.got).length; if (n === x.qs.length) { Snd.win(); confetti(); } else Snd.whistle(); histDone("iconic", this.score(), n, 5 + n * 3, "football"); Mascot.react("over"); }
+    this.paint();
+  },
+  guess() { const x = this.s; if (!x || x.done) return; const v = ($("#icIn") || {}).value || ""; if (!v.trim()) return; if (nameMatch(v, x.qs[x.k].ans)) { x.got[x.k] = true; Snd.right(); this.advance(); } else { x.wrong++; x.msg = `“${v.trim()}” is not it.`; Snd.wrong(); this.paint(); } },
+};
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest && e.target.closest("button"); if (!t || !$("#room > .hg")) return;
+  if (t.dataset.fin && Fin.s) { if (t.dataset.fin === "lock") Fin.lock(); else if (t.dataset.fin === "next") Fin.advance(); else Fin.start(Fin.s.mode); return; }
+  if (t.dataset.ickind) { Ic.kind = t.dataset.ickind; Ic.menu(); return; }
+  const a = t.dataset.ic; if (!a) return;
+  if (a === "start") Ic.start(); else if (a === "menu") Ic.menu(); else if (!Ic.s || Ic.s.done) return; else if (a === "guess") Ic.guess(); else if (a === "hint") { Ic.s.hint++; Ic.s.hints++; Ic.paint(); } else { Snd.tick(); Ic.advance(); }
+});
+document.addEventListener("input", (e) => { if (e.target.id === "finRange" && Fin.s) { Fin.s.cur.guess = +e.target.value; const v = $("#finVal"); if (v) v.textContent = ordn(Fin.s.cur.guess); } });
+document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.id === "icIn") { e.preventDefault(); Ic.guess(); } });
 
 /* ================= light / dark ================= */
 const Look = {

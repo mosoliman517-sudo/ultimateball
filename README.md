@@ -114,3 +114,9 @@ games and the World Championship hub, taken from its public build by `python3 pi
 current screen (`site/chess_card.js`). `site/lab/` holds the front door and styles added on top. ballknowledge's database
 settings are removed, so nothing there uses its accounts or boards; scores are kept in the browser. Re-run after
 ballknowledge rebuilds its chess page.
+
+## Where did they finish? and Who did it (26 November)
+
+From ballknowledge: real final tables (football and basketball) and 338 big football matches. `pipelines/bk_history.py`
+writes `site/bk_history.json`; the games are in `site/history_games.js`. Solo and two players on one device ("Who did it"
+is solo only); no two-device mode for these two. There are no basketball match records, so "Who did it" is football only.
