@@ -109,9 +109,9 @@ tapped; promotion asks for the piece; Resign, Opponent and Back ask for a second
 A finished game against the computer shows ballknowledge's summary card (your moves counted by a quick Stockfish pass,
 then Game review, New game, Rematch).
 
-`docs/lab/` is the chess room: ballknowledge's own game review (with import from Lichess, chess.com or PGN), six position
-games and the World Championship hub, taken from its public build by `python3 pipelines/chess_lab.py`. It opens over the
-current screen (`site/chess_card.js`). `site/lab/` holds the front door and styles added on top. ballknowledge's database
+`docs/chessroom.html` (files in `docs/lab/`) is the chess room: ballknowledge's own game review (with import from Lichess, chess.com or PGN), six position
+games and the World Championship hub, taken from its public build by `python3 pipelines/chess_lab.py`. It is a page of its own
+(`site/chess_card.js` opens it; over a live online game, in a new tab). Do not frame it: `vercel.json` forbids framing. `site/lab/` holds the front door and styles added on top. ballknowledge's database
 settings are removed, so nothing there uses its accounts or boards; scores are kept in the browser. Re-run after
 ballknowledge rebuilds its chess page.
 

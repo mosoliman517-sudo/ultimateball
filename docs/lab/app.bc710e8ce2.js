@@ -31,7 +31,7 @@ const Usage = (() => {
    from /voice/ (index.json maps the exact text to a file). A line with no clip, or a page opened without /voice/,
    falls back to the device's own voice. */
 const AIVoice = (() => {
-  const BASE = "voice/";
+  const BASE = "lab/voice/";
   let map = null, cur = null, seq = 0, el = null, opened = false;
   /* one player for every line. Safari and phones only let a page start sound from a tap, so the player is opened on the first
      tap or key press and can then speak whenever a character has something to say */
@@ -895,7 +895,7 @@ function aiPaint() {
 /* ---------- Game review: real Stockfish (version 10, loaded from a CDN on first use), move by move ---------- */
 const SF_URL = "https://cdn.jsdelivr.net/npm/stockfish.js@10.0.2/stockfish.js";
 /* Stockfish 17.1 lite (NNUE, single-threaded, GPL-3, docs/engine/), served from this site; Stockfish 10 from the CDN is the fallback */
-const SF17_URL = new URL("../engine/stockfish-17.1-lite-single.js", location.href).href;
+const SF17_URL = new URL("engine/stockfish-17.1-lite-single.js", location.href).href;
 let SF_MODERN = location.protocol !== "file:";
 const mkSf = () => {
   let w = null, dead = false, cur = null, ready = null, pend = 0; const queue = [];
@@ -3544,7 +3544,7 @@ function whRing(frac, size, inner, cls = "") {
 }
 function whHero(info) {
   const gk = cpP(CP_ID.gukesh), sn = cpP(CP_ID.sindarov), live = info.rounds.find((x) => x.live), rs = WH.d ? WH.d.rounds : [], now = Date.now(), next = rs.find((r) => !r.finished && !r.ongoing && r.startsAt > now), nextI = next ? rs.indexOf(next) : -1;
-  const face = (p, k, role) => `<button class="whplayer ${k}" type="button" data-cpp="${CP_ID[k === "g" ? "gukesh" : "sindarov"]}"><span class="whrole">${role}</span><span class="whpic" style="--img:url(img/${k === "g" ? "gukesh" : "sindarov"}.jpg)">${cpFace(p, "big")}</span><b>${esc(cpName(p))}</b><span class="cpmeta">${cpFed(p)}</span>${p && p.std ? `<span class="whelo"><b class="num" data-count="${p.std}">${p.std}</b><small>classical</small></span>` : ""}</button>`;
+  const face = (p, k, role) => `<button class="whplayer ${k}" type="button" data-cpp="${CP_ID[k === "g" ? "gukesh" : "sindarov"]}"><span class="whrole">${role}</span><span class="whpic" style="--img:url(lab/img/${k === "g" ? "gukesh" : "sindarov"}.jpg)">${cpFace(p, "big")}</span><b>${esc(cpName(p))}</b><span class="cpmeta">${cpFed(p)}</span>${p && p.std ? `<span class="whelo"><b class="num" data-count="${p.std}">${p.std}</b><small>classical</small></span>` : ""}</button>`;
   const seg = info.rounds.length ? info.rounds : Array.from({ length: 14 }, (_, i) => ({ i: i + 1, r: { id: "", name: "Game " + (i + 1) } }));
   const strip = seg.map((x) => { const g = x.white === "g", cl = x.res ? (x.res === "1/2-1/2" ? "d" : (x.res === "1-0") === g ? "wg" : "ws") : x.live ? "live" : x.r.id && nextI === x.i - 1 ? "next" : ""; return `<button type="button" class="whseg ${cl}" ${x.done || x.live ? `data-whround="${x.r.id}"` : "disabled"} title="${esc(x.r.name)}${x.res ? ": " + whRes(x.res) : x.live ? ": live" : ""}"><small>${x.i}</small></button>`; }).join("");
   let status;
@@ -3708,7 +3708,7 @@ setTimeout(() => {
 .whkick2{font:700 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}.whop h3,.whgame h3{margin:6px 0}.whop h3{font-size:20px}.whmoves{display:flex;flex-wrap:wrap;gap:4px 8px;font:600 14px var(--mono);margin:8px 0}.whmoves small{opacity:.5;margin-right:2px}.whmoves .bk{color:var(--gold)}.whtheory{height:6px;border-radius:99px;background:var(--line);overflow:hidden}.whtheory i{display:block;height:100%;background:linear-gradient(90deg,#e8c35a,#4fc27a);animation:whgrow 1.2s ease both}
 .whgt{display:flex;justify-content:space-between;align-items:center}.whgame .whspark{height:48px;width:100%;margin:8px 0;border-radius:10px;background:#0d1220;color:#f4f1ea}
 
-.whcity{position:absolute;inset:0;z-index:-2;background:url(img/geneva.jpg) center 60%/cover;opacity:.5;animation:whken 36s ease-in-out infinite alternate}@keyframes whken{to{transform:scale(1.12) translateX(-2%)}}
+.whcity{position:absolute;inset:0;z-index:-2;background:url(lab/img/geneva.jpg) center 60%/cover;opacity:.5;animation:whken 36s ease-in-out infinite alternate}@keyframes whken{to{transform:scale(1.12) translateX(-2%)}}
 .whhero{background:linear-gradient(180deg,#0d1220cc 0%,#0d122080 35%,#0d1220f2 100%),radial-gradient(100% 80% at 85% 10%,#5a3a1a66 0%,transparent 55%),#0d1220!important}
 .whplayer .whpic{position:relative;display:grid;place-items:center;width:100%;aspect-ratio:3/4;max-height:330px;border-radius:16px;overflow:hidden;background:#0d1220}.whplayer .whpic .cpf{opacity:.6}.whplayer .whpic:after{content:"";position:absolute;inset:0;background:var(--img) center 15%/cover;-webkit-mask:linear-gradient(#000 62%,transparent);mask:linear-gradient(#000 62%,transparent);transition:transform .8s cubic-bezier(.2,.8,.2,1)}.whplayer:hover .whpic:after{transform:scale(1.07)}
 .whplayer.g .whpic:after{background-position:center 12%}.whplayer.s .whpic:after{background-position:center 20%}
@@ -4771,7 +4771,8 @@ function labRoute() {
   }
   labHome();
 }
-const labClose = () => { if (window.parent !== window) window.parent.postMessage({ ub: "labclose" }, location.origin); else location.href = "../"; };
+const labClose = () => { if (window.opener) { window.close(); return; } location.href = "./#w-chess"; };   /* a tab opened over an online game just closes */
+if (typeof Install !== "undefined") Install.show = () => {};   /* ballknowledge's install prompt does not belong here */
 document.getElementById("labClose").addEventListener("click", labClose);
 addEventListener("keydown", (e) => { if (e.key === "Escape" && !/INPUT|TEXTAREA/.test(e.target.tagName || "")) labClose(); });
 addEventListener("hashchange", labRoute);

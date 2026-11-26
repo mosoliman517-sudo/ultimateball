@@ -1,17 +1,15 @@
-/* ================= the end-of-game summary card (as on ballknowledge) and the door to the chess room (docs/lab/) =================
+/* ================= the end-of-game summary card (as on ballknowledge) and the door to the chess room (docs/chessroom.html) =================
    The card counts your moves with a quick Stockfish pass; the full Game review searches deeper, so its numbers can differ. */
 const Lab = {
-  el: null,
+  /* the chess room is its own page (the site does not allow itself to be framed). Over a live online game it opens in a new tab, so the room stays open. */
   open(hash, game) {
-    this.close(); Voice.stop();
+    Voice.stop();
     if (game) { try { sessionStorage.setItem("ub_review", JSON.stringify(game)); } catch (e) { /* blocked: the review asks for a game */ } }
-    const f = document.createElement("iframe"); f.className = "labframe"; f.title = "Chess room"; f.src = "lab/index.html#" + hash; f.allow = "autoplay";
-    document.body.appendChild(f); document.body.classList.add("labopen"); this.el = f; f.addEventListener("load", () => { try { f.contentWindow.focus(); } catch (e) { /* fine */ } });
+    const url = "chessroom.html#" + hash;
+    if (CP.s && CP.s.mode === "online" && ChessNet.code && window.open(url, "_blank")) return;
+    location.href = url;
   },
-  close() { if (this.el) this.el.remove(); this.el = null; document.body.classList.remove("labopen"); },
 };
-addEventListener("message", (e) => { if (e.origin === location.origin && e.data && e.data.ub === "labclose") Lab.close(); });
-addEventListener("hashchange", () => Lab.close());
 
 const cpGameFor = (s) => ({ sans: s.c.history(), color: s.mode !== "duo" ? s.you : "w", names: s.mode !== "duo" ? ((o) => (s.you === "w" ? ["You", o] : [o, "You"]))(s.mode === "solo" ? cpOpp(s.bot).name : s.oppName) : NAMES().slice(0, 2) });
 

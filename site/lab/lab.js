@@ -27,7 +27,8 @@ function labRoute() {
   }
   labHome();
 }
-const labClose = () => { if (window.parent !== window) window.parent.postMessage({ ub: "labclose" }, location.origin); else location.href = "../"; };
+const labClose = () => { if (window.opener) { window.close(); return; } location.href = "./#w-chess"; };   /* a tab opened over an online game just closes */
+if (typeof Install !== "undefined") Install.show = () => {};   /* ballknowledge's install prompt does not belong here */
 document.getElementById("labClose").addEventListener("click", labClose);
 addEventListener("keydown", (e) => { if (e.key === "Escape" && !/INPUT|TEXTAREA/.test(e.target.tagName || "")) labClose(); });
 addEventListener("hashchange", labRoute);

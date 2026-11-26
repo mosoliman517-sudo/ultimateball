@@ -1,5 +1,5 @@
 """
-Builds docs/lab/: ballknowledge's own chess screens that the user asked to have here (game review with import from
+Builds docs/chessroom.html and docs/lab/: ballknowledge's own chess screens that the user asked to have here (game review with import from
 chess.com, Lichess or PGN, the position games and the World Championship hub), taken from its public build (read only).
     python3 pipelines/chess_lab.py
 Run it again after ballknowledge rebuilds its chess page. site/lab/lab.js and lab.css are added on top.
@@ -11,6 +11,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BK = os.path.expanduser("~/Desktop/football-prediction-model")
 SRC = os.path.join(BK, "docs", "chess")
 OUT = os.path.join(ROOT, "docs", "lab")
+PAGE = os.path.join(ROOT, "docs", "chessroom.html")   # beside the site, not lab/index.html: the host drops "index.html" and the paths would break
 rd = lambda *p: open(os.path.join(*p), encoding="utf-8").read()
 
 
@@ -61,10 +62,13 @@ def main():
     json.dump(keep, open(os.path.join(OUT, "voice", "index.json"), "w"), ensure_ascii=False)
 
     # the code: our own front door instead of ballknowledge's, no splash
-    app = swap(app, 'const BASE = "../voice/";', 'const BASE = "voice/";')
+    app = swap(app, 'const BASE = "../voice/";', 'const BASE = "lab/voice/";')
+    app = swap(app, '"../engine/stockfish-17.1-lite-single.js"', '"engine/stockfish-17.1-lite-single.js"')
+    app = app.replace("url(img/", "url(lab/img/")
+    assert "url(lab/img/" in app, "championship pictures not found"
     app = swap(app, "\nhome();\nrunSplash();", "\n" + rd(ROOT, "site", "lab", "lab.js"))
     ev_name = hashed("events", events)
-    data = swap(data, names["events"], ev_name)
+    data = swap(data, names["events"], "lab/" + ev_name)
     app_name, data_name = hashed("app", app), hashed("data", data)
 
     # the page: no app install, no ballknowledge branding, splash gone, our styles on top
@@ -80,12 +84,12 @@ def main():
     html = re.sub(r'<div class="foot">.*?</div>', '<div class="foot">Brought over from ballknowledge. Games and puzzles: Lichess (CC0). Player facts: Wikidata; photos: Wikimedia Commons. '
                   'Engine: Stockfish (GPL-3). Not affiliated with Lichess, FIDE or any player.</div>', html, count=1, flags=re.S)
     for k, new in (("app", app_name), ("data", data_name)):
-        html = swap(html, names[k], new, 9)
+        html = swap(html, names[k], "lab/" + new, 9)
     html = swap(html, "</html>", "<style>" + rd(ROOT, "site", "lab", "lab.css") + "</style></html>")
     assert "supabase.co/" not in html and "lkawhxog" not in html + app + data, "ballknowledge's database address is still there"
-    open(os.path.join(OUT, "index.html"), "w", encoding="utf-8").write(html)
+    open(PAGE, "w", encoding="utf-8").write(html)
 
-    size = sum(os.path.getsize(os.path.join(d, f)) for d, _, fs in os.walk(OUT) for f in fs)
+    size = os.path.getsize(PAGE) + sum(os.path.getsize(os.path.join(d, f)) for d, _, fs in os.walk(OUT) for f in fs)
     clips = len(set(keep.values()))
     print(f"docs/lab: {size / 1e6:.1f} MB, {clips} coach clips")
 
