@@ -23,7 +23,7 @@ const Engine = {
     return new Promise((res) => { this.cb = res; this.w.postMessage("setoption name Skill Level value " + skill); this.w.postMessage("position fen " + fen); this.w.postMessage("go movetime " + ms); });
   },
 };
-const CP = { s: null };
+const CP = { s: null, games: 0 };
 /* who you can play: the characters brought over from ballknowledge (site/bk_bots.js), and plain Stockfish at full strength */
 const CPOPP = [...BKBots.BOTS.map((b) => ({ ...b, elo: BKBots.ELO[b.id] })),
   { id: "stockfish", name: "Stockfish", tag: "Full strength", style: ["No character", "No mercy"], desc: "The engine on its own, as strong as it gets in a browser." }];
@@ -61,10 +61,28 @@ const CPTEMPO = { pip: [1200, 2600], arteta: [2200, 4800], berserker: [1100, 260
 function cpThinkMs(s) {
   const [lo, hi] = CPTEMPO[s.bot] || [1500, 3000], n = s.c.history().length, last = s.c.history({ verbose: true }).pop();
   let ms = lo + Math.random() * (hi - lo);
-  if (n < 8) ms *= 0.65; else if (last && last.captured) ms *= 0.7; else if (n > 14 && Math.random() < 0.12) ms += 2500;
+  const sharp = s.c.in_check() || s.c.moves({ verbose: true }).filter((m) => m.captured || /\+/.test(m.san)).length >= 4;   /* checks and many captures */
+  if (sharp) ms = ms * 1.35 + 500; else if (n < 8) ms *= 0.65; else if (last && last.captured) ms *= 0.7;   /* a simple recapture is quick */
+  if (!sharp && n > 14 && Math.random() < 0.1) ms += 1500;
   if (s.c.moves().length === 1) ms = 900;
-  ms = Math.max(1000, ms);
+  ms = Math.min(4500, Math.max(1000, ms));
   return s.clock ? Math.min(ms, Math.max(300, s.ms[s.c.turn()] / 30)) : ms;   /* never think itself out of time */
+}
+/* ---------- update the screen in place: only what changed is touched, so the board never redraws or jumps ---------- */
+function cpMorph(a, b) {
+  if (a.nodeType !== b.nodeType || a.nodeName !== b.nodeName) return a.replaceWith(b);
+  if (a.nodeType !== 1) { if (a.nodeValue !== b.nodeValue) a.nodeValue = b.nodeValue; return; }
+  for (const { name } of [...a.attributes]) if (!b.hasAttribute(name) && name !== "open") a.removeAttribute(name);   /* a tip you opened stays open */
+  for (const { name, value } of [...b.attributes]) if (a.getAttribute(name) !== value) a.setAttribute(name, value);
+  const was = [...a.childNodes], now = [...b.childNodes];
+  now.forEach((n, i) => (was[i] ? cpMorph(was[i], n) : a.appendChild(n)));
+  was.slice(now.length).forEach((n) => n.remove());
+}
+/* put a chess screen in the room: the same screen is patched, a different one replaces it */
+function cpPaint(html) {
+  const t = document.createElement("template"); t.innerHTML = html;
+  const next = t.content.firstElementChild, old = $("#room > .cpwrap");
+  if (old && old.dataset.view === next.dataset.view) cpMorph(old, next); else $("#room").innerHTML = html;
 }
 /* the piece that just moved glides from its old square (the rook too, when castling) */
 function cpSlide(from, to) {
@@ -94,13 +112,13 @@ function newChessPlay(mode, bot) {
   Voice.stop();
   if (mode === "solo" && !bot) { CP.s = null; return renderOpponents(); }
   const p = prof(), you = mode === "solo" ? (p.lastColor === "w" ? "b" : "w") : "w"; p.lastColor = you; if (bot) p.chessBot = bot; saveProf();
-  const s = (CP.s = { mode, c: new Chess(), you, sel: null, targets: [], last: null, think: false, over: null, bot: mode === "solo" ? bot : null, say: null, talk: BKBots.TALK.fresh(false), note: "" });
+  const s = (CP.s = { id: ++CP.games, mode, c: new Chess(), you, sel: null, targets: [], last: null, think: false, over: null, bot: mode === "solo" ? bot : null, say: null, talk: BKBots.TALK.fresh(false), note: "" });
   s.clock = mode === "solo" ? p.chessClock || 0 : 0; s.ms = { w: s.clock * 1000, b: s.clock * 1000 }; s.stamp = performance.now();
   if (s.clock) s.timer = setInterval(() => cpTick(s), 100);
   if (mode === "solo") Engine.boot();
   s.think = mode === "solo" && you === "b";
   renderChess();
-  const card = $(".cpwrap"); if (card) card.scrollIntoView({ block: "start" });
+  const card = $(".cpwrap"); if (card) scrollTo({ top: card.getBoundingClientRect().top + scrollY - 4, behavior: "instant" });   /* once, at the start: both players on screen */
   if (s.think) setTimeout(cpEngine, 400);
   if (cpTalks(s)) setTimeout(() => { if (CP.s === s) cpSay("start", () => { if (!s.over && s.c.history().length < 6) cpSay("rival", () => { const y = s.say; if (y && y.face !== s.bot && s.bot !== "council") { s.say = null; const el = $("#cpSay"); if (el) el.innerHTML = cpSayHTML(s); } }); }); }, 900);
 }
@@ -180,9 +198,9 @@ function renderChess() {
   const status = s.over ? "" : s.think ? `${esc(opp.name)} is thinking…` : c.in_check() ? "Check!" : solo ? (c.turn() === s.you ? "Your move." : "") : `${esc(who(c.turn()))} to move.`;
   const moves = c.history(); let ml = ""; for (let i = 0; i < moves.length; i += 2) ml += `<span><small>${i / 2 + 1}.</small> ${esc(moves[i])} ${moves[i + 1] ? esc(moves[i + 1]) : ""}</span>`;
   const over = s.over ? `<div class="cpover ${s.over.cls}"><h3>${esc(s.over.title)}</h3><p class="fine">${esc(s.over.why)}</p><div class="row" style="justify-content:center;gap:8px"><button class="btn" id="cpAgain" type="button">Play again</button>${solo ? `<button class="btn ghost" id="cpChange" type="button">Change opponent</button>` : ""}<button class="btn ghost" id="cpReview" type="button">Review game</button></div></div>` : "";
-  $("#room").innerHTML = `<div class="card cpwrap ${cpTalks(s) ? "vsbot" : ""}">${gamesBar(solo ? `Play chess · ${esc(opp.name)}` : "Play chess · two players")}${cpTalks(s) ? `<div class="cpsay" id="cpSay" role="status">${cpSayHTML(s)}</div>` : ""}${bar(top)}<div class="cpboard">${chessBoard(s)}${over}${s.promo ? `<div class="cppromo" role="dialog" aria-label="Choose a piece">${["q", "r", "b", "n"].map((k) => `<button type="button" data-promo="${k}" aria-label="${{ q: "Queen", r: "Rook", b: "Bishop", n: "Knight" }[k]}"><i class="pcz pc-${c.turn()}${k}"></i></button>`).join("")}<button type="button" class="btn ghost" data-promo="x">Cancel</button></div>` : ""}</div>${bar(bottom)}
+  cpPaint(`<div class="card cpwrap ${cpTalks(s) ? "vsbot" : ""}" data-view="game${s.id}">${gamesBar(solo ? `Play chess · ${esc(opp.name)}` : "Play chess · two players")}${cpTalks(s) ? `<div class="cpsay" id="cpSay" role="status">${cpSayHTML(s)}</div>` : ""}${bar(top)}<div class="cpboard">${chessBoard(s)}${over}${s.promo ? `<div class="cppromo" role="dialog" aria-label="Choose a piece">${["q", "r", "b", "n"].map((k) => `<button type="button" data-promo="${k}" aria-label="${{ q: "Queen", r: "Rook", b: "Bishop", n: "Knight" }[k]}"><i class="pcz pc-${c.turn()}${k}"></i></button>`).join("")}<button type="button" class="btn ghost" data-promo="x">Cancel</button></div>` : ""}</div>${bar(bottom)}
     <div class="row" style="justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:8px"><span class="fine">${s.note ? esc(s.note) + " " : ""}${status}</span><span class="row" style="gap:6px">${solo && !s.over ? `<button class="btn ghost" id="cpChange" type="button">Opponent</button>` : ""}<button class="btn ghost" id="cpUndo" type="button" ${moves.length < (solo && s.you === "b" ? 2 : 1) || s.think || s.over ? "disabled" : ""}>Undo</button>${solo ? "" : `<button class="btn ghost" id="cpDraw" type="button" ${s.over ? "disabled" : ""}>Draw</button>`}<button class="btn ghost" id="cpResign" type="button" ${s.over ? "disabled" : ""}>Resign</button></span></div>
-    <div class="cpmoves">${ml || `<span class="fine">${solo ? `You have ${s.you === "w" ? "White" : "Black"}. Tap a piece, then a square.` : "White starts. Tap a piece, then a square. Pass the device after each move."}</span>`}</div><p class="fine" style="margin-top:8px">Engine: Stockfish (free software, GPL), running in your browser. Pieces: cburnett set (CC BY-SA 3.0).</p></div>`;
+    <div class="cpmoves">${ml || `<span class="fine">${solo ? `You have ${s.you === "w" ? "White" : "Black"}. Tap a piece, then a square.` : "White starts. Tap a piece, then a square. Pass the device after each move."}</span>`}</div><p class="fine" style="margin-top:8px">Engine: Stockfish (free software, GPL), running in your browser. Pieces: cburnett set (CC BY-SA 3.0).</p></div>`);
   const ml2 = $(".cpmoves"); if (ml2) ml2.scrollLeft = ml2.scrollWidth;
   cpAnimate(s);
 }

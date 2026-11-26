@@ -20,7 +20,7 @@ const Train = {
     const d = this.data();
     return `<div class="trstrip">${[["puzzles", "Puzzles", `Your puzzle rating: ${d.r} · ${d.solved} solved`], ["rush", "Puzzle rush", `3 minutes, 3 strikes · best ${d.rush}`], ["endgames", "Endgame trainer", `${Object.keys(d.eg).length}/${ENDGAMES.length} done`]].map(([k, n, t]) => `<button type="button" class="contbar caldoor chessdoor" data-train="${k}"><div><span class="dk">Training</span><b>${n}</b><span class="fine">${t}</span></div></button>`).join("")}</div>`;
   },
-  frame(title, body) { const s = this.s; if (s && s.last && s.c) queueMicrotask(() => { if (this.s === s) cpAnimate(s); }); $("#room").innerHTML = `<div class="card cpwrap trwrap"><div class="row" style="margin-bottom:12px;gap:10px"><button class="btn ghost" type="button" data-train="back">← Back</button><h2 style="font-size:24px">${title}</h2></div>${body}</div>`; },
+  frame(title, body) { const s = this.s; if (s && s.last && s.c) queueMicrotask(() => { if (this.s === s) cpAnimate(s); }); cpPaint(`<div class="card cpwrap trwrap" data-view="train:${esc(title)}"><div class="row" style="margin-bottom:12px;gap:10px"><button class="btn ghost" type="button" data-train="back">← Back</button><h2 style="font-size:24px">${title}</h2></div>${body}</div>`); },
   open(kind) {
     this.stop(); stopQuiz(); Q.s = null; H.s = null; CP.s = null; S.game = null; document.body.classList.add("ingame"); Snd.mode("game");
     if (typeof Chess === "undefined") return this.frame("Training", "<p>The chess rules could not load (offline?). Try again in a moment.</p>");
