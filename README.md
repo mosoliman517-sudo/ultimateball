@@ -100,3 +100,6 @@ move rules, faces, measured ratings, lines and recorded voices; they replace the
 `docs/voice_bk/`. Change a character in ballknowledge, then run it again, then `python3 build.py`.
 `site/chessplay.js` holds the opponent screen and the speech bubble. The same screen picks the clock (none, 3, 5 or 10 minutes each, solo only). It starts after both first moves; running out
 loses, or draws if the other side has too little left to mate. Undo does not give time back.
+
+Bots take their time (`CPTEMPO` in `site/chessplay.js`; less when their clock is low). Pieces can be dragged or
+tapped; promotion asks for the piece; Resign, Opponent and Back ask for a second tap in a running game.

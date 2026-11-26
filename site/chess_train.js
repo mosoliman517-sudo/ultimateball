@@ -20,7 +20,7 @@ const Train = {
     const d = this.data();
     return `<div class="trstrip">${[["puzzles", "Puzzles", `Your puzzle rating: ${d.r} · ${d.solved} solved`], ["rush", "Puzzle rush", `3 minutes, 3 strikes · best ${d.rush}`], ["endgames", "Endgame trainer", `${Object.keys(d.eg).length}/${ENDGAMES.length} done`]].map(([k, n, t]) => `<button type="button" class="contbar caldoor chessdoor" data-train="${k}"><div><span class="dk">Training</span><b>${n}</b><span class="fine">${t}</span></div></button>`).join("")}</div>`;
   },
-  frame(title, body) { $("#room").innerHTML = `<div class="card cpwrap trwrap"><div class="row" style="margin-bottom:12px;gap:10px"><button class="btn ghost" type="button" data-train="back">← Back</button><h2 style="font-size:24px">${title}</h2></div>${body}</div>`; },
+  frame(title, body) { const s = this.s; if (s && s.last && s.c) queueMicrotask(() => { if (this.s === s) cpAnimate(s); }); $("#room").innerHTML = `<div class="card cpwrap trwrap"><div class="row" style="margin-bottom:12px;gap:10px"><button class="btn ghost" type="button" data-train="back">← Back</button><h2 style="font-size:24px">${title}</h2></div>${body}</div>`; },
   open(kind) {
     this.stop(); stopQuiz(); Q.s = null; H.s = null; CP.s = null; S.game = null; document.body.classList.add("ingame"); Snd.mode("game");
     if (typeof Chess === "undefined") return this.frame("Training", "<p>The chess rules could not load (offline?). Try again in a moment.</p>");
@@ -38,7 +38,7 @@ const Train = {
     if (!pool.length) { s.used.clear(); pool = PZ.map((p, i) => i); }
     const i = rnd(pool); s.used.add(i); const [fen, moves, rating, theme] = PZ[i], c = new Chess(fen), line = moves.split(" ");
     Object.assign(s, { c, line, at: 0, rating, theme, sel: null, targets: [], last: null, think: true, over: null, failed: false, done: false, msg: "", mode: "solo", you: c.turn() === "w" ? "b" : "w" });
-    this.paint(); const key = line; setTimeout(() => { if (this.s !== s || s.line !== key) return; this.play(line[0]); s.at = 1; s.think = false; this.paint(); }, s.kind === "rush" ? 300 : 650);
+    this.paint(); const key = line; setTimeout(() => { if (this.s !== s || s.line !== key) return; this.play(line[0]); s.at = 1; s.think = false; this.paint(); }, s.kind === "rush" ? 500 : 1000);
   },
   play(u) { const s = this.s, m = s.c.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || "q" }); if (m) { s.last = [m.from, m.to]; Snd.tick(); } return m; },
   paint() {
@@ -64,7 +64,7 @@ const Train = {
     s.last = [from, to]; s.at++; Snd.tick();
     if (s.at >= s.line.length || s.c.in_checkmate()) return this.solved();
     s.think = true; s.msg = "Good. Keep going."; this.paint(); const key = s.line;
-    setTimeout(() => { if (this.s !== s || s.line !== key) return; this.play(s.line[s.at]); s.at++; s.think = false; if (s.at >= s.line.length) return this.solved(); this.paint(); }, 350);
+    setTimeout(() => { if (this.s !== s || s.line !== key) return; this.play(s.line[s.at]); s.at++; s.think = false; if (s.at >= s.line.length) return this.solved(); this.paint(); }, s.kind === "rush" ? 500 : 900);
   },
   rate(win) {   // an Elo step once per puzzle: a hint, a wrong move or the solution counts as a miss
     const s = this.s, d = this.data(); if (s.kind !== "puzzles" || s.failed) return; if (!win) s.failed = true;
@@ -118,7 +118,7 @@ const Train = {
   async egMove(from, to) {
     const s = this.s; if (!s.c.move({ from, to, promotion: "q" })) return; s.last = [from, to]; s.n++; Snd.tick();
     if (this.egCheck()) return; s.think = true; this.egPaint(); const fen = s.c.fen();
-    const u = await Engine.best(fen, 20, 600); if (this.s !== s || s.c.fen() !== fen) return;
+    const [u] = await Promise.all([Engine.best(fen, 20, 600), new Promise((r) => setTimeout(r, 1000 + Math.random() * 800))]); if (this.s !== s || s.c.fen() !== fen) return;
     let m = u && u !== "(none)" ? s.c.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || "q" }) : null;
     if (!m) { const all = s.c.moves({ verbose: true }); m = s.c.move(all.find((x) => x.captured) || rnd(all)); }
     s.think = false; if (m) s.last = [m.from, m.to]; if (!this.egCheck()) this.egPaint();

@@ -56,6 +56,39 @@ function cpTick(s) {
   if (cpCharge(s)) { clearInterval(s.timer); return; }
   document.querySelectorAll(".cpclk").forEach((el) => { const v = s.ms[el.dataset.side]; el.textContent = cpTime(v); el.classList.toggle("low", v < 20000); });
 }
+/* ---------- how long a bot takes: each has its own tempo; quicker in the opening, after a capture or with one legal move ---------- */
+const CPTEMPO = { pip: [1200, 2600], arteta: [2200, 4800], berserker: [1100, 2600], bea: [2000, 4200], trader: [1500, 3400], escaped: [900, 4000], council: [2800, 5600], vera: [2200, 4400], stockfish: [1500, 3200] };
+function cpThinkMs(s) {
+  const [lo, hi] = CPTEMPO[s.bot] || [1500, 3000], n = s.c.history().length, last = s.c.history({ verbose: true }).pop();
+  let ms = lo + Math.random() * (hi - lo);
+  if (n < 8) ms *= 0.65; else if (last && last.captured) ms *= 0.7; else if (n > 14 && Math.random() < 0.12) ms += 2500;
+  if (s.c.moves().length === 1) ms = 900;
+  ms = Math.max(1000, ms);
+  return s.clock ? Math.min(ms, Math.max(300, s.ms[s.c.turn()] / 30)) : ms;   /* never think itself out of time */
+}
+/* the piece that just moved glides from its old square (the rook too, when castling) */
+function cpSlide(from, to) {
+  const a = document.querySelector(`.cpwrap [data-csq="${from}"]`), b = document.querySelector(`.cpwrap [data-csq="${to}"]`), p = b && b.querySelector(".pcz");
+  if (!a || !p || !p.animate || (typeof REDUCED !== "undefined" && REDUCED)) return;
+  const x = a.getBoundingClientRect(), y = b.getBoundingClientRect();
+  p.style.zIndex = 4; p.animate([{ transform: `translate(${x.left - y.left}px, ${x.top - y.top}px)` }, { transform: "none" }], { duration: 220, easing: "ease-out" });
+}
+function cpAnimate(s) {
+  const key = s.c.fen() + String(s.last);
+  if (!s.last || s.slid === key) return; s.slid = key;
+  if (s.dropped) { s.dropped = false; return; }   /* you dragged it there yourself */
+  cpSlide(s.last[0], s.last[1]);
+  const king = s.c.get(s.last[1]);
+  if (king && king.type === "k" && Math.abs(s.last[0].charCodeAt(0) - s.last[1].charCodeAt(0)) === 2) { const r = s.last[1][1], short = s.last[1][0] === "g"; cpSlide((short ? "h" : "a") + r, (short ? "f" : "d") + r); }
+}
+/* resigning or walking out of a running game takes a second tap */
+function cpSure(btn, label) {
+  if (btn.dataset.sure) return true;
+  const was = btn.textContent; btn.dataset.sure = "1"; btn.textContent = label; btn.classList.add("cpwarn");
+  setTimeout(() => { if (btn.isConnected) { delete btn.dataset.sure; btn.textContent = was; btn.classList.remove("cpwarn"); } }, 3000);
+  return false;
+}
+const cpRunning = () => { const s = CP.s; return !!(s && !s.over && s.c.history().length > 1 && $(".cpwrap:not(.trwrap)")); };
 function newChessPlay(mode, bot) {
   if (typeof Chess === "undefined") { $("#room").innerHTML = `<div class="card">${gamesBar("Play chess")}<p>The chess rules could not load (offline?). Try again in a moment.</p></div>`; return; }
   Voice.stop();
@@ -65,9 +98,11 @@ function newChessPlay(mode, bot) {
   s.clock = mode === "solo" ? p.chessClock || 0 : 0; s.ms = { w: s.clock * 1000, b: s.clock * 1000 }; s.stamp = performance.now();
   if (s.clock) s.timer = setInterval(() => cpTick(s), 100);
   if (mode === "solo") Engine.boot();
+  s.think = mode === "solo" && you === "b";
   renderChess();
-  if (mode === "solo" && you === "b") setTimeout(cpEngine, 400);
-  if (cpTalks(s)) setTimeout(() => { if (CP.s === s) cpSay("start", () => { if (!s.over && s.c.history().length < 6) cpSay("rival"); }); }, 900);
+  const card = $(".cpwrap"); if (card) card.scrollIntoView({ block: "start" });
+  if (s.think) setTimeout(cpEngine, 400);
+  if (cpTalks(s)) setTimeout(() => { if (CP.s === s) cpSay("start", () => { if (!s.over && s.c.history().length < 6) cpSay("rival", () => { const y = s.say; if (y && y.face !== s.bot && s.bot !== "council") { s.say = null; const el = $("#cpSay"); if (el) el.innerHTML = cpSayHTML(s); } }); }); }, 900);
 }
 function renderOpponents() {
   const p = prof(), rec = p.chessVs || {};
@@ -140,15 +175,16 @@ function renderChess() {
   const s = CP.s, c = s.c, names = NAMES(), solo = s.mode === "solo", opp = solo ? cpOpp(s.bot) : null;
   const who = (col) => (solo ? (col === s.you ? prof().nick || "You" : opp.name + (opp.elo ? ` · ${opp.elo}` : "")) : names[col === "w" ? 0 : 1]);
   const lost = (col) => capturedOf(c, col), mat = (col) => lost(col === "w" ? "b" : "w").reduce((a, t) => a + PVAL[t], 0) - lost(col).reduce((a, t) => a + PVAL[t], 0);
-  const bar = (col) => `<div class="cpbar ${c.turn() === col && !s.over ? "on" : ""}"><span class="cpdot ${col}"></span><b>${esc(who(col))}</b><span class="cpcap">${lost(col === "w" ? "b" : "w").map((t) => `<i class="pcz pc-${col === "w" ? "b" : "w"}${t}"></i>`).join("")}${mat(col) > 0 ? ` +${mat(col)}` : ""}</span>${s.clock ? `<span class="cpclk num ${s.ms[col] < 20000 ? "low" : ""}" data-side="${col}">${cpTime(s.ms[col])}</span>` : ""}</div>`;
+  const bar = (col) => `<div class="cpbar ${c.turn() === col && !s.over ? "on" : ""}"><span class="cpdot ${col}"></span><b>${esc(who(col))}</b>${solo && s.think && col !== s.you ? `<span class="cpthink" aria-label="thinking"><i></i><i></i><i></i></span>` : ""}<span class="cpcap">${lost(col === "w" ? "b" : "w").map((t) => `<i class="pcz pc-${col === "w" ? "b" : "w"}${t}"></i>`).join("")}${mat(col) > 0 ? ` +${mat(col)}` : ""}</span>${s.clock ? `<span class="cpclk num ${s.ms[col] < 20000 ? "low" : ""}" data-side="${col}">${cpTime(s.ms[col])}</span>` : ""}</div>`;
   const top = solo ? (s.you === "w" ? "b" : "w") : "b", bottom = top === "w" ? "b" : "w";
   const status = s.over ? "" : s.think ? `${esc(opp.name)} is thinking…` : c.in_check() ? "Check!" : solo ? (c.turn() === s.you ? "Your move." : "") : `${esc(who(c.turn()))} to move.`;
   const moves = c.history(); let ml = ""; for (let i = 0; i < moves.length; i += 2) ml += `<span><small>${i / 2 + 1}.</small> ${esc(moves[i])} ${moves[i + 1] ? esc(moves[i + 1]) : ""}</span>`;
   const over = s.over ? `<div class="cpover ${s.over.cls}"><h3>${esc(s.over.title)}</h3><p class="fine">${esc(s.over.why)}</p><div class="row" style="justify-content:center;gap:8px"><button class="btn" id="cpAgain" type="button">Play again</button>${solo ? `<button class="btn ghost" id="cpChange" type="button">Change opponent</button>` : ""}<button class="btn ghost" id="cpReview" type="button">Review game</button></div></div>` : "";
-  $("#room").innerHTML = `<div class="card cpwrap ${cpTalks(s) ? "vsbot" : ""}">${gamesBar(solo ? `Play chess · ${esc(opp.name)}` : "Play chess · two players")}${cpTalks(s) ? `<div class="cpsay" id="cpSay" role="status">${cpSayHTML(s)}</div>` : ""}${bar(top)}<div class="cpboard">${chessBoard(s)}${over}</div>${bar(bottom)}
-    <div class="row" style="justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:8px"><span class="fine">${s.note ? esc(s.note) + " " : ""}${status}</span><span class="row" style="gap:6px">${solo && !s.over ? `<button class="btn ghost" id="cpChange" type="button">Opponent</button>` : ""}<button class="btn ghost" id="cpUndo" type="button" ${!moves.length || s.think || s.over ? "disabled" : ""}>Undo</button><button class="btn ghost" id="cpResign" type="button" ${s.over ? "disabled" : ""}>${solo ? "Resign" : "Offer draw / resign"}</button></span></div>
+  $("#room").innerHTML = `<div class="card cpwrap ${cpTalks(s) ? "vsbot" : ""}">${gamesBar(solo ? `Play chess · ${esc(opp.name)}` : "Play chess · two players")}${cpTalks(s) ? `<div class="cpsay" id="cpSay" role="status">${cpSayHTML(s)}</div>` : ""}${bar(top)}<div class="cpboard">${chessBoard(s)}${over}${s.promo ? `<div class="cppromo" role="dialog" aria-label="Choose a piece">${["q", "r", "b", "n"].map((k) => `<button type="button" data-promo="${k}" aria-label="${{ q: "Queen", r: "Rook", b: "Bishop", n: "Knight" }[k]}"><i class="pcz pc-${c.turn()}${k}"></i></button>`).join("")}<button type="button" class="btn ghost" data-promo="x">Cancel</button></div>` : ""}</div>${bar(bottom)}
+    <div class="row" style="justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:8px"><span class="fine">${s.note ? esc(s.note) + " " : ""}${status}</span><span class="row" style="gap:6px">${solo && !s.over ? `<button class="btn ghost" id="cpChange" type="button">Opponent</button>` : ""}<button class="btn ghost" id="cpUndo" type="button" ${moves.length < (solo && s.you === "b" ? 2 : 1) || s.think || s.over ? "disabled" : ""}>Undo</button>${solo ? "" : `<button class="btn ghost" id="cpDraw" type="button" ${s.over ? "disabled" : ""}>Draw</button>`}<button class="btn ghost" id="cpResign" type="button" ${s.over ? "disabled" : ""}>Resign</button></span></div>
     <div class="cpmoves">${ml || `<span class="fine">${solo ? `You have ${s.you === "w" ? "White" : "Black"}. Tap a piece, then a square.` : "White starts. Tap a piece, then a square. Pass the device after each move."}</span>`}</div><p class="fine" style="margin-top:8px">Engine: Stockfish (free software, GPL), running in your browser. Pieces: cburnett set (CC BY-SA 3.0).</p></div>`;
   const ml2 = $(".cpmoves"); if (ml2) ml2.scrollLeft = ml2.scrollWidth;
+  cpAnimate(s);
 }
 function cpRecord(s) {
   const p = prof(), k = s.over.cls === "win" ? "w" : s.over.cls === "loss" ? "l" : "d";
@@ -163,29 +199,33 @@ function cpCheckEnd() {
   if (solo) { cpRecord(s); cpLastWord(); }
   return true;
 }
-function cpMove(from, to) {
-  const s = CP.s; if (cpCharge(s)) return false; const m = s.c.move({ from, to, promotion: "q" }); if (!m) return false;
-  s.last = [from, to]; s.sel = null; s.targets = []; Snd.tick(); if (m.captured) Snd.lock();
+function cpMove(from, to, piece) {
+  const s = CP.s; if (cpCharge(s)) return false;
+  const pawn = s.c.get(from);
+  if (!piece && pawn && pawn.type === "p" && /[18]$/.test(to) && s.c.moves({ square: from, verbose: true }).some((x) => x.to === to)) { s.promo = { from, to }; s.sel = null; s.targets = []; s.dropped = false; renderChess(); return true; }
+  const m = s.c.move({ from, to, promotion: piece || "q" }); if (!m) return false;
+  s.promo = null; s.last = [from, to]; s.sel = null; s.targets = []; Snd.tick(); if (m.captured) Snd.lock();
   if (!cpCheckEnd() && s.mode === "solo" && s.c.turn() !== s.you) { s.think = true; renderChess(); setTimeout(cpEngine, 200); } else renderChess();
   cpWatch();
   return true;
 }
 async function cpEngine() {
-  const s = CP.s; if (!s || s.over || !$(".cpwrap")) return; s.think = true; const fen = s.c.fen(), t0 = performance.now();
+  const s = CP.s; if (!s || s.over || !$(".cpwrap")) return; s.think = true; const fen = s.c.fen(), t0 = performance.now(), want = cpThinkMs(s);
   let mv = null;
   try {
     if (s.bot === "stockfish") { const u = await Engine.best(fen, 20, 1200); if (u && u !== "(none)") mv = { from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] }; }
     else if (s.bot === "pip") mv = BKBots.smallMove(fen);
     else mv = await BKBots.move(BKBots.BOTS.findIndex((b) => b.id === s.bot) + 1, fen);
   } catch (e) { /* the engine failed: handled below */ }
-  const gap = 450 - (performance.now() - t0); if (gap > 0) await new Promise((r) => setTimeout(r, gap));
+  const gap = want - (performance.now() - t0); if (gap > 0) await new Promise((r) => setTimeout(r, gap));
   if (CP.s !== s || s.c.fen() !== fen || s.over || !$(".cpwrap") || cpCharge(s)) return;
   let m = mv ? s.c.move({ from: mv.from, to: mv.to, promotion: mv.promotion || "q" }) : null;
   if (!m) { s.note = "Stockfish could not load, so a much simpler engine is moving."; const x = BKBots.smallMove(fen); m = s.c.move({ from: x.from, to: x.to, promotion: x.promotion || "q" }); }
   s.think = false; if (m) { s.last = [m.from, m.to]; Snd.tick(); } cpCheckEnd(); renderChess(); cpWatch();
 }
 function chessClick(sq) {
-  const s = CP.s; if (!s || s.over || s.think) return; const c = s.c; if (s.mode === "solo" && c.turn() !== s.you) return;
+  const s = CP.s; if (!s || s.over || s.think || s.promo) return; const c = s.c; if (s.mode === "solo" && c.turn() !== s.you) return;
+  if (s.sel === sq) { s.sel = null; s.targets = []; renderChess(); return; }
   if (s.sel && s.targets.includes(sq)) { cpMove(s.sel, sq); return; }
   const pc = c.get(sq); if (pc && pc.color === c.turn()) { s.sel = sq; s.targets = c.moves({ square: sq, verbose: true }).map((m) => m.to); } else { s.sel = null; s.targets = []; }
   renderChess();
@@ -196,8 +236,43 @@ document.addEventListener("click", (e) => {
   if (t.dataset.secs != null) { const p = prof(); p.chessClock = +t.dataset.secs; saveProf(); Snd.tick(); document.querySelectorAll("[data-secs]").forEach((b) => b.setAttribute("aria-pressed", b === t)); return; }
   if (t.dataset.bot) { Snd.tick(); newChessPlay("solo", t.dataset.bot); return; }
   if (!CP.s) return;
+  if (t.dataset.promo) { const s = CP.s, p = s.promo; if (!p) return; s.promo = null; if (t.dataset.promo === "x") renderChess(); else cpMove(p.from, p.to, t.dataset.promo); return; }
+  if (t.id === "cpDraw") { const s = CP.s; if (s.over || !cpSure(t, "Both agree? Tap again")) return; s.over = { cls: "draw", title: "Draw", why: "Agreed." }; renderChess(); return; }
   if (t.id === "cpAgain") { newChessPlay(CP.s.mode, CP.s.bot); return; }
-  if (t.id === "cpChange") { newChessPlay("solo"); return; }
-  if (t.id === "cpUndo") { const s = CP.s; if (cpCharge(s)) return; s.c.undo(); if (s.mode === "solo" && s.c.turn() !== s.you) s.c.undo(); s.sel = null; s.targets = []; s.last = null; const n = s.c.history().length; s.talk.seen = n; s.talk.evals.length = Math.min(s.talk.evals.length, n + 1); s.talk.last = Math.min(s.talk.last, n); s.talk.pending = null; renderChess(); if (s.mode === "solo" && s.c.turn() !== s.you) { s.think = true; renderChess(); setTimeout(cpEngine, 400); } return; }
-  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (s.over || cpCharge(s)) return; if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; cpRecord(s); Mascot.react("ch_loss", true); s.think = false; cpLastWord(); } else s.over = { cls: "draw", title: "Game over", why: "Ended by agreement." }; renderChess(); return; }
+  if (t.id === "cpChange") { if (cpRunning() && !cpSure(t, "Leave this game?")) return; newChessPlay("solo"); return; }
+  if (t.id === "cpUndo") { const s = CP.s; if (cpCharge(s)) return; s.promo = null; s.slid = null; s.c.undo(); if (s.mode === "solo" && s.c.turn() !== s.you) s.c.undo(); s.sel = null; s.targets = []; s.last = null; const n = s.c.history().length; s.talk.seen = n; s.talk.evals.length = Math.min(s.talk.evals.length, n + 1); s.talk.last = Math.min(s.talk.last, n); s.talk.pending = null; renderChess(); if (s.mode === "solo" && s.c.turn() !== s.you) { s.think = true; renderChess(); setTimeout(cpEngine, 400); } return; }
+  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (s.over || cpCharge(s) || !cpSure(t, "Tap again to resign")) return; s.promo = null; if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; cpRecord(s); Mascot.react("ch_loss", true); s.think = false; cpLastWord(); } else { const names = NAMES(), side = s.c.turn(); s.over = { cls: "win", title: `${names[side === "w" ? 1 : 0]} wins!`, why: `${names[side === "w" ? 0 : 1]} resigned.` }; } renderChess(); return; }
 });
+
+/* "Back" in a running game asks once more (this runs before the page's own Back handler) */
+document.addEventListener("click", (e) => { const t = e.target.closest && e.target.closest("#gamesBack"); if (t && cpRunning() && !cpSure(t, "Leave the game?")) { e.stopPropagation(); e.preventDefault(); } }, true);
+/* ---------- drag and drop, on every board (games, puzzles, endgames): a drag is a press on the piece, then on the square it is dropped on ---------- */
+{
+  let d = null, eat = 0;
+  const at = (sq) => document.querySelector(`.cpwrap [data-csq="${sq}"]`);
+  const end = () => { if (d && d.ghost) { d.ghost.remove(); const o = at(d.from); if (o) o.classList.remove("dragging"); } d = null; };
+  document.addEventListener("pointerdown", (e) => {
+    end(); const sq = e.target.closest && e.target.closest('.cpwrap [data-csq][data-own="1"]'); if (!sq || e.button > 0) return;
+    const p = sq.querySelector(".pcz"); if (!p) return;
+    d = { from: sq.dataset.csq, x: e.clientX, y: e.clientY, id: e.pointerId, cls: p.className, size: sq.getBoundingClientRect().width, ghost: null };
+  });
+  document.addEventListener("pointermove", (e) => {
+    if (!d || e.pointerId !== d.id) return;
+    if (!d.ghost) {
+      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) return;
+      const o = at(d.from); if (!o) return end(); if (!o.classList.contains("sel")) o.click();   /* select it, so the squares it can go to show */
+      d.ghost = Object.assign(document.createElement("b"), { className: d.cls + " cpghost" }); d.ghost.style.width = d.ghost.style.height = d.size * 1.15 + "px"; document.body.appendChild(d.ghost);
+    }
+    const o = at(d.from); if (o) o.classList.add("dragging");
+    d.ghost.style.left = e.clientX - d.size * 0.575 + "px"; d.ghost.style.top = e.clientY - d.size * 0.575 + "px";
+  });
+  document.addEventListener("pointerup", (e) => {
+    if (!d || e.pointerId !== d.id) return; const was = d; end(); if (!was.ghost) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY), sq = el && el.closest(".cpwrap [data-csq]");
+    if (sq && sq.dataset.csq !== was.from) { if (CP.s) CP.s.dropped = true; if (typeof Train !== "undefined" && Train.s) Train.s.dropped = true; sq.click(); if (CP.s) CP.s.dropped = false; }
+    eat = performance.now();
+  });
+  document.addEventListener("pointercancel", end);
+  /* the browser may follow a drag with a click of its own: ignore it */
+  document.addEventListener("click", (e) => { if (e.isTrusted && performance.now() - eat < 60 && e.target.closest && e.target.closest(".cpwrap [data-csq]")) e.stopPropagation(); }, true);
+}
