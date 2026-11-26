@@ -31,12 +31,39 @@ const cpOpp = (id) => CPOPP.find((o) => o.id === id) || CPOPP[0];
 const CPXP = { pip: 20, arteta: 40, berserker: 40, bea: 40, trader: 80, escaped: 80, council: 110, vera: 110, stockfish: 150 };
 const cpFace = (id, mood) => (id === "stockfish" ? `<span class="cpsf">♞</span>` : BKBots.face(id, mood || "calm"));
 const PVAL = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+/* ---------- the clock (solo games), as on ballknowledge: none, 3, 5 or 10 minutes each ---------- */
+const CPCLOCKS = [[0, "No clock"], [180, "3 min"], [300, "5 min"], [600, "10 min"]];
+const cpTime = (ms) => { const t = Math.max(0, ms) / 1000; return t < 20 ? t.toFixed(1) : `${Math.floor(Math.ceil(t) / 60)}:${String(Math.ceil(t) % 60).padStart(2, "0")}`; };
+/* take the time since the last look off the side to move; nothing runs until both sides have made their first move. True if that side's flag fell */
+function cpCharge(s) {
+  const now = performance.now(), gone = now - s.stamp; s.stamp = now;
+  if (!s.clock || s.over || s.c.history().length < 2) return false;
+  const side = s.c.turn(); s.ms[side] -= gone;
+  if (s.ms[side] > 0) return false;
+  s.ms[side] = 0; cpFlag(s, side); return true;
+}
+function cpFlag(s, side) {
+  const winner = side === "w" ? "b" : "w";
+  const left = s.c.board().flat().filter((p) => p && p.color === winner && p.type !== "k").map((p) => p.type);
+  s.think = false; s.sel = null; s.targets = [];
+  if (!left.length || (left.length === 1 && "nb".includes(left[0]))) { s.over = { cls: "draw", title: "Draw", why: "Time ran out, but there is not enough left to mate." }; addXP(10, "chess"); }
+  else if (winner === s.you) { s.over = { cls: "win", title: "You win!", why: "On time." }; Snd.win(); confetti(); addXP(CPXP[s.bot], "chess"); Mascot.react("ch_win", true); if (s.bot === "stockfish") award("elite_win"); }
+  else { s.over = { cls: "loss", title: "You lost on time.", why: "On time." }; Snd.wrong(); Mascot.react("ch_loss", true); }
+  cpRecord(s); renderChess(); cpLastWord();
+}
+function cpTick(s) {
+  if (CP.s !== s || !$(".cpwrap") || s.over) { clearInterval(s.timer); return; }
+  if (cpCharge(s)) { clearInterval(s.timer); return; }
+  document.querySelectorAll(".cpclk").forEach((el) => { const v = s.ms[el.dataset.side]; el.textContent = cpTime(v); el.classList.toggle("low", v < 20000); });
+}
 function newChessPlay(mode, bot) {
   if (typeof Chess === "undefined") { $("#room").innerHTML = `<div class="card">${gamesBar("Play chess")}<p>The chess rules could not load (offline?). Try again in a moment.</p></div>`; return; }
   Voice.stop();
   if (mode === "solo" && !bot) { CP.s = null; return renderOpponents(); }
   const p = prof(), you = mode === "solo" ? (p.lastColor === "w" ? "b" : "w") : "w"; p.lastColor = you; if (bot) p.chessBot = bot; saveProf();
   const s = (CP.s = { mode, c: new Chess(), you, sel: null, targets: [], last: null, think: false, over: null, bot: mode === "solo" ? bot : null, say: null, talk: BKBots.TALK.fresh(false), note: "" });
+  s.clock = mode === "solo" ? p.chessClock || 0 : 0; s.ms = { w: s.clock * 1000, b: s.clock * 1000 }; s.stamp = performance.now();
+  if (s.clock) s.timer = setInterval(() => cpTick(s), 100);
   if (mode === "solo") Engine.boot();
   renderChess();
   if (mode === "solo" && you === "b") setTimeout(cpEngine, 400);
@@ -45,7 +72,7 @@ function newChessPlay(mode, bot) {
 function renderOpponents() {
   const p = prof(), rec = p.chessVs || {};
   const card = (o) => { const r = rec[o.id]; return `<button type="button" class="cpopp ${p.chessBot === o.id ? "on" : ""}" data-bot="${o.id}"><span class="cpav">${cpFace(o.id, "happy")}</span><b>${esc(o.name)}</b><span class="cpelo num">${o.elo || "Max"}<small>${o.elo ? "Elo" : "strength"}</small></span><span class="cptag">${esc(o.tag)}</span><span class="cpstyle">${o.style.map((t) => `<i>${esc(t)}</i>`).join("")}</span><span class="fine">${esc(o.desc)}</span>${r ? `<span class="cprec num">You: ${r.w} won · ${r.d} drawn · ${r.l} lost</span>` : ""}</button>`; };
-  $("#room").innerHTML = `<div class="card">${gamesBar("Choose your opponent")}<p class="sub">Eight characters, each with their own way of playing and their own voice, brought over from ballknowledge. The ratings were measured there from how they play master-game positions (Lichess scale; chess.com runs a little lower at club level).</p><div class="cpgrid">${CPOPP.map(card).join("")}</div></div>`;
+  $("#room").innerHTML = `<div class="card">${gamesBar("Choose your opponent")}<p class="sub">Eight characters, each with their own way of playing and their own voice, brought over from ballknowledge. The ratings were measured there from how they play master-game positions (Lichess scale; chess.com runs a little lower at club level).</p><div class="label">Clock</div><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap" role="group" aria-label="Clock">${CPCLOCKS.map(([sec, n]) => `<button type="button" class="chip" data-secs="${sec}" aria-pressed="${(p.chessClock || 0) === sec}">${n}</button>`).join("")}</div><p class="fine" style="margin-top:6px">Time for each side. The clock starts after both first moves.</p><div class="cpgrid">${CPOPP.map(card).join("")}</div></div>`;
 }
 /* ---------- what the character says ---------- */
 const cpTalks = (s) => s && s.mode === "solo" && !!BKBots.LINES[s.bot];
@@ -98,7 +125,7 @@ function cpWatch() {
 /* the last word, from the character's side */
 function cpLastWord() {
   const s = CP.s; if (!cpTalks(s)) return; const o = s.over, base = o.cls === "win" ? "lose" : o.cls === "loss" ? "win" : "draw", L = BKBots.LINES[s.bot];
-  const k = base === "draw" ? (o.why === "Stalemate." ? "stalemate" : "draw") : o.why === "Checkmate." ? base + "_mate" : base;
+  const k = base === "draw" ? (o.why === "Stalemate." ? "stalemate" : "draw") : o.why === "Checkmate." ? base + "_mate" : o.why === "On time." ? base + "_time" : base;
   setTimeout(() => { if (CP.s === s) cpSay(L[k] ? k : base); }, 600);
 }
 function chessBoard(s) {
@@ -113,7 +140,7 @@ function renderChess() {
   const s = CP.s, c = s.c, names = NAMES(), solo = s.mode === "solo", opp = solo ? cpOpp(s.bot) : null;
   const who = (col) => (solo ? (col === s.you ? prof().nick || "You" : opp.name + (opp.elo ? ` · ${opp.elo}` : "")) : names[col === "w" ? 0 : 1]);
   const lost = (col) => capturedOf(c, col), mat = (col) => lost(col === "w" ? "b" : "w").reduce((a, t) => a + PVAL[t], 0) - lost(col).reduce((a, t) => a + PVAL[t], 0);
-  const bar = (col) => `<div class="cpbar ${c.turn() === col && !s.over ? "on" : ""}"><span class="cpdot ${col}"></span><b>${esc(who(col))}</b><span class="cpcap">${lost(col === "w" ? "b" : "w").map((t) => `<i class="pcz pc-${col === "w" ? "b" : "w"}${t}"></i>`).join("")}${mat(col) > 0 ? ` +${mat(col)}` : ""}</span></div>`;
+  const bar = (col) => `<div class="cpbar ${c.turn() === col && !s.over ? "on" : ""}"><span class="cpdot ${col}"></span><b>${esc(who(col))}</b><span class="cpcap">${lost(col === "w" ? "b" : "w").map((t) => `<i class="pcz pc-${col === "w" ? "b" : "w"}${t}"></i>`).join("")}${mat(col) > 0 ? ` +${mat(col)}` : ""}</span>${s.clock ? `<span class="cpclk num ${s.ms[col] < 20000 ? "low" : ""}" data-side="${col}">${cpTime(s.ms[col])}</span>` : ""}</div>`;
   const top = solo ? (s.you === "w" ? "b" : "w") : "b", bottom = top === "w" ? "b" : "w";
   const status = s.over ? "" : s.think ? `${esc(opp.name)} is thinking…` : c.in_check() ? "Check!" : solo ? (c.turn() === s.you ? "Your move." : "") : `${esc(who(c.turn()))} to move.`;
   const moves = c.history(); let ml = ""; for (let i = 0; i < moves.length; i += 2) ml += `<span><small>${i / 2 + 1}.</small> ${esc(moves[i])} ${moves[i + 1] ? esc(moves[i + 1]) : ""}</span>`;
@@ -137,7 +164,7 @@ function cpCheckEnd() {
   return true;
 }
 function cpMove(from, to) {
-  const s = CP.s, m = s.c.move({ from, to, promotion: "q" }); if (!m) return false;
+  const s = CP.s; if (cpCharge(s)) return false; const m = s.c.move({ from, to, promotion: "q" }); if (!m) return false;
   s.last = [from, to]; s.sel = null; s.targets = []; Snd.tick(); if (m.captured) Snd.lock();
   if (!cpCheckEnd() && s.mode === "solo" && s.c.turn() !== s.you) { s.think = true; renderChess(); setTimeout(cpEngine, 200); } else renderChess();
   cpWatch();
@@ -152,7 +179,7 @@ async function cpEngine() {
     else mv = await BKBots.move(BKBots.BOTS.findIndex((b) => b.id === s.bot) + 1, fen);
   } catch (e) { /* the engine failed: handled below */ }
   const gap = 450 - (performance.now() - t0); if (gap > 0) await new Promise((r) => setTimeout(r, gap));
-  if (CP.s !== s || s.c.fen() !== fen || s.over || !$(".cpwrap")) return;
+  if (CP.s !== s || s.c.fen() !== fen || s.over || !$(".cpwrap") || cpCharge(s)) return;
   let m = mv ? s.c.move({ from: mv.from, to: mv.to, promotion: mv.promotion || "q" }) : null;
   if (!m) { s.note = "Stockfish could not load, so a much simpler engine is moving."; const x = BKBots.smallMove(fen); m = s.c.move({ from: x.from, to: x.to, promotion: x.promotion || "q" }); }
   s.think = false; if (m) { s.last = [m.from, m.to]; Snd.tick(); } cpCheckEnd(); renderChess(); cpWatch();
@@ -166,10 +193,11 @@ function chessClick(sq) {
 document.addEventListener("click", (e) => {
   const sq = e.target.closest("[data-csq]"); if (sq && CP.s && $(".cpwrap")) { chessClick(sq.dataset.csq); return; }
   const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.secs != null) { const p = prof(); p.chessClock = +t.dataset.secs; saveProf(); Snd.tick(); document.querySelectorAll("[data-secs]").forEach((b) => b.setAttribute("aria-pressed", b === t)); return; }
   if (t.dataset.bot) { Snd.tick(); newChessPlay("solo", t.dataset.bot); return; }
   if (!CP.s) return;
   if (t.id === "cpAgain") { newChessPlay(CP.s.mode, CP.s.bot); return; }
   if (t.id === "cpChange") { newChessPlay("solo"); return; }
-  if (t.id === "cpUndo") { const s = CP.s; s.c.undo(); if (s.mode === "solo" && s.c.turn() !== s.you) s.c.undo(); s.sel = null; s.targets = []; s.last = null; const n = s.c.history().length; s.talk.seen = n; s.talk.evals.length = Math.min(s.talk.evals.length, n + 1); s.talk.last = Math.min(s.talk.last, n); s.talk.pending = null; renderChess(); if (s.mode === "solo" && s.c.turn() !== s.you) { s.think = true; renderChess(); setTimeout(cpEngine, 400); } return; }
-  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; cpRecord(s); Mascot.react("ch_loss", true); s.think = false; cpLastWord(); } else s.over = { cls: "draw", title: "Game over", why: "Ended by agreement." }; renderChess(); return; }
+  if (t.id === "cpUndo") { const s = CP.s; if (cpCharge(s)) return; s.c.undo(); if (s.mode === "solo" && s.c.turn() !== s.you) s.c.undo(); s.sel = null; s.targets = []; s.last = null; const n = s.c.history().length; s.talk.seen = n; s.talk.evals.length = Math.min(s.talk.evals.length, n + 1); s.talk.last = Math.min(s.talk.last, n); s.talk.pending = null; renderChess(); if (s.mode === "solo" && s.c.turn() !== s.you) { s.think = true; renderChess(); setTimeout(cpEngine, 400); } return; }
+  if (t.id === "cpResign") { const s = CP.s, solo = s.mode === "solo"; if (s.over || cpCharge(s)) return; if (solo) { s.over = { cls: "loss", title: "You resigned", why: "Another one?" }; cpRecord(s); Mascot.react("ch_loss", true); s.think = false; cpLastWord(); } else s.over = { cls: "draw", title: "Game over", why: "Ended by agreement." }; renderChess(); return; }
 });

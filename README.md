@@ -98,4 +98,5 @@ move rules, faces, measured ratings, lines and recorded voices; they replace the
 
 `pipelines/chess_characters.py` copies them over (it only reads ballknowledge) into `site/bk_bots.js` and
 `docs/voice_bk/`. Change a character in ballknowledge, then run it again, then `python3 build.py`.
-`site/chessplay.js` holds the opponent screen and the speech bubble. There is no clock in these games (ballknowledge has one).
+`site/chessplay.js` holds the opponent screen and the speech bubble. The same screen picks the clock (none, 3, 5 or 10 minutes each, solo only). It starts after both first moves; running out
+loses, or draws if the other side has too little left to mate. Undo does not give time back.

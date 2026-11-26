@@ -36,3 +36,4 @@
 .cpsay .cpav{width:76px;height:76px}
 body:has(.cpwrap.vsbot) #mascot{display:none}
 @media (max-width:520px){.cpgrid{grid-template-columns:repeat(2,1fr)}.cpsay .cpav{width:58px;height:58px}.cpsay{min-height:80px;gap:8px}.cpsay p{font-size:14px}}
+.cpclk{font-weight:800;font-size:20px;padding:2px 10px;border-radius:8px;border:1px solid var(--line);min-width:64px;text-align:center}.cpbar.on .cpclk{border-color:var(--gold)}.cpclk.low{color:#ff6b6b;border-color:#ff6b6b}
