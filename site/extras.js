@@ -7,7 +7,6 @@ const Look = {
 };
 Look.apply();
 matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => Look.apply());
-function lookCardHTML() { return `<div class="card"><div class="label">Look</div><div class="row" style="gap:8px;margin-top:8px">${[["dark", "Dark"], ["light", "Light"], ["device", "Follow my device"]].map(([k, n]) => `<button type="button" class="chip" data-look="${k}" aria-pressed="${Look.get() === k}">${n}</button>`).join("")}</div></div>`; }
 
 /* ================= profile share card: a picture of your profile to send or save ================= */
 const Share = {
@@ -102,7 +101,6 @@ function calDoorHTML() { return `<button type="button" class="contbar caldoor" d
 
 document.addEventListener("click", (e) => {
   const t = e.target.closest("button"); if (!t) return;
-  if (t.dataset.look) { Look.set(t.dataset.look); renderSettings(); return; }
   if (t.id === "shareOpen") { Share.open().catch(() => toast("Could not make the card on this device.")); return; }
   if (t.dataset.calmove) { Cal.move(+t.dataset.calmove); return; }
   if (t.dataset.calday) Cal.pick(+t.dataset.calday);

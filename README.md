@@ -120,3 +120,8 @@ ballknowledge rebuilds its chess page.
 From ballknowledge: real final tables (football and basketball) and 338 big football matches. `pipelines/bk_history.py`
 writes `site/bk_history.json`; the games are in `site/history_games.js`. Solo and two players on one device ("Who did it"
 is solo only); no two-device mode for these two. There are no basketball match records, so "Who did it" is football only.
+
+## Swipeable settings (26 November)
+
+Look, sidekick (per category), outfit and text size are rows of cards to swipe, tap or step with the arrows
+(`site/settings_swipe.js`). Not tried with a finger on a real phone.

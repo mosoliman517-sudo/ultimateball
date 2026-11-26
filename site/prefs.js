@@ -13,11 +13,11 @@ const Prefs = {
   },
 };
 Prefs.apply();
-function displayCardHTML() {
+/* text size has its own swipe row (settings_swipe.js) */
+function volumeCardHTML() {
   const chips = (k, cur, opts) => `<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px">${opts.map(([v, n]) => `<button type="button" class="chip" data-pref="${k}:${v}" aria-pressed="${cur === v}">${n}</button>`).join("")}</div>`;
   const slider = (k, n) => `<label class="mixrow"><span>${n}</span><input type="range" min="0" max="100" step="5" value="${Math.round(Prefs.num(k, 1) * 100)}" data-mix="${k}"><output>${Math.round(Prefs.num(k, 1) * 100)}%</output></label>`;
-  return `<div class="card"><div class="label">Text size</div>${chips("text", Prefs.get("text", "m"), [["s", "Small"], ["m", "Normal"], ["l", "Large"], ["xl", "Extra large"]])}
-    <div class="label" style="margin-top:14px">Contrast</div>${chips("contrast", Prefs.get("contrast", ""), [["", "Normal"], ["high", "High"]])}
+  return `<div class="card"><div class="label">Contrast</div>${chips("contrast", Prefs.get("contrast", ""), [["", "Normal"], ["high", "High"]])}
     <div class="label" style="margin-top:14px">Motion</div>${chips("motion", Prefs.get("motion", ""), [["", "Follow my device"], ["reduced", "Reduce motion"]])}<p class="fine">Reduce motion stops animations; background effects stop after a reload.</p></div>
   <div class="card"><div class="label">Volume mixer</div>${slider("mixfx", "Effects and music (overall)")}${slider("mixmus", "Music")}${slider("mixvox", "Sidekick voices")}</div>`;
 }

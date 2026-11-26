@@ -1349,6 +1349,17 @@ body.ingame #tourChip,body:not(.athome) #tourChip{display:none}
 .hglist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.hglist li{display:flex;gap:10px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;font-size:14px}.hglist li>.num{min-width:34px;font-weight:800}.hglist li.cur{border-color:var(--gold, #e8c35a);border-width:2px}
 .hgask{margin-top:12px;display:flex;flex-direction:column;gap:8px}.hgask input{flex:1;min-width:150px}
 
+/* swipeable settings */
+.uxrow{display:flex;align-items:center;gap:6px;margin-top:10px;min-width:0}
+.uxarrow{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:none;color:inherit;font-size:20px;cursor:pointer}
+.uxtrack{position:relative;display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px;flex:1;min-width:0;scrollbar-width:none}.uxtrack::-webkit-scrollbar{display:none}
+.uxcard{flex:0 0 min(210px,72%);scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:16px;border:2px solid var(--line);background:rgba(127,127,127,.07);color:inherit;font:inherit;text-align:center;cursor:pointer}
+.uxcard.on{border-color:var(--gold,#e8c35a);box-shadow:0 0 0 2px rgba(232,195,90,.25)}.uxcard.locked{opacity:.55;cursor:default}.uxcard small{font-size:12px;opacity:.8}
+.uxface{position:relative;display:block;width:92px;height:104px}.uxface>svg{width:100%;height:100%}
+.uxlook{display:flex;flex-direction:column;gap:6px;width:100%;height:84px;border-radius:10px;padding:10px}.uxlook i{display:block;height:12px;border-radius:6px}
+.uxlook.dark{background:#101418}.uxlook.dark i{background:#2b333d}.uxlook.light{background:#f2efe7}.uxlook.light i{background:#d8d0bd}.uxlook.device{background:linear-gradient(115deg,#101418 50%,#f2efe7 50%)}.uxlook.device i{background:#8a8f96}
+.uxtext{display:flex;align-items:center;min-height:56px;line-height:1.25}
+
 /* chess pieces and board, copied from ballknowledge's chess page (piece set: cburnett, CC BY-SA 3.0, via Lichess) */
 .pc-bb{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJjb2xvci1zY2hlbWU6bGlnaHQgb25seSIgd2lkdGg9IjQ1IiBoZWlnaHQ9IjQ1IiB2aWV3Qm94PSIwIDAgNDUgNDUiPjxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS13aWR0aD0iMS41Ij48ZyBmaWxsPSIjMDAwIiBzdHJva2UtbGluZWNhcD0iYnV0dCI+PHBhdGggZD0iTTkgMzZjMy40LTEgMTAuMS40IDEzLjUtMiAzLjQgMi40IDEwLjEgMSAxMy41IDIgMCAwIDEuNi41IDMgMi0uNyAxLTEuNiAxLTMgLjUtMy40LTEtMTAuMS41LTEzLjUtMS0zLjQgMS41LTEwLjEgMC0xMy41IDEtMS40LjUtMi4zLjUtMy0uNSAxLjQtMiAzLTIgMy0yeiIvPjxwYXRoIGQ9Ik0xNSAzMmMyLjUgMi41IDEyLjUgMi41IDE1IDAgLjUtMS41IDAtMiAwLTIgMC0yLjUtMi41LTQtMi41LTQgNS41LTEuNSA2LTExLjUtNS0xNS41LTExIDQtMTAuNSAxNC01IDE1LjUgMCAwLTIuNSAxLjUtMi41IDQgMCAwLS41LjUgMCAyeiIvPjxwYXRoIGQ9Ik0yNSA4YTIuNSAyLjUgMCAxIDEtNSAwIDIuNSAyLjUgMCAxIDEgNSAweiIvPjwvZz48cGF0aCBzdHJva2U9IiNlY2VjZWMiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIGQ9Ik0xNy41IDI2aDEwTTE1IDMwaDE1bS03LjUtMTQuNXY1TTIwIDE4aDUiLz48L2c+PC9zdmc+)}
 .pc-bk{background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NSA0NSI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2U9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIxLjUiPjxwYXRoIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIGQ9Ik0yMi41IDExLjZWNiIvPjxwYXRoIGZpbGw9IiMwMDAiIHN0cm9rZS1saW5lY2FwPSJidXR0IiBzdHJva2UtbGluZWpvaW49Im1pdGVyIiBkPSJNMjIuNSAyNXM0LjUtNy41IDMtMTAuNWMwIDAtMS0yLjUtMy0yLjVzLTMgMi41LTMgMi41Yy0xLjUgMyAzIDEwLjUgMyAxMC41Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTExLjUgMzdhMjIuMyAyMi4zIDAgMCAwIDIxIDB2LTdzOS00LjUgNi0xMC41Yy00LTYuNS0xMy41LTMuNS0xNiA0VjI3di0zLjVjLTMuNS03LjUtMTMtMTAuNS0xNi00LTMgNiA1IDEwIDUgMTB6Ii8+PHBhdGggc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgZD0iTTIwIDhoNSIvPjxwYXRoIHN0cm9rZT0iI2VjZWNlYyIgZD0iTTMyIDI5LjVzOC41LTQgNi05LjdDMzQuMSAxNCAyNSAxOCAyMi41IDI0LjZ2Mi4xLTIuMUMyMCAxOCA5LjkgMTQgNyAxOS45Yy0yLjUgNS42IDQuOCA5IDQuOCA5Ii8+PHBhdGggc3Ryb2tlPSIjZWNlY2VjIiBkPSJNMTEuNSAzMGM1LjUtMyAxNS41LTMgMjEgMG0tMjEgMy41YzUuNS0zIDE1LjUtMyAyMSAwbS0yMSAzLjVjNS41LTMgMTUuNS0zIDIxIDAiLz48L2c+PC9zdmc+)}
@@ -3843,7 +3854,8 @@ function renderProfile() {
 function afterProfile() { try { Season.board(); } catch (e) { /* not ready */ } }
 function renderSettings() {
   const g = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
-  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div><div class="card"><div class="label">Your sidekick in each category</div><p class="fine">The sidekick cheers you on, reacts to your answers and follows you into that category.</p>${WORLD_IDS.map(kickRow).join("")}</div>${outfitCardHTML()}${lookCardHTML()}${displayCardHTML()}${tourCardHTML()}<div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Pictures and removal</div><p class="fine">Not every picture here is free to reuse. See where they come from and how to have one taken down.</p><a class="btn ghost" href="#credits">Open</a></div>`;
+  $("#setRoom").innerHTML = `<div class="hero"><h1><em>Settings</em></h1></div><div class="card"><div class="label">Sound</div><div class="row" style="gap:8px;margin-top:8px">${["Off", "Soft", "Full"].map((n, i) => `<button class="chip" data-snd="${i}" aria-pressed="${Snd.level === i}">${n}</button>`).join("")}</div><div class="label" style="margin-top:14px">Lobby music</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mus="1" aria-pressed="${!!Snd.music}">On</button><button class="chip" data-mus="0" aria-pressed="${!Snd.music}">Off</button></div><p class="fine">Every world has its own music, played live in your browser.</p><div class="label" style="margin-top:14px">Sidekick</div><div class="row" style="gap:8px;margin-top:8px"><button class="chip" data-mas="on" aria-pressed="${g("gp_mascot", "on") === "on"}">On</button><button class="chip" data-mas="off" aria-pressed="${g("gp_mascot", "on") === "off"}">Off</button><button class="chip" data-voice="${g("gp_voice", "1") === "1" ? "0" : "1"}" aria-pressed="${g("gp_voice", "1") === "1"}">Sidekick voices</button><button class="chip" data-hear="1">Hear your sidekick</button></div></div>${Swipe.cards()}${volumeCardHTML()}${tourCardHTML()}<div class="card"><div class="label">Install as an app</div>${installHTML()}</div><div class="card"><div class="label">Pictures and removal</div><p class="fine">Not every picture here is free to reuse. See where they come from and how to have one taken down.</p><a class="btn ghost" href="#credits">Open</a></div>`;
+  document.querySelectorAll("#setRoom .uxrow").forEach((r) => Swipe.watch(r));
 }
 
 /* ================= wiki: every group, idol, song, country, player... with its facts and links; any name with data-wiki opens it ================= */
@@ -5179,7 +5191,6 @@ const Look = {
 };
 Look.apply();
 matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => Look.apply());
-function lookCardHTML() { return `<div class="card"><div class="label">Look</div><div class="row" style="gap:8px;margin-top:8px">${[["dark", "Dark"], ["light", "Light"], ["device", "Follow my device"]].map(([k, n]) => `<button type="button" class="chip" data-look="${k}" aria-pressed="${Look.get() === k}">${n}</button>`).join("")}</div></div>`; }
 
 /* ================= profile share card: a picture of your profile to send or save ================= */
 const Share = {
@@ -5274,7 +5285,6 @@ function calDoorHTML() { return `<button type="button" class="contbar caldoor" d
 
 document.addEventListener("click", (e) => {
   const t = e.target.closest("button"); if (!t) return;
-  if (t.dataset.look) { Look.set(t.dataset.look); renderSettings(); return; }
   if (t.id === "shareOpen") { Share.open().catch(() => toast("Could not make the card on this device.")); return; }
   if (t.dataset.calmove) { Cal.move(+t.dataset.calmove); return; }
   if (t.dataset.calday) Cal.pick(+t.dataset.calday);
@@ -5439,10 +5449,6 @@ function outfitPaint() {
   const el = document.getElementById("mascot"); if (!el) return; const k = outfitNow(); el.dataset.fit = k;
   const b = el.querySelector(".mbody"); if (!b) return; b.querySelectorAll(".mhat").forEach((x) => x.remove()); if (OUTFIT_HAT[k]) b.insertAdjacentHTML("afterbegin", OUTFIT_HAT[k]);
 }
-function outfitCardHTML() {
-  const cur = outfitNow(), sk = Mascot.id();
-  return `<div class="card"><div class="label">Sidekick outfit</div><p class="fine">Locked outfits open as you play; each card says how.</p><div class="fitrow">${OUTFITS.map(([k, n, , how]) => { const ok = outfitOK(k); return `<button type="button" class="fitcard ${k === cur ? "on" : ""} ${ok ? "" : "locked"}" data-fit="${k}" ${ok ? `data-wear="${k}"` : "disabled"}><span class="fitprev">${OUTFIT_HAT[k] || ""}${MASCOT_SVG[sk]("happy")}</span><b>${ok ? "" : "🔒 "}${n}</b><small>${ok ? (k === cur ? "Wearing it" : "Tap to wear") : how}</small></button>`; }).join("")}</div></div>`;
-}
 
 /* ================= guided tour: your sidekick points things out, in its own voice ================= */
 const Tour = {
@@ -5467,7 +5473,6 @@ function tourCardHTML() { return `<div class="card"><div class="label">Guided to
 
 document.addEventListener("click", (e) => {
   const t = e.target.closest("button"); if (!t) return;
-  if (t.dataset.wear) { prof().outfit = t.dataset.wear; saveProf(); Mascot.dock(); outfitPaint(); renderSettings(); Mascot.react("achieve", true); return; }
   if (t.dataset.tour) { const c = $("#tourChip"); if (c) c.remove(); Voice.ready(); Tour.start(); return; }
   if (t.id === "tourNext") { Tour.at++; Tour.show(); return; }
   if (t.id === "tourSkip" || t.id === "tourNo") { Tour.end(); return; }
@@ -5736,11 +5741,11 @@ const Prefs = {
   },
 };
 Prefs.apply();
-function displayCardHTML() {
+/* text size has its own swipe row (settings_swipe.js) */
+function volumeCardHTML() {
   const chips = (k, cur, opts) => `<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px">${opts.map(([v, n]) => `<button type="button" class="chip" data-pref="${k}:${v}" aria-pressed="${cur === v}">${n}</button>`).join("")}</div>`;
   const slider = (k, n) => `<label class="mixrow"><span>${n}</span><input type="range" min="0" max="100" step="5" value="${Math.round(Prefs.num(k, 1) * 100)}" data-mix="${k}"><output>${Math.round(Prefs.num(k, 1) * 100)}%</output></label>`;
-  return `<div class="card"><div class="label">Text size</div>${chips("text", Prefs.get("text", "m"), [["s", "Small"], ["m", "Normal"], ["l", "Large"], ["xl", "Extra large"]])}
-    <div class="label" style="margin-top:14px">Contrast</div>${chips("contrast", Prefs.get("contrast", ""), [["", "Normal"], ["high", "High"]])}
+  return `<div class="card"><div class="label">Contrast</div>${chips("contrast", Prefs.get("contrast", ""), [["", "Normal"], ["high", "High"]])}
     <div class="label" style="margin-top:14px">Motion</div>${chips("motion", Prefs.get("motion", ""), [["", "Follow my device"], ["reduced", "Reduce motion"]])}<p class="fine">Reduce motion stops animations; background effects stop after a reload.</p></div>
   <div class="card"><div class="label">Volume mixer</div>${slider("mixfx", "Effects and music (overall)")}${slider("mixmus", "Music")}${slider("mixvox", "Sidekick voices")}</div>`;
 }
@@ -5789,6 +5794,65 @@ document.addEventListener("click", (e) => {
 document.addEventListener("input", (e) => {
   if (e.target.dataset.mix) { Prefs.set(e.target.dataset.mix, String(e.target.value / 100)); Prefs.apply(); e.target.nextElementSibling.textContent = e.target.value + "%"; return; }
   if (e.target.dataset.duo != null) { const v = [0, 1].map((i) => (($(`[data-duo="${i}"]`) || {}).value || "").trim() || `Player ${i + 1}`); try { sessionStorage.setItem("gp_names", JSON.stringify(v)); } catch (x) { /* blocked */ } }
+});
+
+/* ================= visual settings, after ballknowledge: rows of cards to swipe, tap or step with the arrows.
+   Swiping a card into the middle applies it. Look, sidekick (per category), outfit and text size. ================= */
+const Swipe = {
+  world: "kpop", timers: {},
+  row(id, cards) { return `<div class="uxrow" data-uxrow="${id}"><button type="button" class="uxarrow" data-uxgo="-1" aria-label="Previous">‹</button><div class="uxtrack">${cards.join("")}</div><button type="button" class="uxarrow" data-uxgo="1" aria-label="Next">›</button></div>`; },
+  card(row, v, on, body, locked) { return `<button type="button" class="uxcard ${on ? "on" : ""} ${locked ? "locked" : ""}" data-ux="${row}" data-v="${v}" aria-pressed="${on}">${body}</button>`; },
+  kick(w) { return (prof().kick || {})[w] || WORLDS[w].mascot; },
+  html(row) {
+    if (row === "look") return this.row(row, [["dark", "Dark", "Stage lights"], ["light", "Light", "Warm paper"], ["device", "Follow my device", "Switches with your phone or computer"]].map(([k, n, d]) => this.card(row, k, Look.get() === k, `<span class="uxlook ${k}"><i></i><i></i><i></i></span><b>${n}</b><small>${d}</small>`)));
+    if (row === "kick") { const w = this.world, list = WORLDS[w].kicks.concat(Object.keys(MASCOTS).filter((k) => !WORLDS[w].kicks.includes(k))).filter((k) => MASCOT_SVG[k]);
+      return this.row(row, list.map((k) => this.card(row, k, this.kick(w) === k, `<span class="uxface">${MASCOT_SVG[k]("happy")}</span><b>${esc(MASCOTS[k].name)}</b><small>${esc(MASCOTS[k].blurb || "")}</small>`))); }
+    if (row === "fit") { const sk = this.kick(this.world);
+      return this.row(row, OUTFITS.map(([k, n, , how]) => { const ok = outfitOK(k); return this.card(row, k, outfitNow() === k, `<span class="uxface fitprev">${OUTFIT_HAT[k] || ""}${MASCOT_SVG[sk]("happy")}</span><b>${ok ? "" : "🔒 "}${n}</b><small>${ok ? (outfitNow() === k ? "Wearing it" : "Yours") : how}</small>`, !ok); })); }
+    return this.row("text", [["s", "Small", 14], ["m", "Normal", 16], ["l", "Large", 19], ["xl", "Extra large", 22]].map(([k, n, px]) => this.card("text", k, Prefs.get("text", "m") === k, `<span class="uxtext" style="font-size:${px}px">Who am I? Name the idol.</span><b>${n}</b>`)));
+  },
+  cards() {
+    const chips = `<div class="chips" role="group" aria-label="Category">${WORLD_IDS.map((w) => `<button type="button" class="chip ${this.world === w ? "on" : ""}" data-uxworld="${w}">${esc(WORLDS[w].name)}</button>`).join("")}</div>`;
+    return `<div class="card"><div class="label">Look</div>${this.html("look")}</div>
+      <div class="card"><div class="label">Your sidekick</div><p class="fine">Each category has its own. Swipe or tap one; tap the chosen one again to hear it.</p>${chips}<div id="uxKick">${this.html("kick")}</div></div>
+      <div class="card"><div class="label">Sidekick outfit</div><p class="fine">Locked outfits open as you play; each card says how.</p><div id="uxFit">${this.html("fit")}</div></div>
+      <div class="card"><div class="label">Text size</div>${this.html("text")}</div>`;
+  },
+  center(row, smooth) { const t = row.querySelector(".uxtrack"), c = t.querySelector(".uxcard.on"); if (c) t.scrollTo({ left: c.offsetLeft - (t.clientWidth - c.offsetWidth) / 2, behavior: smooth ? "smooth" : "instant" }); },
+  mark(row, v) { row.querySelectorAll(".uxcard").forEach((c) => { const on = c.dataset.v === v; c.classList.toggle("on", on); c.setAttribute("aria-pressed", on); }); },
+  redraw(id, name) { const box = $("#" + id); if (!box) return; box.innerHTML = this.html(name); this.watch(box.querySelector(".uxrow")); },
+  hear() { const k = this.kick(this.world), L = MASCOTS[k].lines || {}, pool = L.hello || L.greet || Object.values(L).find((x) => Array.isArray(x) && x.length) || []; if (pool.length) Voice.say(k, rnd(pool)); },
+  /* apply one choice without rebuilding the page */
+  pick(row, v) {
+    const name = row.dataset.uxrow, card = row.querySelector(`.uxcard[data-v="${v}"]`); if (!card || card.classList.contains("locked") || card.classList.contains("on")) return;
+    this.mark(row, v);
+    if (name === "look") Look.set(v);
+    else if (name === "text") { Prefs.set("text", v); Prefs.apply(); }
+    else if (name === "kick") { const p = prof(); p.kick = p.kick || {}; p.kick[this.world] = v; saveProf(); const d = $("#mascot"); if (d) d.dataset.who = ""; Mascot.dock(); this.redraw("uxFit", "fit"); }
+    else if (name === "fit") { prof().outfit = v; saveProf(); Mascot.dock(); outfitPaint(); this.redraw("uxFit", "fit"); }
+    Snd.tick();
+  },
+  watch(row) {
+    const t = row.querySelector(".uxtrack"); this.center(row);
+    let touched = false;
+    ["pointerdown", "wheel", "touchstart"].forEach((ev) => t.addEventListener(ev, () => { touched = true; }, { passive: true }));
+    t.addEventListener("scroll", () => {
+      if (!touched) return; clearTimeout(this.timers[row.dataset.uxrow]);
+      this.timers[row.dataset.uxrow] = setTimeout(() => {
+        const mid = t.scrollLeft + t.clientWidth / 2, cards = [...t.querySelectorAll(".uxcard")], atEnd = t.scrollLeft + t.clientWidth >= t.scrollWidth - 4, atStart = t.scrollLeft <= 4;
+        const best = atStart ? cards[0] : atEnd ? cards[cards.length - 1] : cards.reduce((a, c) => (Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid) < Math.abs(a.offsetLeft + a.offsetWidth / 2 - mid) ? c : a));
+        if (t.scrollWidth > t.clientWidth + 8) this.pick(row, best.dataset.v);
+      }, 220);
+    }, { passive: true });
+  },
+};
+document.addEventListener("click", (e) => {
+  const t = e.target.closest && e.target.closest("button"); if (!t) return;
+  if (t.dataset.uxworld) { Swipe.world = t.dataset.uxworld; document.querySelectorAll("[data-uxworld]").forEach((b) => b.classList.toggle("on", b === t)); Swipe.redraw("uxKick", "kick"); Swipe.redraw("uxFit", "fit"); return; }
+  const row = t.closest(".uxrow"); if (!row) return;
+  const cards = [...row.querySelectorAll(".uxcard")];
+  if (t.dataset.uxgo) { let i = cards.findIndex((c) => c.classList.contains("on")); do { i += +t.dataset.uxgo; } while (cards[i] && cards[i].classList.contains("locked")); if (cards[i]) { Swipe.pick(row, cards[i].dataset.v); Swipe.center(row, true); } return; }
+  if (t.dataset.ux) { if (t.classList.contains("on")) { if (t.dataset.ux === "kick") Swipe.hear(); return; } Swipe.pick(row, t.dataset.v); Swipe.center(row, true); }
 });
 
 /* ================= redemption round: the questions you missed come back, spaced further apart each time you get them =================
