@@ -89,3 +89,13 @@ Each level is a share of the category with a cap on how many names it holds (`LE
 household names, Hard leaves those out, Elite starts well below Medium and stops before the unknown tail. K-pop has no levels.
 Anime is ranked by `pipelines/anime_popular.py` (AniList popularity and character favourites, plus a short hand-picked list
 of household names). Run it after anything that rebuilds or re-ranks the anime pack.
+
+## Play chess against the ballknowledge characters (26 November)
+
+Solo "Play chess" asks who you want to play: Pip, Mikel Arteta, The Berserker, Bishop Bea, The Trader, The Escaped,
+The Council, Queen Vera, or plain Stockfish. The characters are the ones from ballknowledge's chess page, with the same
+move rules, faces, measured ratings, lines and recorded voices; they replace the old four difficulty levels.
+
+`pipelines/chess_characters.py` copies them over (it only reads ballknowledge) into `site/bk_bots.js` and
+`docs/voice_bk/`. Change a character in ballknowledge, then run it again, then `python3 build.py`.
+`site/chessplay.js` holds the opponent screen and the speech bubble. There is no clock in these games (ballknowledge has one).

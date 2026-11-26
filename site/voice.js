@@ -2,7 +2,7 @@
    A clip's file name is a hash of "sidekick|line", so there is no index to download or go stale. A line without a clip stays silent. */
 const Voice = {
   ctx: null, src: null, seq: 0, pending: null, cache: new Map(),
-  file(who, text) { let h = 0x811c9dc5; for (const b of new TextEncoder().encode(who + "|" + text)) h = Math.imul(h ^ b, 0x01000193) >>> 0; return "voice/" + h.toString(16).padStart(8, "0") + ".mp3"; },
+  file(who, text) { let h = 0x811c9dc5; for (const b of new TextEncoder().encode(who + "|" + text)) h = Math.imul(h ^ b, 0x01000193) >>> 0; return (who.startsWith("bk_") ? "voice_bk/" : "voice/") + h.toString(16).padStart(8, "0") + ".mp3"; },   // bk_: the chess characters (pipelines/chess_characters.py)
   // browsers only let sound start after a tap or key press: open the audio context on the first one, then say anything waiting
   ready() {
     try {
